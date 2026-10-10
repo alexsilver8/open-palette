@@ -37,7 +37,7 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: OS, runtime version, and anything else that might be relevant.
+      description: Operating system and version, how you installed Open Palette, and any extensions you use.
   - type: textarea
     id: logs
     attributes:

@@ -4,6 +4,10 @@
 
 Only the latest release receives security fixes.
 
+## Extensions
+
+Extensions run with full Node.js access in a separate process, like any package you install from npm. Open Palette validates what extensions send to the launcher, but it does not sandbox what they can do on your computer. Only install extensions you trust. Reports about ways an extension could affect the launcher beyond its documented API are welcome.
+
 ## Reporting a vulnerability
 
 **Please do not report security vulnerabilities through public issues, discussions, or pull requests.**

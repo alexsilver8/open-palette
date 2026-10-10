@@ -1,0 +1,199 @@
+/**
+ * Core data model shared by the main process, the extension host and the renderer.
+ *
+ * Everything here crosses a process boundary (IPC or the extension-host channel),
+ * so it must stay plain, JSON-serialisable data — no functions, no class instances.
+ */
+
+export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+
+export type Platform = 'darwin' | 'win32' | 'linux';
+
+export type Tint = 'red' | 'orange' | 'yellow' | 'green' | 'teal' | 'blue' | 'purple' | 'pink' | 'gray';
+
+/** Built-in glyphs the launcher knows how to draw. */
+export type BuiltinIconName =
+  | 'alert'
+  | 'app'
+  | 'calculator'
+  | 'clipboard'
+  | 'copy'
+  | 'extension'
+  | 'file'
+  | 'folder'
+  | 'globe'
+  | 'link'
+  | 'lock'
+  | 'moon'
+  | 'note'
+  | 'power'
+  | 'refresh'
+  | 'search'
+  | 'settings'
+  | 'sparkles'
+  | 'terminal'
+  | 'text'
+  | 'trash';
+
+export type Icon =
+  /** A built-in glyph on a coloured tile. */
+  | { builtin: BuiltinIconName; tint?: Tint }
+  /** A single emoji or short text. */
+  | { emoji: string }
+  /** An absolute path: image files are shown as-is, anything else shows its OS icon. */
+  | { path: string };
+
+/** Keyboard shortcut for an action. `mod` is ⌘ on macOS and Ctrl elsewhere. */
+export interface Shortcut {
+  key: string;
+  modifiers?: Array<'mod' | 'shift' | 'alt' | 'ctrl'>;
+}
+
+/** Identifies a command: `extension` is the extension's name, `command` the command's name. */
+export interface CommandRef {
+  extension: string;
+  command: string;
+}
+
+interface ActionBase {
+  /** Label shown in the action panel. A sensible default is used when omitted. */
+  title?: string;
+  shortcut?: Shortcut;
+}
+
+/**
+ * Something the user can do with an item. The first action of an item is the primary
+ * one (↵), the second is the secondary one (⌘↵ / Ctrl+↵), and all of them are listed in
+ * the action panel (⌘K / Ctrl+K).
+ */
+export type Action =
+  | (ActionBase & { type: 'open-command'; ref: CommandRef; argument?: string })
+  | (ActionBase & { type: 'open-url'; url: string })
+  | (ActionBase & { type: 'open-path'; path: string })
+  | (ActionBase & { type: 'reveal-path'; path: string })
+  | (ActionBase & { type: 'copy'; text: string })
+  /** Calls back into the command that produced the item (`onAction(id, payload)`). */
+  | (ActionBase & { type: 'callback'; title: string; id: string; payload?: Json; style?: 'destructive' });
+
+export interface ListItem {
+  /** Stable within its view; used for selection and React keys. */
+  id: string;
+  title: string;
+  subtitle?: string;
+  icon?: Icon;
+  /** Extra terms the fuzzy search matches against. */
+  keywords?: string[];
+  /** Short right-aligned text, e.g. "Command" or "2 min ago". */
+  accessory?: string;
+  actions: Action[];
+}
+
+export interface ListSection {
+  title?: string;
+  items: ListItem[];
+}
+
+export interface ListView {
+  type: 'list';
+  /** Shown next to the search field while the view is open. */
+  title?: string;
+  searchPlaceholder?: string;
+  sections: ListSection[];
+  /**
+   * `true` (default): the launcher fuzzy-filters the items as the user types.
+   * `false`: the command filters itself — its `view()` is called again with the new query.
+   */
+  filtering?: boolean;
+  /** Shown when there is nothing to list. */
+  emptyText?: string;
+}
+
+/** Only lists for now; a detail (markdown) view and forms are on the roadmap. */
+export type View = ListView;
+
+/** What should happen in the launcher after a command ran or an action was performed. */
+export interface ActionResult {
+  /** Hide the launcher window. */
+  hide?: boolean;
+  /** Short message shown in the footer. */
+  toast?: string;
+  toastStyle?: 'success' | 'failure';
+  /** Open a new view on top of the current one. */
+  push?: View;
+  /** Replace the current view, e.g. after deleting an item. */
+  replace?: View;
+  /** Go back to the previous view. */
+  pop?: boolean;
+  /** Empty the search field, e.g. after its text was used to create something. */
+  clearSearch?: boolean;
+}
+
+export interface CommandManifest {
+  /** Unique within the extension: lowercase letters, digits and dashes. */
+  name: string;
+  title: string;
+  subtitle?: string;
+  icon?: Icon;
+  keywords?: string[];
+  /** `view` commands show a list; `no-view` commands just do something. */
+  mode: 'view' | 'no-view';
+  /**
+   * Fallback commands are offered under "Use “…” with" when the search text matches
+   * nothing well. They receive the search text as `ctx.argument`.
+   */
+  fallback?: boolean;
+  /** Restrict the command to some operating systems. */
+  platforms?: Platform[];
+}
+
+export interface ExtensionManifest {
+  /** Unique across all installed extensions: lowercase letters, digits and dashes. */
+  name: string;
+  title: string;
+  description?: string;
+  icon?: Icon;
+  commands: CommandManifest[];
+}
+
+/** Passed to every command call. */
+export interface CommandContext {
+  /** Current text of the search field inside the command's view ("" when it opens). */
+  query: string;
+  /** Text handed over from the root search, for fallback commands. */
+  argument?: string;
+  platform: Platform;
+}
+
+type MaybePromise<T> = T | Promise<T>;
+/** Commands may return nothing at all; `void` lets plain functions without a return type fit. */
+// biome-ignore lint/suspicious/noConfusingVoidType: deliberately allows functions that return nothing
+type OptionalResult = ActionResult | undefined | void;
+
+/** What a command module implements. Built-ins and third-party extensions share this shape. */
+export interface CommandImplementation<Ctx extends CommandContext = CommandContext> {
+  /** Required for `view` commands. */
+  view?(ctx: Ctx): MaybePromise<View>;
+  /** Required for `no-view` commands. Hides the launcher unless the result says otherwise. */
+  run?(ctx: Ctx): MaybePromise<OptionalResult>;
+  /** Handles `callback` actions emitted by this command's items. */
+  onAction?(id: string, payload: Json | undefined, ctx: Ctx): MaybePromise<OptionalResult>;
+}
+
+/** An entry of the root search: a command or an installed application. */
+export interface RootItem extends ListItem {
+  kind: 'command' | 'application';
+  /** Usage-based score; higher means used more often and more recently. */
+  frecency: number;
+  /** Offered under "Use “…” with" and opened with the search text as argument. */
+  fallback?: CommandRef;
+}
+
+/** Where an action was triggered from, so the main process can route and record it. */
+export interface ActionContext {
+  /** The command whose view the action came from (needed for `callback` actions). */
+  ref?: CommandRef;
+  /** The root item the action belongs to, used to rank frequently used items higher. */
+  rootItemId?: string;
+  /** Current search text. */
+  query?: string;
+}

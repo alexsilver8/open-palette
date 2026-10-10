@@ -1,0 +1,5 @@
+# pnpm settings (this repo is a single package, not a workspace).
+# Electron downloads its binary on first run, so it needs no install script.
+allowBuilds:
+  esbuild: true
+  electron-winstaller: false
