@@ -1,9 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { setUpDocument } from './document';
 import './styles.css';
 
-document.documentElement.dataset.platform = window.palette.platform;
+setUpDocument(window.palette.platform);
 
 createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>

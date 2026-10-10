@@ -1,4 +1,11 @@
-/* Design tokens shared by the launcher and the Notes window. */
+/*
+ * Design tokens shared by every window.
+ *
+ * The look is frosted glass, like Raycast: the system blurs whatever is behind the window
+ * (vibrancy on macOS, acrylic on Windows 11) and the page lays a thin tint over it.
+ * `data-glass` on <html> says which one is in play; with `none` there's no system blur,
+ * so the tint becomes an opaque surface.
+ */
 
 :root {
   color-scheme: light dark;
@@ -7,49 +14,84 @@
     -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, Cantarell, Ubuntu, "Noto Sans",
     sans-serif;
 
-  /* Pigments, named for the paints they come from. */
-  --pigment-red: #d8412f; /* cadmium red */
-  --pigment-orange: #e0702a; /* cadmium orange */
-  --pigment-yellow: #d39516; /* indian yellow */
-  --pigment-green: #1e8c6e; /* viridian */
-  --pigment-teal: #1d8aa0; /* cerulean */
-  --pigment-blue: #3f4fd8; /* ultramarine */
-  --pigment-purple: #6c3fc4; /* dioxazine violet */
-  --pigment-pink: #cf3f7c; /* quinacridone rose */
-  --pigment-gray: #566373; /* payne's grey */
+  /* Icon colours. */
+  --pigment-red: #f2555a;
+  --pigment-orange: #f5843c;
+  --pigment-yellow: #f0b429;
+  --pigment-green: #2fb47c;
+  --pigment-teal: #22a6c0;
+  --pigment-blue: #4c6ef5;
+  --pigment-purple: #8b5cf6;
+  --pigment-pink: #ec5b9b;
+  --pigment-gray: #7a8494;
 
-  --accent: var(--pigment-blue);
+  --accent: #5b74ff;
+  --accent-ink: #3d55e6;
 
-  --ink: #1c1f2b;
-  --ink-muted: #656b7b;
-  --ink-faint: #9aa0ae;
-  --surface: #f7f7fa;
-  --surface-translucent: rgb(247 247 250 / 0.74);
-  --raised: #ffffff;
-  --hairline: rgb(28 31 43 / 0.09);
-  --keycap: rgb(28 31 43 / 0.07);
-  --wash-neutral: rgb(28 31 43 / 0.07);
-  --wash-strength: 17%;
-  --accent-ink: #3445c9;
-  --shadow-popover: 0 14px 36px rgb(20 22 40 / 0.18), 0 2px 6px rgb(20 22 40 / 0.08);
+  /* Light glass */
+  --ink: rgb(0 0 0 / 0.86);
+  --ink-muted: rgb(0 0 0 / 0.5);
+  --ink-faint: rgb(0 0 0 / 0.32);
+  --hairline: rgb(0 0 0 / 0.08);
+  --keycap: rgb(0 0 0 / 0.06);
+  --selected: rgb(0 0 0 / 0.075);
+  --hover: rgb(0 0 0 / 0.04);
+  --control: rgb(255 255 255 / 0.62);
+  --control-border: rgb(0 0 0 / 0.1);
+  --control-strong: rgb(255 255 255 / 0.95);
+  --track: rgb(0 0 0 / 0.12);
+  /* The tint over the blurred backdrop. */
+  --glass: rgb(248 248 250 / 0.58);
+  /* Bars and sidebars sit a shade apart from the main glass. */
+  --glass-bar: rgb(255 255 255 / 0.32);
+  /* Popovers blur the window content under them. */
+  --glass-panel: rgb(252 252 253 / 0.78);
+  /* The lit edge of the glass. */
+  --glass-edge: rgb(255 255 255 / 0.6);
+  --shadow-popover: 0 16px 40px rgb(0 0 0 / 0.16), 0 2px 8px rgb(0 0 0 / 0.08);
 
   --radius-window: 12px;
   --radius-row: 8px;
+
+  /* Older names, kept so every window shares one vocabulary. */
+  --surface: var(--glass);
+  --raised: var(--control);
+  --wash-neutral: var(--selected);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --ink: #eceef4;
-    --ink-muted: #9a9fae;
-    --ink-faint: #676c7c;
-    --surface: #1d1e26;
-    --surface-translucent: rgb(29 30 38 / 0.7);
-    --raised: #272834;
-    --hairline: rgb(236 238 244 / 0.08);
-    --keycap: rgb(236 238 244 / 0.08);
-    --wash-neutral: rgb(236 238 244 / 0.08);
-    --wash-strength: 22%;
-    --accent-ink: #9aa6ff;
-    --shadow-popover: 0 14px 36px rgb(0 0 0 / 0.45), 0 2px 6px rgb(0 0 0 / 0.3);
+    --accent: #7b8cff;
+    --accent-ink: #a5b1ff;
+
+    --ink: rgb(255 255 255 / 0.92);
+    --ink-muted: rgb(255 255 255 / 0.55);
+    --ink-faint: rgb(255 255 255 / 0.34);
+    --hairline: rgb(255 255 255 / 0.08);
+    --keycap: rgb(255 255 255 / 0.1);
+    --selected: rgb(255 255 255 / 0.1);
+    --hover: rgb(255 255 255 / 0.05);
+    --control: rgb(255 255 255 / 0.07);
+    --control-border: rgb(255 255 255 / 0.1);
+    --control-strong: rgb(255 255 255 / 0.16);
+    --track: rgb(255 255 255 / 0.16);
+    --glass: rgb(26 26 30 / 0.55);
+    --glass-bar: rgb(255 255 255 / 0.035);
+    --glass-panel: rgb(40 40 46 / 0.78);
+    --glass-edge: rgb(255 255 255 / 0.13);
+    --shadow-popover: 0 16px 40px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.3);
+  }
+}
+
+/* No system blur: a see-through tint would show the desktop sharp behind the text. */
+:root[data-glass="none"] {
+  --glass: rgb(244 244 246);
+  --glass-bar: rgb(0 0 0 / 0.025);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-glass="none"] {
+    --glass: rgb(30 30 34);
+    --glass-bar: rgb(255 255 255 / 0.03);
   }
 }

@@ -1,5 +1,6 @@
 import { join } from 'node:path';
-import { app, BrowserWindow, nativeTheme } from 'electron';
+import { app, BrowserWindow } from 'electron';
+import { glassFor, glassWindowOptions, loadPage } from './glass';
 
 const isMac = process.platform === 'darwin';
 
@@ -20,6 +21,7 @@ export class SettingsWindow {
   }
 
   private create(): BrowserWindow {
+    const glass = glassFor();
     const window = new BrowserWindow({
       width: 760,
       height: 560,
@@ -29,7 +31,7 @@ export class SettingsWindow {
       title: 'Open Palette Settings',
       fullscreenable: false,
       maximizable: false,
-      backgroundColor: nativeTheme.shouldUseDarkColors ? '#1d1e26' : '#f7f7fa',
+      ...glassWindowOptions(glass, false),
       ...(isMac
         ? ({ titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 14, y: 15 } } as const)
         : ({ autoHideMenuBar: true } as const)),
@@ -46,11 +48,7 @@ export class SettingsWindow {
     window.on('closed', () => {
       this.window = undefined;
     });
-    if (!app.isPackaged && process.env.ELECTRON_RENDERER_URL) {
-      void window.loadURL(`${process.env.ELECTRON_RENDERER_URL}/settings.html`);
-    } else {
-      void window.loadFile(join(import.meta.dirname, '../renderer/settings.html'));
-    }
+    loadPage(window, 'settings', glass);
     return window;
   }
 }

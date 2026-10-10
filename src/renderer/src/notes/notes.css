@@ -1,6 +1,6 @@
 /*
- * Notes window. Same tokens as the launcher; Notes' pigment is Indian yellow, so the open
- * note in the list carries a wash of it.
+ * Notes window: the same frosted glass as the launcher, with the note list on a slightly
+ * lighter strip of it.
  */
 
 @import "../tokens.css";
@@ -17,7 +17,8 @@ body,
 }
 
 body {
-  background: var(--surface);
+  /* The window is glass; .notes lays the tint over it. */
+  background: transparent;
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: 14px;
@@ -40,6 +41,7 @@ button {
     "sidebar body"
     "sidebar footer";
   height: 100%;
+  background: var(--glass);
 }
 
 .notes[data-sidebar] {
@@ -113,7 +115,7 @@ button {
   min-height: 0;
   overflow: hidden;
   border-right: 1px solid var(--hairline);
-  background: color-mix(in oklab, var(--ink) 3%, var(--surface));
+  background: var(--glass-bar);
 }
 
 .notes__search {
@@ -171,11 +173,11 @@ button {
 }
 
 .notes__item:hover {
-  background: var(--wash-neutral);
+  background: var(--hover);
 }
 
 .notes__item[aria-current="true"] {
-  background: color-mix(in oklab, var(--pigment) var(--wash-strength), transparent);
+  background: var(--selected);
 }
 
 .notes__item-title {

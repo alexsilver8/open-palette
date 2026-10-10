@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { app, BrowserWindow, screen } from 'electron';
 import { IpcChannel, type ShownInfo, type ToastMessage } from '../shared/ipc';
+import { glassFor, glassWindowOptions, loadPage } from './glass';
 
 const WIDTH = 750;
 const HEIGHT = 474;
@@ -19,6 +20,7 @@ export class LauncherWindow {
   private hiddenAt = 0;
 
   constructor(private readonly options: LauncherWindowOptions) {
+    const glass = glassFor();
     this.window = new BrowserWindow({
       width: WIDTH,
       height: HEIGHT,
@@ -30,13 +32,11 @@ export class LauncherWindow {
       fullscreenable: false,
       skipTaskbar: true,
       alwaysOnTop: true,
-      backgroundColor: '#00000000',
       hasShadow: true,
-      // macOS: a panel can float above full-screen apps, and gets the native blurred
-      // material. Elsewhere the window is transparent and the page draws its own rounded card.
-      ...(isMac
-        ? ({ type: 'panel', vibrancy: 'popover', visualEffectState: 'active' } as const)
-        : ({ transparent: true } as const)),
+      // Frosted glass: the system blurs what's behind the window where it can.
+      ...glassWindowOptions(glass, true),
+      // On macOS a panel can float above full-screen apps.
+      ...(isMac ? ({ type: 'panel' } as const) : {}),
       webPreferences: {
         preload: join(import.meta.dirname, '../preload/index.cjs'),
         sandbox: true,
@@ -54,11 +54,7 @@ export class LauncherWindow {
       if (this.options.hideOnBlur() && !this.window.webContents.isDevToolsFocused()) this.hide();
     });
 
-    if (!app.isPackaged && process.env.ELECTRON_RENDERER_URL) {
-      void this.window.loadURL(process.env.ELECTRON_RENDERER_URL);
-    } else {
-      void this.window.loadFile(join(import.meta.dirname, '../renderer/index.html'));
-    }
+    loadPage(this.window, 'index', glass);
   }
 
   get visible(): boolean {

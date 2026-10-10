@@ -1,6 +1,6 @@
 /*
- * Settings window. Each section keeps the pigment of its launcher command (Clipboard is
- * orange, Notes yellow, Extensions violet), and the open section's nav item takes a wash of it.
+ * Settings window: frosted glass like the launcher, with the section list on a lighter strip.
+ * Each section keeps the icon colour of its launcher command.
  */
 
 @import "../base.css";
@@ -17,7 +17,8 @@ body,
 }
 
 body {
-  background: var(--surface);
+  /* The window is glass; .settings lays the tint over it. */
+  background: transparent;
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: 14px;
@@ -38,6 +39,7 @@ select {
     "titlebar titlebar"
     "nav content";
   height: 100%;
+  background: var(--glass);
 }
 
 /* ── Title bar and navigation ───────────────────────────── */
@@ -61,7 +63,7 @@ select {
   gap: 2px;
   padding: 12px 10px;
   border-right: 1px solid var(--hairline);
-  background: color-mix(in oklab, var(--ink) 3%, var(--surface));
+  background: var(--glass-bar);
 }
 
 .settings__nav-item {
@@ -78,11 +80,11 @@ select {
 }
 
 .settings__nav-item:hover {
-  background: var(--wash-neutral);
+  background: var(--hover);
 }
 
 .settings__nav-item[aria-current="page"] {
-  background: color-mix(in oklab, var(--pigment) var(--wash-strength), transparent);
+  background: var(--selected);
 }
 
 .settings__nav-item:focus-visible,
@@ -185,16 +187,16 @@ select {
 .button {
   height: 28px;
   padding: 0 12px;
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--control-border);
   border-radius: 7px;
-  background: var(--raised);
+  background: var(--control);
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
 }
 
 .button:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--ink) 5%, var(--raised));
+  background: var(--control-strong);
 }
 
 .button:disabled {
@@ -231,7 +233,7 @@ select {
   padding: 0;
   border: none;
   border-radius: 11px;
-  background: color-mix(in oklab, var(--ink) 18%, var(--surface));
+  background: var(--track);
   transition: background-color 140ms ease;
 }
 
@@ -288,7 +290,7 @@ select {
 }
 
 .segmented__option[data-checked] {
-  background: var(--raised);
+  background: var(--control-strong);
   color: var(--ink);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
 }
@@ -310,9 +312,9 @@ select {
 .select {
   height: 28px;
   padding: 0 8px;
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--control-border);
   border-radius: 7px;
-  background: var(--raised);
+  background: var(--control);
   font-size: 13px;
 }
 
@@ -330,9 +332,9 @@ select {
   min-width: 132px;
   height: 32px;
   padding: 0 10px;
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--control-border);
   border-radius: 8px;
-  background: var(--raised);
+  background: var(--control);
 }
 
 .hotkey__field[data-recording] {
