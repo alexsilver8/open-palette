@@ -251,7 +251,13 @@ function General({ state, update }: SectionProps) {
       </Row>
       <Row
         label="Open at login"
-        description={info.canLaunchAtLogin ? 'Start Open Palette when you log in.' : 'Not available on Linux yet.'}
+        description={
+          info.canLaunchAtLogin
+            ? 'Start Open Palette when you log in.'
+            : info.platform === 'linux'
+              ? 'Not available on Linux yet.'
+              : 'Works in the installed app, not when running from source.'
+        }
       >
         <Toggle
           label="Open at login"

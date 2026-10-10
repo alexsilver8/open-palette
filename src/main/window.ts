@@ -50,6 +50,12 @@ export class LauncherWindow {
 
     if (isMac) this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
+    // If the page crashes, bring it back rather than leaving an empty window.
+    this.window.webContents.on('render-process-gone', (_event, details) => {
+      console.error(`[launcher] Renderer gone: ${details.reason}`);
+      if (details.reason !== 'clean-exit') loadPage(this.window, 'index', glass);
+    });
+
     this.window.on('blur', () => {
       if (this.options.hideOnBlur() && !this.window.webContents.isDevToolsFocused()) this.hide();
     });

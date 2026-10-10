@@ -32,6 +32,8 @@ export interface SettingsState {
     clipboardEntries: number;
     /** Launching at login isn't supported everywhere (e.g. Linux). */
     canLaunchAtLogin: boolean;
+    /** Running the installed app, rather than from source. */
+    packaged: boolean;
   };
 }
 
