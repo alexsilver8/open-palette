@@ -82,7 +82,7 @@ pnpm typecheck
 pnpm dist         # installers for your OS in release/
 ```
 
-The first run downloads the Electron binary for your platform.
+`pnpm install` also downloads the Electron binary for your platform.
 
 ### How it fits together
 

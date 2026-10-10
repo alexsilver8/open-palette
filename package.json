@@ -9,6 +9,7 @@
   "author": "Alexander Silver",
   "homepage": "https://github.com/alexsilver8/open-palette",
   "scripts": {
+    "postinstall": "install-electron",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
