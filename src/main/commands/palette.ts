@@ -5,13 +5,13 @@ import type { CommandRegistry } from '../registry';
 import type { BuiltinExtension } from './types';
 
 interface PaletteCommandOptions {
-  settingsPath: string;
+  openSettings: () => void;
   extensionsDir: string;
   registry: () => CommandRegistry;
 }
 
 /** Commands for managing Open Palette itself. */
-export function paletteExtension({ settingsPath, extensionsDir, registry }: PaletteCommandOptions): BuiltinExtension {
+export function paletteExtension({ openSettings, extensionsDir, registry }: PaletteCommandOptions): BuiltinExtension {
   const openExtensionsFolder = async () => {
     mkdirSync(extensionsDir, { recursive: true });
     const error = await shell.openPath(extensionsDir);
@@ -100,9 +100,9 @@ export function paletteExtension({ settingsPath, extensionsDir, registry }: Pale
     },
     commands: {
       settings: {
-        async run() {
-          const error = await shell.openPath(settingsPath);
-          return error ? { toast: error, toastStyle: 'failure' } : { hide: true };
+        run() {
+          openSettings();
+          return { hide: true };
         },
       },
       extensions: {

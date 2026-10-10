@@ -5,7 +5,7 @@
  * (its icon tile), and the selected row takes on a wash of that colour.
  */
 
-@import "./tokens.css";
+@import "./base.css";
 
 * {
   box-sizing: border-box;
@@ -186,34 +186,6 @@ button {
   background: var(--row-pigment);
 }
 
-[data-tint="red"] {
-  --pigment: var(--pigment-red);
-}
-[data-tint="orange"] {
-  --pigment: var(--pigment-orange);
-}
-[data-tint="yellow"] {
-  --pigment: var(--pigment-yellow);
-}
-[data-tint="green"] {
-  --pigment: var(--pigment-green);
-}
-[data-tint="teal"] {
-  --pigment: var(--pigment-teal);
-}
-[data-tint="blue"] {
-  --pigment: var(--pigment-blue);
-}
-[data-tint="purple"] {
-  --pigment: var(--pigment-purple);
-}
-[data-tint="pink"] {
-  --pigment: var(--pigment-pink);
-}
-[data-tint="gray"] {
-  --pigment: var(--pigment-gray);
-}
-
 .row__text {
   display: flex;
   align-items: baseline;
@@ -251,37 +223,6 @@ button {
   flex: none;
   color: var(--ink-faint);
   font-size: 12px;
-}
-
-.icon {
-  flex: none;
-  width: 22px;
-  height: 22px;
-}
-
-.icon--tile {
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  background: var(--pigment);
-  color: #fff;
-  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.12);
-}
-
-.icon--emoji {
-  display: grid;
-  place-items: center;
-  font-size: 17px;
-  line-height: 1;
-}
-
-.icon--image {
-  object-fit: contain;
-}
-
-.icon--blank {
-  border-radius: 6px;
-  background: var(--keycap);
 }
 
 /* The calculator answers inline: the sum on the left, the answer large on the right. */
@@ -416,25 +357,6 @@ button {
   height: 16px;
   margin: 0 4px;
   background: var(--hairline);
-}
-
-.keycaps {
-  display: inline-flex;
-  gap: 3px;
-}
-
-.keycap {
-  display: inline-grid;
-  place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  border-radius: 5px;
-  background: var(--keycap);
-  color: var(--ink-muted);
-  font-family: inherit;
-  font-size: 11.5px;
-  font-weight: 500;
 }
 
 /* ── Action panel (⌘K) ──────────────────────────────────── */

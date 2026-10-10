@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SETTINGS, normalizeSettings } from './settings-schema';
+import { DEFAULT_SETTINGS, normalizeSettings } from './settings';
 
 describe('normalizeSettings', () => {
   it('returns the defaults when nothing was saved', () => {

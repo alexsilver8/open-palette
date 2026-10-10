@@ -119,3 +119,23 @@ test('lists every note, with no cap', async () => {
   await page.keyboard.type('number 7');
   await expect(page.getByRole('option')).toHaveCount(1);
 });
+
+test('changes settings in the Settings window', async () => {
+  const settingsFile = () => JSON.parse(readFileSync(join(userData, 'settings.json'), 'utf8'));
+  await page.keyboard.type('open settings');
+  const [settings] = await Promise.all([app.waitForEvent('window'), page.keyboard.press('Enter')]);
+  await expect(settings.getByRole('heading', { name: 'General' })).toBeVisible();
+
+  await settings.getByText('Dark', { exact: true }).click();
+  await expect.poll(() => settingsFile().theme).toBe('dark');
+
+  await settings.getByRole('button', { name: /^Shortcut:/ }).click();
+  await expect(settings.getByText('Press a shortcut…')).toBeVisible();
+  await settings.keyboard.press('Control+Shift+K');
+  await expect.poll(() => settingsFile().hotkey).toBe('Control+Shift+K');
+
+  await settings.getByRole('button', { name: 'Clipboard' }).click();
+  await settings.getByRole('switch', { name: 'Save clipboard history' }).click();
+  await settings.getByLabel('Entries to keep').selectOption('500');
+  await expect.poll(() => settingsFile().clipboardHistory).toEqual({ enabled: true, maxItems: 500 });
+});

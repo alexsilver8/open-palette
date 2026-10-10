@@ -1,10 +1,10 @@
 import { EventEmitter } from 'node:events';
 import { type FSWatcher, watch } from 'node:fs';
 import { basename, dirname } from 'node:path';
+import { normalizeSettings, type Settings } from '../shared/settings';
 import { debounce, readJsonFile, writeJsonFile } from './json-file';
-import { normalizeSettings, type Settings } from './settings-schema';
 
-export type { Settings } from './settings-schema';
+export type { Settings } from '../shared/settings';
 
 interface SettingsEvents {
   change: [settings: Settings, previous: Settings];
@@ -30,6 +30,16 @@ export class SettingsStore extends EventEmitter<SettingsEvents> {
 
   get(): Settings {
     return this.current;
+  }
+
+  /** Changes some settings, saves the file and notifies listeners. Invalid values are dropped. */
+  update(patch: Partial<Settings>): Settings {
+    const previous = this.current;
+    const { settings } = normalizeSettings({ ...previous, ...patch });
+    this.current = settings;
+    writeJsonFile(this.path, settings);
+    if (JSON.stringify(settings) !== JSON.stringify(previous)) this.emit('change', settings, previous);
+    return settings;
   }
 
   /** Starts watching the file. Editors often replace files on save, so watch the folder. */

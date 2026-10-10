@@ -54,7 +54,9 @@ Notes are saved as you type, one `.md` file per note. Set `notesDirectory` to a 
 
 ## Settings
 
-Run **Open Settings** to edit `settings.json`. Changes apply as soon as you save.
+Open **Settings** with <kbd>⌘</kbd> <kbd>,</kbd> in the launcher, the **Open Settings** command, or **Settings…** in the tray menu. There you can record a new shortcut, pick light or dark, choose how much clipboard history to keep, move your notes folder and manage extensions.
+
+Everything is also saved in `settings.json` (**Settings → About → Edit settings.json**), and changes you make there apply as soon as you save:
 
 ```jsonc
 {
@@ -109,7 +111,6 @@ Built-in commands implement the same interface as extensions, so anything a buil
 - Markdown preview and checklists in Notes
 - Quicklinks and snippets
 - Window management
-- A settings screen, including recording the hotkey
 - Code-signed, auto-updating releases
 
 Ideas and bug reports are welcome in [Issues](https://github.com/alexsilver8/open-palette/issues).

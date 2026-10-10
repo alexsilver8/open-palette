@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { app, globalShortcut, nativeTheme, shell } from 'electron';
+import { app, nativeTheme, shell } from 'electron';
 import { IpcChannel } from '../shared/ipc';
 import { NotesChannel } from '../shared/notes';
 import type { Platform } from '../shared/types';
@@ -14,6 +14,7 @@ import { paletteExtension } from './commands/palette';
 import { system } from './commands/system';
 import { webSearch } from './commands/web-search';
 import { ExtensionHostClient } from './extensions/host-client';
+import { HotkeyManager } from './hotkey';
 import { handleIconProtocol, registerIconScheme } from './icon-protocol';
 import { registerIpc } from './ipc';
 import { registerNotesIpc } from './notes/ipc';
@@ -21,6 +22,8 @@ import { NotesStore } from './notes/store';
 import { NotesWindow } from './notes/window';
 import { CommandRegistry } from './registry';
 import { type Settings, SettingsStore } from './settings';
+import { registerSettingsIpc } from './settings-ipc';
+import { SettingsWindow } from './settings-window';
 import { AppTray } from './tray';
 import { UsageTracker } from './usage';
 import { LauncherWindow } from './window';
@@ -36,26 +39,6 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   void main();
-}
-
-let activeHotkey: string | undefined;
-
-/**
- * Switches the global shortcut. The new one is registered before the old one is released,
- * so a typo or a shortcut taken by another app never leaves you without one.
- */
-function setHotkey(accelerator: string, onPress: () => void): boolean {
-  if (accelerator === activeHotkey) return true;
-  let registered = false;
-  try {
-    registered = globalShortcut.register(accelerator, onPress);
-  } catch {
-    // An invalid accelerator throws.
-  }
-  if (!registered) return false;
-  if (activeHotkey) globalShortcut.unregister(activeHotkey);
-  activeHotkey = accelerator;
-  return true;
 }
 
 async function main(): Promise<void> {
@@ -89,6 +72,7 @@ async function main(): Promise<void> {
   registerNotesIpc(notesStore, notesWindow);
   notesStore.on('change', () => notesWindow.webContents?.send(NotesChannel.changed));
   void notesStore.watch();
+  const settingsWindow = new SettingsWindow();
 
   const registry: CommandRegistry = new CommandRegistry({
     platform,
@@ -107,7 +91,7 @@ async function main(): Promise<void> {
       notesExtension(notesStore, notesWindow),
       webSearch,
       system,
-      paletteExtension({ settingsPath, extensionsDir, registry: () => registry }),
+      paletteExtension({ openSettings: () => settingsWindow.open(), extensionsDir, registry: () => registry }),
     ],
   });
 
@@ -118,28 +102,46 @@ async function main(): Promise<void> {
   });
 
   const launcher = new LauncherWindow({ hideOnBlur: () => settings.get().hideOnBlur });
+  const hotkeys = new HotkeyManager(() => launcher.toggle());
   registerIpc(registry, launcher);
-  registry.on('change', () => launcher.window.webContents.send(IpcChannel.rootItemsChanged));
+  const settingsIpc = registerSettingsIpc({
+    store: settings,
+    window: settingsWindow,
+    hotkeys,
+    registry,
+    clipboardHistory,
+    platform,
+    paths: {
+      settingsFile: settingsPath,
+      dataDirectory: dataDir,
+      extensionsDirectory: extensionsDir,
+      notesDirectory: () => notesDirectoryFor(settings.get()),
+    },
+  });
+  registry.on('change', () => {
+    launcher.window.webContents.send(IpcChannel.rootItemsChanged);
+    settingsIpc.notifyChanged();
+  });
   app.on('second-instance', () => launcher.show());
 
   const tray = new AppTray({
-    hotkey: () => activeHotkey,
+    hotkey: () => hotkeys.current,
     onOpen: () => launcher.show(),
     onOpenNotes: () => notesWindow.open(),
-    onOpenSettings: () => void shell.openPath(settingsPath),
+    onOpenSettings: () => settingsWindow.open(),
     onOpenExtensionsFolder: () => void shell.openPath(extensionsDir),
     onReloadExtensions: () => void registry.loadUserExtensions(),
   });
 
   const apply = (current: Settings, previous?: Settings) => {
-    if (current.hotkey !== previous?.hotkey && !setHotkey(current.hotkey, () => launcher.toggle())) {
-      const fallback = activeHotkey ? ` Still using ${activeHotkey}.` : '';
+    if (current.hotkey !== previous?.hotkey && !hotkeys.set(current.hotkey)) {
+      const fallback = hotkeys.current ? ` Still using ${hotkeys.current}.` : '';
       console.warn(`[hotkey] Could not register "${current.hotkey}".`);
       launcher.toast({
         text: `Couldn't use “${current.hotkey}” as the shortcut. It may be invalid or taken by another app.${fallback}`,
         style: 'failure',
       });
-      if (!activeHotkey) launcher.show();
+      if (!hotkeys.current) launcher.show();
     }
     tray.refresh();
     nativeTheme.themeSource = current.theme;
@@ -155,7 +157,10 @@ async function main(): Promise<void> {
     }
   };
   apply(settings.get());
-  settings.on('change', apply);
+  settings.on('change', (current, previous) => {
+    apply(current, previous);
+    settingsIpc.notifyChanged();
+  });
   settings.watch();
 
   // Show the launcher right away in development, on first run, or when asked to. Apps and
@@ -166,7 +171,7 @@ async function main(): Promise<void> {
   apps.startAutoRefresh();
 
   app.on('will-quit', () => {
-    globalShortcut.unregisterAll();
+    hotkeys.dispose();
     usage.flush();
     clipboardHistory.flush();
     notesWindow.flushState();
