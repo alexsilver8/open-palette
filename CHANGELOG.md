@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/alexsilver8/open-palette/compare/v1.1.0...v1.2.0) (2026-10-10)
+
+
+### Features
+
+* frosted-glass look, in the style of Raycast ([#7](https://github.com/alexsilver8/open-palette/issues/7)) ([2340613](https://github.com/alexsilver8/open-palette/commit/2340613ef861c54945f6df6b512fde2fad2d9e50))
+
+
+### Bug Fixes
+
+* stop the app crashing on macOS when search shows apps ([#9](https://github.com/alexsilver8/open-palette/issues/9)) ([0e73ac6](https://github.com/alexsilver8/open-palette/commit/0e73ac62370b483610229053e5f5ce06a4ff929e))
+
 ## [1.1.0](https://github.com/alexsilver8/open-palette/compare/v1.0.0...v1.1.0) (2026-10-10)
 
 
