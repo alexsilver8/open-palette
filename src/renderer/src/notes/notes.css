@@ -3,7 +3,7 @@
  * lighter strip of it.
  */
 
-@import "../tokens.css";
+@import "../base.css";
 
 * {
   box-sizing: border-box;

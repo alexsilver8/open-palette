@@ -87,3 +87,41 @@
   font-size: 11.5px;
   font-weight: 500;
 }
+
+/* Shown by ErrorBoundary when a window's UI fails. */
+.crash {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  height: 100%;
+  padding: 24px;
+  background: var(--glass);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  text-align: center;
+}
+
+.crash__title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.crash__detail {
+  max-width: 480px;
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.crash__reload {
+  margin-top: 8px;
+  height: 28px;
+  padding: 0 14px;
+  border: 1px solid var(--control-border);
+  border-radius: 7px;
+  background: var(--control);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
