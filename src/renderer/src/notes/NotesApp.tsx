@@ -59,7 +59,12 @@ export function NotesApp() {
     pending.current = { id, text, timer: setTimeout(() => void saveNow(), SAVE_DELAY_MS) };
   };
 
-  const focusEditor = useCallback(() => requestAnimationFrame(() => editor.current?.focus()), []);
+  // Focus after React has rendered the change: the editor may only just have become enabled.
+  const [focusRequest, setFocusRequest] = useState(0);
+  const focusEditor = useCallback(() => setFocusRequest((n) => n + 1), []);
+  useEffect(() => {
+    if (focusRequest > 0 && currentId) editor.current?.focus();
+  }, [focusRequest, currentId]);
 
   /** Switches to a note, saving the current one and dropping it if you never wrote anything. */
   const select = useCallback(

@@ -1,0 +1,431 @@
+/*
+ * Settings window. Each section keeps the pigment of its launcher command (Clipboard is
+ * orange, Notes yellow, Extensions violet), and the open section's nav item takes a wash of it.
+ */
+
+@import "../base.css";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+.settings {
+  display: grid;
+  grid-template-columns: 196px 1fr;
+  grid-template-rows: 44px 1fr;
+  grid-template-areas:
+    "titlebar titlebar"
+    "nav content";
+  height: 100%;
+}
+
+/* ── Title bar and navigation ───────────────────────────── */
+
+.settings__titlebar {
+  grid-area: titlebar;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 600;
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+.settings__nav {
+  grid-area: nav;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 10px;
+  border-right: 1px solid var(--hairline);
+  background: color-mix(in oklab, var(--ink) 3%, var(--surface));
+}
+
+.settings__nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  text-align: left;
+  font-weight: 500;
+}
+
+.settings__nav-item:hover {
+  background: var(--wash-neutral);
+}
+
+.settings__nav-item[aria-current="page"] {
+  background: color-mix(in oklab, var(--pigment) var(--wash-strength), transparent);
+}
+
+.settings__nav-item:focus-visible,
+.button:focus-visible,
+.toggle:focus-visible,
+.hotkey__field:focus-visible,
+.select:focus-visible,
+.link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ── Content ────────────────────────────────────────────── */
+
+.settings__content {
+  grid-area: content;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 36px 40px;
+}
+
+.settings__content > * {
+  max-width: 600px;
+}
+
+.settings__heading {
+  margin: 0 0 14px;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.section__intro {
+  margin: 0 0 16px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.section__subheading {
+  margin: 28px 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.section__empty {
+  margin: 0 0 8px;
+  color: var(--ink-faint);
+  font-size: 13px;
+}
+
+.row-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 60px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.row-setting:first-of-type {
+  border-top: 1px solid var(--hairline);
+}
+
+.row-setting__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.row-setting__label {
+  font-weight: 500;
+}
+
+.row-setting__description {
+  min-width: 0;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.row-setting__control {
+  flex: none;
+}
+
+.path {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+}
+
+/* ── Controls ───────────────────────────────────────────── */
+
+.button {
+  height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 7px;
+  background: var(--raised);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.button:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--ink) 5%, var(--raised));
+}
+
+.button:disabled {
+  color: var(--ink-faint);
+}
+
+.button[data-tone="destructive"] {
+  color: var(--pigment-red);
+}
+
+.button-row {
+  display: flex;
+  gap: 8px;
+}
+
+.button-row--start {
+  margin: 4px 0 8px;
+}
+
+.link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent-ink);
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.toggle {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 11px;
+  background: color-mix(in oklab, var(--ink) 18%, var(--surface));
+  transition: background-color 140ms ease;
+}
+
+.toggle[aria-checked="true"] {
+  background: var(--accent);
+}
+
+.toggle:disabled {
+  opacity: 0.45;
+}
+
+.toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+  transition: transform 140ms ease;
+}
+
+.toggle[aria-checked="true"] .toggle__thumb {
+  transform: translateX(16px);
+}
+
+.segmented {
+  display: inline-flex;
+  margin: 0;
+  padding: 2px;
+  border: none;
+  border-radius: 8px;
+  background: var(--keycap);
+}
+
+.segmented__option {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 6px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.segmented__option input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+.segmented__option[data-checked] {
+  background: var(--raised);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+.segmented__option:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.select {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--hairline);
+  border-radius: 7px;
+  background: var(--raised);
+  font-size: 13px;
+}
+
+.hotkey {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.hotkey__field {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 132px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--raised);
+}
+
+.hotkey__field[data-recording] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+.hotkey__prompt {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.hotkey__message {
+  max-width: 260px;
+  color: var(--pigment-red);
+  font-size: 12px;
+  text-align: right;
+}
+
+/* ── Lists ──────────────────────────────────────────────── */
+
+.extension-list,
+.folder-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.extension,
+.folder {
+  display: flex;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.extension {
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 0;
+}
+
+.extension__title {
+  font-weight: 500;
+}
+
+.extension__meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+}
+
+.extension[data-failed] .extension__meta {
+  color: var(--pigment-red);
+  white-space: normal;
+}
+
+.folder {
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+/* ── About ──────────────────────────────────────────────── */
+
+.about {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 4px 0 18px;
+}
+
+.about .palette-mark {
+  color: var(--ink);
+}
+
+.about__name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.about__version {
+  margin: 2px 0 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle,
+  .toggle__thumb {
+    transition: none;
+  }
+}

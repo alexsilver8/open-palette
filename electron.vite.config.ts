@@ -23,6 +23,7 @@ export default defineConfig({
         input: {
           index: resolve('src/preload/index.ts'),
           notes: resolve('src/preload/notes.ts'),
+          settings: resolve('src/preload/settings.ts'),
         },
         // Sandboxed preload scripts must be CommonJS.
         output: { format: 'cjs', entryFileNames: '[name].cjs' },
@@ -37,6 +38,7 @@ export default defineConfig({
         input: {
           index: resolve('src/renderer/index.html'),
           notes: resolve('src/renderer/notes.html'),
+          settings: resolve('src/renderer/settings.html'),
         },
       },
     },
