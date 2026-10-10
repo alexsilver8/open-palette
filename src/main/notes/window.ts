@@ -1,6 +1,7 @@
 import { join } from 'node:path';
-import { app, BrowserWindow, nativeTheme } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import { NotesChannel, type NotesWindowState } from '../../shared/notes';
+import { glassFor, glassWindowOptions, loadPage } from '../glass';
 import { debounce, readJsonFile, writeJsonFile } from '../json-file';
 
 const isMac = process.platform === 'darwin';
@@ -71,6 +72,7 @@ export class NotesWindow {
 
   private create(): BrowserWindow {
     const { bounds } = this.state;
+    const glass = glassFor();
     const window = new BrowserWindow({
       width: bounds?.width ?? 560,
       height: bounds?.height ?? 600,
@@ -80,7 +82,7 @@ export class NotesWindow {
       show: false,
       title: 'Notes',
       fullscreenable: false,
-      backgroundColor: nativeTheme.shouldUseDarkColors ? '#1d1e26' : '#f7f7fa',
+      ...glassWindowOptions(glass, false),
       ...(isMac
         ? ({ titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 14, y: 15 } } as const)
         : ({ autoHideMenuBar: true } as const)),
@@ -108,11 +110,7 @@ export class NotesWindow {
       this.save.flush();
     });
 
-    if (!app.isPackaged && process.env.ELECTRON_RENDERER_URL) {
-      void window.loadURL(`${process.env.ELECTRON_RENDERER_URL}/notes.html`);
-    } else {
-      void window.loadFile(join(import.meta.dirname, '../renderer/notes.html'));
-    }
+    loadPage(window, 'notes', glass);
     return window;
   }
 

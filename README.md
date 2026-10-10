@@ -19,6 +19,7 @@ An open-source, keyboard-first launcher for macOS, Windows and Linux, in the spi
 - **Learns what you use** — frequently used items rise to the top.
 - **Runs extensions** — commands written in JavaScript, each extension in a separate process. See [Writing extensions](docs/extensions.md).
 - **Everything has actions** — <kbd>⌘</kbd> <kbd>K</kbd> lists what you can do with the selected item.
+- **Looks at home on your desktop** — frosted-glass windows that blur what's behind them on macOS and Windows 11, in light or dark. Linux gets the same design on a solid background, since it has no system blur.
 
 ## Install
 
