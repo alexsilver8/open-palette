@@ -36,13 +36,21 @@
   height: 22px;
 }
 
+/* Glossy tiles, lit from above like the glass around them. */
 .icon--tile {
   display: grid;
   place-items: center;
   border-radius: 6px;
-  background: var(--pigment);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--pigment) 72%, white), var(--pigment) 70%);
   color: #fff;
-  box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.12);
+  box-shadow:
+    inset 0 0.5px 0 rgb(255 255 255 / 0.45),
+    inset 0 0 0 0.5px rgb(0 0 0 / 0.14),
+    0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+.icon--tile svg {
+  filter: drop-shadow(0 0.5px 0.5px rgb(0 0 0 / 0.18));
 }
 
 .icon--emoji {
