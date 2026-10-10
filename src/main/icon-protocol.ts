@@ -1,11 +1,18 @@
 import { extname } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { app, net, protocol } from 'electron';
+import { fileIconSize, IconCache } from './icon-cache';
 
 /** `palette-icon://icon?path=/Applications/Safari.app` serves the icon for that file. */
 export const ICON_SCHEME = 'palette-icon';
 
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico']);
+
+const osIcons = new IconCache(async (path) => {
+  const icon = await app.getFileIcon(path, { size: fileIconSize(process.platform) });
+  if (icon.isEmpty()) throw new Error(`No icon for ${path}`);
+  return new Uint8Array(icon.toPNG());
+});
 
 /** Must run before the app is ready. */
 export function registerIconScheme(): void {
@@ -30,8 +37,7 @@ export function handleIconProtocol(): void {
           },
         });
       }
-      const icon = await app.getFileIcon(path, { size: 'large' });
-      return new Response(new Uint8Array(icon.toPNG()), {
+      return new Response(await osIcons.get(path), {
         headers: { 'content-type': 'image/png', 'cache-control': 'max-age=3600' },
       });
     } catch {

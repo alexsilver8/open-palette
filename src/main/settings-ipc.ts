@@ -64,7 +64,8 @@ export function registerSettingsIpc(options: SettingsIpcOptions): { notifyChange
         extensionsDirectory: paths.extensionsDirectory,
         notesDirectory: paths.notesDirectory(),
         clipboardEntries: clipboardHistory.entries().length,
-        canLaunchAtLogin: platform !== 'linux',
+        canLaunchAtLogin: platform !== 'linux' && app.isPackaged,
+        packaged: app.isPackaged,
       },
     };
   };

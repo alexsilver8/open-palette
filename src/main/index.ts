@@ -96,6 +96,10 @@ async function main(): Promise<void> {
   });
 
   handleIconProtocol();
+  // Leave a trace when a window's renderer or a helper process dies, instead of a silent blank.
+  app.on('child-process-gone', (_event, details) => {
+    console.error(`[process] ${details.type} process gone: ${details.reason} (exit code ${details.exitCode})`);
+  });
   app.on('web-contents-created', (_event, contents) => {
     contents.setWindowOpenHandler(() => ({ action: 'deny' }));
     contents.on('will-navigate', (event) => event.preventDefault());
@@ -133,6 +137,17 @@ async function main(): Promise<void> {
     onReloadExtensions: () => void registry.loadUserExtensions(),
   });
 
+  // Only the installed app can register itself to open at login: in development macOS
+  // refuses ("Operation not permitted"), and it would register Electron itself anyway.
+  const syncLoginItem = (openAtLogin: boolean) => {
+    if (platform === 'linux' || !app.isPackaged) return;
+    try {
+      if (app.getLoginItemSettings().openAtLogin !== openAtLogin) app.setLoginItemSettings({ openAtLogin });
+    } catch (error) {
+      console.warn('[login item] Could not update:', error);
+    }
+  };
+
   const apply = (current: Settings, previous?: Settings) => {
     if (current.hotkey !== previous?.hotkey && !hotkeys.set(current.hotkey)) {
       const fallback = hotkeys.current ? ` Still using ${hotkeys.current}.` : '';
@@ -145,7 +160,7 @@ async function main(): Promise<void> {
     }
     tray.refresh();
     nativeTheme.themeSource = current.theme;
-    if (platform !== 'linux') app.setLoginItemSettings({ openAtLogin: current.launchAtLogin });
+    syncLoginItem(current.launchAtLogin);
     clipboardHistory.setMaxItems(current.clipboardHistory.maxItems);
     if (current.clipboardHistory.enabled) void clipboardHistory.start();
     else clipboardHistory.stop();
