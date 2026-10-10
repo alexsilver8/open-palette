@@ -1,22 +1,51 @@
 {
   "name": "open-palette",
+  "productName": "Open Palette",
   "version": "0.0.0",
-  "description": "",
+  "description": "An open-source, keyboard-first command palette and launcher for macOS, Windows and Linux.",
+  "private": true,
   "type": "module",
-  "exports": "./src/index.js",
-  "files": [
-    "src"
-  ],
+  "main": "./out/main/index.js",
+  "author": "Alexander Silver",
+  "homepage": "https://github.com/alexsilver8/open-palette",
   "scripts": {
-    "test": "node --test"
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "start": "electron-vite preview",
+    "typecheck": "tsc -p tsconfig.node.json && tsc -p tsconfig.web.json",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "pnpm run build && playwright test",
+    "dist": "pnpm run build && electron-builder --publish never",
+    "dist:dir": "pnpm run build && electron-builder --dir"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alexsilver8/open-palette.git"
   },
   "license": "MIT",
-  "packageManager": "pnpm@11.19.0"
+  "packageManager": "pnpm@11.19.0",
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@playwright/test": "1.64.0",
+    "@types/node": "^24.19.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "lucide-react": "^1.54.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^7.3.7",
+    "vitest": "^5.0.3"
+  }
 }

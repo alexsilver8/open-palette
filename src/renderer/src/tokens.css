@@ -1,0 +1,55 @@
+/* Design tokens shared by the launcher and the Notes window. */
+
+:root {
+  color-scheme: light dark;
+
+  --font-ui:
+    -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, Cantarell, Ubuntu, "Noto Sans",
+    sans-serif;
+
+  /* Pigments, named for the paints they come from. */
+  --pigment-red: #d8412f; /* cadmium red */
+  --pigment-orange: #e0702a; /* cadmium orange */
+  --pigment-yellow: #d39516; /* indian yellow */
+  --pigment-green: #1e8c6e; /* viridian */
+  --pigment-teal: #1d8aa0; /* cerulean */
+  --pigment-blue: #3f4fd8; /* ultramarine */
+  --pigment-purple: #6c3fc4; /* dioxazine violet */
+  --pigment-pink: #cf3f7c; /* quinacridone rose */
+  --pigment-gray: #566373; /* payne's grey */
+
+  --accent: var(--pigment-blue);
+
+  --ink: #1c1f2b;
+  --ink-muted: #656b7b;
+  --ink-faint: #9aa0ae;
+  --surface: #f7f7fa;
+  --surface-translucent: rgb(247 247 250 / 0.74);
+  --raised: #ffffff;
+  --hairline: rgb(28 31 43 / 0.09);
+  --keycap: rgb(28 31 43 / 0.07);
+  --wash-neutral: rgb(28 31 43 / 0.07);
+  --wash-strength: 17%;
+  --accent-ink: #3445c9;
+  --shadow-popover: 0 14px 36px rgb(20 22 40 / 0.18), 0 2px 6px rgb(20 22 40 / 0.08);
+
+  --radius-window: 12px;
+  --radius-row: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #eceef4;
+    --ink-muted: #9a9fae;
+    --ink-faint: #676c7c;
+    --surface: #1d1e26;
+    --surface-translucent: rgb(29 30 38 / 0.7);
+    --raised: #272834;
+    --hairline: rgb(236 238 244 / 0.08);
+    --keycap: rgb(236 238 244 / 0.08);
+    --wash-neutral: rgb(236 238 244 / 0.08);
+    --wash-strength: 22%;
+    --accent-ink: #9aa6ff;
+    --shadow-popover: 0 14px 36px rgb(0 0 0 / 0.45), 0 2px 6px rgb(0 0 0 / 0.3);
+  }
+}

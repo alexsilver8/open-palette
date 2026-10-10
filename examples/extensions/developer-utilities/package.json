@@ -1,0 +1,48 @@
+{
+  "name": "developer-utilities",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Example extension: UUIDs, npm search and a to-do list.",
+  "type": "module",
+  "main": "index.js",
+  "openPalette": {
+    "title": "Developer Utilities",
+    "icon": "🧰",
+    "commands": [
+      {
+        "name": "uuid",
+        "title": "Generate UUID",
+        "mode": "view",
+        "icon": "🎲",
+        "keywords": [
+          "guid",
+          "random",
+          "id"
+        ]
+      },
+      {
+        "name": "npm-search",
+        "title": "Search npm Packages",
+        "mode": "view",
+        "icon": "📦",
+        "keywords": [
+          "node",
+          "package",
+          "registry"
+        ],
+        "fallback": true
+      },
+      {
+        "name": "todos",
+        "title": "To-dos",
+        "mode": "view",
+        "icon": "✅",
+        "keywords": [
+          "todo",
+          "tasks",
+          "checklist"
+        ]
+      }
+    ]
+  }
+}

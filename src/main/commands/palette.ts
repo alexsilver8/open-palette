@@ -1,0 +1,125 @@
+import { mkdirSync } from 'node:fs';
+import { app, shell } from 'electron';
+import type { ListItem, View } from '../../shared/types';
+import type { CommandRegistry } from '../registry';
+import type { BuiltinExtension } from './types';
+
+interface PaletteCommandOptions {
+  settingsPath: string;
+  extensionsDir: string;
+  registry: () => CommandRegistry;
+}
+
+/** Commands for managing Open Palette itself. */
+export function paletteExtension({ settingsPath, extensionsDir, registry }: PaletteCommandOptions): BuiltinExtension {
+  const openExtensionsFolder = async () => {
+    mkdirSync(extensionsDir, { recursive: true });
+    const error = await shell.openPath(extensionsDir);
+    return error ? { toast: error, toastStyle: 'failure' as const } : { hide: true };
+  };
+
+  const reload = async () => {
+    const { loaded, failed } = await registry().loadUserExtensions();
+    const summary = `Loaded ${loaded} extension${loaded === 1 ? '' : 's'}`;
+    return failed > 0
+      ? { toast: `${summary}, ${failed} failed`, toastStyle: 'failure' as const }
+      : { toast: summary, toastStyle: 'success' as const };
+  };
+
+  const extensionsView = (): View => {
+    const user: ListItem[] = [];
+    const builtin: ListItem[] = [];
+    for (const info of registry().listExtensions()) {
+      const name = info.manifest?.name ?? info.dir ?? 'unknown';
+      const commandCount = info.manifest?.commands.length ?? 0;
+      const item: ListItem = {
+        id: `${info.source}:${name}:${info.dir ?? ''}`,
+        title: info.manifest?.title ?? info.dir ?? name,
+        subtitle: info.error ?? `${commandCount} command${commandCount === 1 ? '' : 's'}`,
+        icon: info.error
+          ? { builtin: 'alert', tint: 'red' }
+          : (info.manifest?.icon ?? { builtin: 'extension', tint: 'purple' }),
+        accessory: info.error ? 'Failed to load' : info.source === 'builtin' ? 'Built-in' : name,
+        actions: [],
+      };
+      if (info.dir) item.actions.push({ type: 'open-path', path: info.dir, title: 'Open Extension Folder' });
+      if (info.error) item.actions.push({ type: 'copy', text: info.error, title: 'Copy Error' });
+      item.actions.push({ type: 'callback', id: 'reload', title: 'Reload Extensions' });
+      (info.source === 'builtin' ? builtin : user).push(item);
+    }
+    return {
+      type: 'list',
+      title: 'Extensions',
+      searchPlaceholder: 'Search extensions…',
+      sections: [
+        { title: 'Installed', items: user },
+        { title: 'Built-in', items: builtin },
+      ],
+    };
+  };
+
+  return {
+    manifest: {
+      name: 'open-palette',
+      title: 'Open Palette',
+      icon: { builtin: 'sparkles', tint: 'pink' },
+      commands: [
+        {
+          name: 'settings',
+          title: 'Open Settings',
+          mode: 'no-view',
+          icon: { builtin: 'settings', tint: 'gray' },
+          keywords: ['preferences', 'hotkey', 'config'],
+        },
+        {
+          name: 'extensions',
+          title: 'Manage Extensions',
+          mode: 'view',
+          icon: { builtin: 'extension', tint: 'purple' },
+        },
+        {
+          name: 'reload-extensions',
+          title: 'Reload Extensions',
+          mode: 'no-view',
+          icon: { builtin: 'refresh', tint: 'green' },
+        },
+        {
+          name: 'open-extensions-folder',
+          title: 'Open Extensions Folder',
+          mode: 'no-view',
+          icon: { builtin: 'folder', tint: 'blue' },
+        },
+        {
+          name: 'quit',
+          title: 'Quit Open Palette',
+          mode: 'no-view',
+          icon: { builtin: 'power', tint: 'red' },
+          keywords: ['exit'],
+        },
+      ],
+    },
+    commands: {
+      settings: {
+        async run() {
+          const error = await shell.openPath(settingsPath);
+          return error ? { toast: error, toastStyle: 'failure' } : { hide: true };
+        },
+      },
+      extensions: {
+        view: extensionsView,
+        async onAction(id) {
+          if (id !== 'reload') return undefined;
+          return { ...(await reload()), replace: extensionsView() };
+        },
+      },
+      'reload-extensions': { run: reload },
+      'open-extensions-folder': { run: openExtensionsFolder },
+      quit: {
+        run() {
+          app.quit();
+          return { hide: true };
+        },
+      },
+    },
+  };
+}

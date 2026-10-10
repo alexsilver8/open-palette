@@ -158,3 +158,9 @@ vite.config.ts.timestamp-*
 Thumbs.db
 .idea/
 *.swp
+
+# Open Palette build output
+out/
+release/
+test-results/
+playwright-report/

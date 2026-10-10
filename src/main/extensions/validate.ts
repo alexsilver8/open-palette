@@ -1,0 +1,308 @@
+/**
+ * Validation for everything that comes from third-party extensions: their manifest in
+ * package.json, and the views and results their commands return at runtime. Extension
+ * output is never trusted to be well-formed — bad items are dropped instead of crashing
+ * the launcher.
+ */
+import { isAbsolute, relative, resolve } from 'node:path';
+import type {
+  Action,
+  ActionResult,
+  BuiltinIconName,
+  CommandManifest,
+  ExtensionManifest,
+  Icon,
+  Json,
+  ListItem,
+  ListSection,
+  Platform,
+  Shortcut,
+  Tint,
+  View,
+} from '../../shared/types';
+
+export class ValidationError extends Error {}
+
+const NAME_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
+const IMAGE_PATTERN = /\.(png|jpe?g|gif|webp|svg|ico|icns)$/i;
+const PLATFORMS: Platform[] = ['darwin', 'win32', 'linux'];
+const TINTS: Tint[] = ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'purple', 'pink', 'gray'];
+const BUILTIN_ICONS: BuiltinIconName[] = [
+  'alert',
+  'app',
+  'calculator',
+  'clipboard',
+  'copy',
+  'extension',
+  'file',
+  'folder',
+  'globe',
+  'link',
+  'lock',
+  'moon',
+  'note',
+  'power',
+  'refresh',
+  'search',
+  'settings',
+  'sparkles',
+  'terminal',
+  'text',
+  'trash',
+];
+const MAX_ITEMS = 2000;
+const MAX_TEXT = 1000;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function text(value: unknown, max = MAX_TEXT): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
+}
+
+function stringList(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const list = value.filter((v): v is string => typeof v === 'string').map((v) => v.slice(0, 100));
+  return list.length > 0 ? list.slice(0, 50) : undefined;
+}
+
+/**
+ * Accepts `"🎉"`, `"assets/icon.png"` (relative to `baseDir`), or the object forms of
+ * `Icon`. Returns `undefined` for anything else.
+ */
+export function sanitizeIcon(value: unknown, baseDir?: string): Icon | undefined {
+  if (typeof value === 'string') {
+    if (IMAGE_PATTERN.test(value)) {
+      if (isAbsolute(value)) return { path: value };
+      return baseDir ? { path: resolve(baseDir, value) } : undefined;
+    }
+    return value.length > 0 && value.length <= 8 && !/[\\/]/.test(value) ? { emoji: value } : undefined;
+  }
+  if (!isRecord(value)) return undefined;
+  if (typeof value.builtin === 'string' && (BUILTIN_ICONS as string[]).includes(value.builtin)) {
+    const tint =
+      typeof value.tint === 'string' && (TINTS as string[]).includes(value.tint) ? (value.tint as Tint) : undefined;
+    return tint ? { builtin: value.builtin as BuiltinIconName, tint } : { builtin: value.builtin as BuiltinIconName };
+  }
+  if (typeof value.emoji === 'string' && value.emoji.length > 0 && value.emoji.length <= 8)
+    return { emoji: value.emoji };
+  if (typeof value.path === 'string') {
+    // The object form may point at any file; non-images show their OS icon.
+    if (isAbsolute(value.path)) return { path: value.path };
+    return IMAGE_PATTERN.test(value.path) && baseDir ? { path: resolve(baseDir, value.path) } : undefined;
+  }
+  return undefined;
+}
+
+function sanitizeShortcut(value: unknown): Shortcut | undefined {
+  if (!isRecord(value) || typeof value.key !== 'string' || value.key.length === 0) return undefined;
+  const allowed = ['mod', 'shift', 'alt', 'ctrl'] as const;
+  const modifiers = Array.isArray(value.modifiers)
+    ? value.modifiers.filter((m): m is (typeof allowed)[number] => (allowed as readonly unknown[]).includes(m))
+    : undefined;
+  return modifiers && modifiers.length > 0 ? { key: value.key, modifiers } : { key: value.key };
+}
+
+function isJson(value: unknown, depth = 0): value is Json {
+  if (depth > 20) return false;
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return true;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (Array.isArray(value)) return value.every((v) => isJson(v, depth + 1));
+  if (isRecord(value)) return Object.values(value).every((v) => isJson(v, depth + 1));
+  return false;
+}
+
+export function sanitizeAction(value: unknown): Action | undefined {
+  if (!isRecord(value)) return undefined;
+  const title = text(value.title, 100);
+  const shortcut = sanitizeShortcut(value.shortcut);
+  const base = { ...(title ? { title } : {}), ...(shortcut ? { shortcut } : {}) };
+
+  switch (value.type) {
+    case 'open-url': {
+      const url = text(value.url, 8192);
+      return url ? { ...base, type: 'open-url', url } : undefined;
+    }
+    case 'open-path':
+    case 'reveal-path': {
+      const path = text(value.path, 4096);
+      return path && isAbsolute(path) ? { ...base, type: value.type, path } : undefined;
+    }
+    case 'copy': {
+      const copied = typeof value.text === 'string' ? value.text : undefined;
+      return copied !== undefined ? { ...base, type: 'copy', text: copied } : undefined;
+    }
+    case 'open-command': {
+      const ref = value.ref;
+      if (!isRecord(ref) || typeof ref.extension !== 'string' || typeof ref.command !== 'string') return undefined;
+      const argument = text(value.argument);
+      return {
+        ...base,
+        type: 'open-command',
+        ref: { extension: ref.extension, command: ref.command },
+        ...(argument !== undefined ? { argument } : {}),
+      };
+    }
+    case 'callback': {
+      const id = text(value.id, 200);
+      if (!id || !title) return undefined;
+      if (value.payload !== undefined && !isJson(value.payload)) return undefined;
+      return {
+        ...base,
+        type: 'callback',
+        title,
+        id,
+        ...(value.payload !== undefined ? { payload: value.payload as Json } : {}),
+        ...(value.style === 'destructive' ? { style: 'destructive' as const } : {}),
+      };
+    }
+    default:
+      return undefined;
+  }
+}
+
+function sanitizeItem(value: unknown, baseDir: string | undefined, seen: Set<string>): ListItem | undefined {
+  if (!isRecord(value)) return undefined;
+  const title = text(value.title);
+  if (title === undefined) return undefined;
+  let id = text(value.id, 200) ?? title;
+  for (let n = 2; seen.has(id); n++) id = `${text(value.id, 200) ?? title}#${n}`;
+  seen.add(id);
+
+  const actions = Array.isArray(value.actions)
+    ? value.actions.map(sanitizeAction).filter((a): a is Action => a !== undefined)
+    : [];
+  const item: ListItem = { id, title, actions };
+  const subtitle = text(value.subtitle);
+  const accessory = text(value.accessory, 100);
+  const keywords = stringList(value.keywords);
+  const icon = sanitizeIcon(value.icon, baseDir);
+  if (subtitle) item.subtitle = subtitle;
+  if (accessory) item.accessory = accessory;
+  if (keywords) item.keywords = keywords;
+  if (icon) item.icon = icon;
+  return item;
+}
+
+/** Validates a view returned by a command. `items` is accepted as shorthand for one section. */
+export function sanitizeView(value: unknown, baseDir?: string): View {
+  if (!isRecord(value) || value.type !== 'list')
+    throw new ValidationError('A view must be an object with type "list".');
+
+  const rawSections: unknown[] = Array.isArray(value.sections)
+    ? value.sections
+    : Array.isArray(value.items)
+      ? [{ items: value.items }]
+      : [];
+  const seen = new Set<string>();
+  let budget = MAX_ITEMS;
+  const sections: ListSection[] = [];
+  for (const raw of rawSections) {
+    if (!isRecord(raw) || !Array.isArray(raw.items)) continue;
+    const items = raw.items
+      .slice(0, Math.max(0, budget))
+      .map((item) => sanitizeItem(item, baseDir, seen))
+      .filter((item): item is ListItem => item !== undefined);
+    budget -= items.length;
+    const title = text(raw.title, 100);
+    sections.push(title ? { title, items } : { items });
+  }
+
+  const view: View = { type: 'list', sections };
+  const title = text(value.title, 100);
+  const searchPlaceholder = text(value.searchPlaceholder, 100);
+  const emptyText = text(value.emptyText, 200);
+  if (title) view.title = title;
+  if (searchPlaceholder) view.searchPlaceholder = searchPlaceholder;
+  if (emptyText) view.emptyText = emptyText;
+  if (value.filtering === false) view.filtering = false;
+  return view;
+}
+
+/** Validates what a command's `run()` or `onAction()` returned. `undefined` means "nothing special". */
+export function sanitizeActionResult(value: unknown, baseDir?: string): ActionResult | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (!isRecord(value)) throw new ValidationError('A command must return an object or nothing.');
+  const result: ActionResult = {};
+  if (value.hide === true) result.hide = true;
+  if (value.pop === true) result.pop = true;
+  if (value.clearSearch === true) result.clearSearch = true;
+  const toast = text(value.toast, 200);
+  if (toast) result.toast = toast;
+  if (value.toastStyle === 'success' || value.toastStyle === 'failure') result.toastStyle = value.toastStyle;
+  if (value.push !== undefined) result.push = sanitizeView(value.push, baseDir);
+  if (value.replace !== undefined) result.replace = sanitizeView(value.replace, baseDir);
+  return result;
+}
+
+function parseCommand(value: unknown, index: number, dir: string): CommandManifest {
+  if (!isRecord(value)) throw new ValidationError(`commands[${index}] must be an object.`);
+  const name = value.name;
+  if (typeof name !== 'string' || !NAME_PATTERN.test(name)) {
+    throw new ValidationError(`commands[${index}].name must use lowercase letters, digits and dashes.`);
+  }
+  const title = text(value.title, 100);
+  if (!title) throw new ValidationError(`Command "${name}" needs a title.`);
+  if (value.mode !== 'view' && value.mode !== 'no-view') {
+    throw new ValidationError(`Command "${name}" needs a mode of "view" or "no-view".`);
+  }
+  const command: CommandManifest = { name, title, mode: value.mode };
+  const subtitle = text(value.subtitle, 100);
+  const icon = sanitizeIcon(value.icon, dir);
+  const keywords = stringList(value.keywords);
+  if (subtitle) command.subtitle = subtitle;
+  if (icon) command.icon = icon;
+  if (keywords) command.keywords = keywords;
+  if (value.fallback === true) command.fallback = true;
+  if (Array.isArray(value.platforms)) {
+    command.platforms = value.platforms.filter((p): p is Platform => (PLATFORMS as unknown[]).includes(p));
+  }
+  return command;
+}
+
+export interface ParsedExtension {
+  manifest: ExtensionManifest;
+  /** Absolute path of the module to import. */
+  entry: string;
+}
+
+/**
+ * Reads an extension's package.json. The launcher-specific fields live under
+ * `openPalette`; see docs/extensions.md.
+ */
+export function parseExtensionPackage(pkg: unknown, dir: string): ParsedExtension {
+  if (!isRecord(pkg)) throw new ValidationError('package.json must be an object.');
+  const rawName = typeof pkg.name === 'string' ? pkg.name.replace(/^@[^/]+\//, '') : '';
+  if (!NAME_PATTERN.test(rawName)) {
+    throw new ValidationError('package.json "name" must use lowercase letters, digits and dashes.');
+  }
+  const config = pkg.openPalette;
+  if (!isRecord(config)) throw new ValidationError('package.json needs an "openPalette" section.');
+  const title = text(config.title, 100);
+  if (!title) throw new ValidationError('"openPalette.title" is required.');
+  if (!Array.isArray(config.commands) || config.commands.length === 0) {
+    throw new ValidationError('"openPalette.commands" must list at least one command.');
+  }
+  const commands = config.commands.map((command, index) => parseCommand(command, index, dir));
+  const names = new Set<string>();
+  for (const command of commands) {
+    if (names.has(command.name)) throw new ValidationError(`Duplicate command name "${command.name}".`);
+    names.add(command.name);
+  }
+
+  const main = typeof pkg.main === 'string' ? pkg.main : 'index.js';
+  const entry = resolve(dir, main);
+  const fromDir = relative(dir, entry);
+  if (fromDir.startsWith('..') || isAbsolute(fromDir)) {
+    throw new ValidationError('"main" must point inside the extension folder.');
+  }
+
+  const manifest: ExtensionManifest = { name: rawName, title, commands };
+  const description = text(config.description ?? pkg.description, 300);
+  const icon = sanitizeIcon(config.icon, dir);
+  if (description) manifest.description = description;
+  if (icon) manifest.icon = icon;
+  return { manifest, entry };
+}
