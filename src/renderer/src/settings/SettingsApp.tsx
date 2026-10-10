@@ -1,4 +1,4 @@
-import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useState } from 'react';
+import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import type { Settings } from '../../../shared/settings';
 import type { SettingsState } from '../../../shared/settings-ipc';
 import type { BuiltinIconName, Tint } from '../../../shared/types';
@@ -505,8 +505,15 @@ export function SettingsApp() {
     };
   }, []);
 
+  // Show changes immediately, and only take the answer to the latest change, so quick
+  // successive edits (a toggle, then a menu in the same group) never undo each other.
+  const lastUpdate = useRef(0);
   const update = useCallback((patch: Partial<Settings>) => {
-    void api.update(patch).then(setState);
+    setState((previous) => (previous ? { ...previous, settings: { ...previous.settings, ...patch } } : previous));
+    const request = ++lastUpdate.current;
+    void api.update(patch).then((next) => {
+      if (request === lastUpdate.current) setState(next);
+    });
   }, []);
 
   const onNavKeyDown = (event: KeyboardEvent<HTMLElement>) => {
