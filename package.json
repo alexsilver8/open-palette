@@ -1,0 +1,22 @@
+{
+  "name": "open-palette",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "exports": "./src/index.js",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexsilver8/open-palette.git"
+  },
+  "license": "MIT",
+  "packageManager": "pnpm@11.19.0"
+}
