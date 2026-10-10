@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/alexsilver8/open-palette/compare/v1.0.0...v1.1.0) (2026-10-10)
+
+
+### Features
+
+* settings window ([#6](https://github.com/alexsilver8/open-palette/issues/6)) ([90118da](https://github.com/alexsilver8/open-palette/commit/90118dae7ea587b1da3f2420e4e8918e2f97706f))
+
+
+### Bug Fixes
+
+* download Electron during install so `pnpm dev` starts ([#4](https://github.com/alexsilver8/open-palette/issues/4)) ([58b93d4](https://github.com/alexsilver8/open-palette/commit/58b93d442656ac54882186a3b0f76d4073642a60))
+
 ## 1.0.0 (2026-10-10)
 
 
