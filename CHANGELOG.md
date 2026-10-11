@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.7.1](https://github.com/alexsilver8/open-palette/compare/v1.7.0...v1.7.1) (2026-10-11)
+
+
+### Bug Fixes
+
+* count ⌘1–9 from the first row in view ([#33](https://github.com/alexsilver8/open-palette/issues/33)) ([40aabec](https://github.com/alexsilver8/open-palette/commit/40aabecf26946fb467816c8bfc1a717879cc652f))
+
+
+### Documentation
+
+* add a bento grid of the smaller details to the landing page ([#31](https://github.com/alexsilver8/open-palette/issues/31)) ([1c4c270](https://github.com/alexsilver8/open-palette/commit/1c4c2702f30f35fe128227bc9f68db0ff9a17b9f))
+
 ## [1.7.0](https://github.com/alexsilver8/open-palette/compare/v1.6.0...v1.7.0) (2026-10-11)
 
 
