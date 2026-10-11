@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { RootItem } from '../../shared/types';
-import { asUrl, buildRootSections } from './root-search';
+import { asUrl, buildRootSections, countRootMatches } from './root-search';
 
 const command = (title: string, extra: Partial<RootItem> = {}): RootItem => ({
   id: `command:x/${title}`,
@@ -18,6 +18,24 @@ const app = (title: string, frecency = 0): RootItem => ({
   actions: [{ type: 'open-path', path: `/Applications/${title}.app` }],
 });
 
+const note = (title: string, body: string): RootItem => ({
+  id: `note:${title}`,
+  kind: 'note',
+  title,
+  keywords: [`${title}\n${body}`],
+  frecency: 0,
+  detail: { body },
+  actions: [{ type: 'open-command', ref: { extension: 'notes', command: 'open' }, argument: title }],
+});
+const copied = (text: string): RootItem => ({
+  id: `clipboard:${text}`,
+  kind: 'clipboard',
+  title: text,
+  keywords: [text],
+  frecency: 0,
+  actions: [{ type: 'copy', text }],
+});
+
 const items: RootItem[] = [
   command('Clipboard History', { frecency: 3 }),
   command('Search Google', { fallback: { extension: 'web-search', command: 'google' } }),
@@ -25,6 +43,9 @@ const items: RootItem[] = [
   app('Safari', 1),
   app('Calendar'),
   app('Calculator'),
+  note('Groceries', '- oat milk\n- sourdough'),
+  note('Trip to Lisbon', 'pack the safari hat'),
+  copied('oat milk barista edition'),
 ];
 
 const titles = (query: string) =>
@@ -81,3 +102,42 @@ describe('asUrl', () => {
     expect(asUrl(query)).toBe(expected);
   });
 });
+
+describe('filter tabs', () => {
+  it('keeps notes and clipboard out of the empty root', () => {
+    const shown = buildRootSections(items, '').flatMap((s) => s.items.map((i) => i.title));
+    expect(shown).not.toContain('Groceries');
+    expect(shown).not.toContain('oat milk barista edition');
+  });
+
+  it('adds a taste of matching notes and clipboard entries to All', () => {
+    const sections = buildRootSections(items, 'oat milk');
+    expect(sections.map((s) => s.title)).toEqual(['Notes', 'Clipboard', 'Use “oat milk” with…']);
+    expect(sections[0]?.items[0]?.title).toBe('Groceries');
+    expect(sections[0]?.items[0]?.detail).toEqual({ body: '- oat milk\n- sourdough' });
+  });
+
+  it('lists everything of one kind in its tab, newest first when empty', () => {
+    expect(titles2(buildRootSections(items, '', 'note'))).toEqual([['Recent notes', ['Groceries', 'Trip to Lisbon']]]);
+    expect(titles2(buildRootSections(items, '', 'application'))).toEqual([
+      ['Applications', ['Calculator', 'Calendar', 'Safari']],
+    ]);
+    expect(titles2(buildRootSections(items, 'safari', 'note'))).toEqual([['Notes', ['Trip to Lisbon']]]);
+  });
+
+  it('only records usage for apps and commands', () => {
+    const [notes] = buildRootSections(items, '', 'note');
+    expect(notes?.items[0]?.rootItemId).toBeUndefined();
+    const [apps] = buildRootSections(items, '', 'application');
+    expect(apps?.items[0]?.rootItemId).toBe('app:/Applications/Calculator.app');
+  });
+
+  it('counts matches per tab', () => {
+    expect(countRootMatches(items, 'safari')).toEqual({ all: 2, application: 1, command: 0, note: 1, clipboard: 0 });
+    expect(countRootMatches(items, '').all).toBe(items.length);
+  });
+});
+
+function titles2(sections: ReturnType<typeof buildRootSections>) {
+  return sections.map((s) => [s.title, s.items.map((i) => i.title)] as const);
+}

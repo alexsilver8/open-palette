@@ -75,6 +75,18 @@ export type Action =
   /** Calls back into the command that produced the item (`onAction(id, payload)`). */
   | (ActionBase & { type: 'callback'; title: string; id: string; payload?: Json; style?: 'destructive' });
 
+/** A closer look at an item, shown in the preview pane beside the list. */
+export interface ItemDetail {
+  title?: string;
+  /**
+   * Plain text. Lines starting with "# " are drawn as headings, "- " as bullets and
+   * "- [ ] " / "- [x] " as checkboxes; everything else as written.
+   */
+  body: string;
+  /** Short facts under the body, e.g. "Edited" → "2 min ago". */
+  metadata?: Array<{ label: string; value: string }>;
+}
+
 export interface ListItem {
   /** Stable within its view; used for selection and React keys. */
   id: string;
@@ -86,6 +98,8 @@ export interface ListItem {
   /** Short right-aligned text, e.g. "Command" or "2 min ago". */
   accessory?: string;
   actions: Action[];
+  /** When any item in a list has one, the launcher shows a preview pane. */
+  detail?: ItemDetail;
 }
 
 export interface ListSection {
@@ -180,8 +194,11 @@ export interface CommandImplementation<Ctx extends CommandContext = CommandConte
 }
 
 /** An entry of the root search: a command or an installed application. */
+/** The kinds of things the root search finds, which are also its filter tabs. */
+export type RootKind = 'command' | 'application' | 'note' | 'clipboard';
+
 export interface RootItem extends ListItem {
-  kind: 'command' | 'application';
+  kind: RootKind;
   /** Usage-based score; higher means used more often and more recently. */
   frecency: number;
   /** Offered under "Use “…” with" and opened with the search text as argument. */

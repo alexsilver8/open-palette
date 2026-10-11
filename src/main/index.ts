@@ -2,14 +2,13 @@ import { existsSync, mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { app, nativeTheme, shell } from 'electron';
-import { IpcChannel } from '../shared/ipc';
 import { NotesChannel } from '../shared/notes';
 import type { Platform } from '../shared/types';
 import { AppIndex } from './apps/app-index';
 import { electronClipboard } from './clipboard/electron-source';
 import { ClipboardHistory } from './clipboard/history';
-import { clipboardHistoryExtension } from './commands/clipboard-history';
-import { notesExtension } from './commands/notes';
+import { clipboardHistoryExtension, clipboardRootItems } from './commands/clipboard-history';
+import { noteRootItems, notesExtension } from './commands/notes';
 import { paletteExtension } from './commands/palette';
 import { system } from './commands/system';
 import { webSearch } from './commands/web-search';
@@ -80,6 +79,10 @@ async function main(): Promise<void> {
     apps,
     usage,
     supportRoot: join(dataDir, 'extension-data'),
+    rootSources: [
+      () => noteRootItems(notesStore),
+      () => clipboardRootItems(clipboardHistory, () => settings.get().clipboardHistory.enabled),
+    ],
     extensionRoots: () => [
       extensionsDir,
       ...settings.get().extensionDirectories,
@@ -123,9 +126,10 @@ async function main(): Promise<void> {
     },
   });
   registry.on('change', () => {
-    launcher.window.webContents.send(IpcChannel.rootItemsChanged);
+    launcher.rootItemsChanged();
     settingsIpc.notifyChanged();
   });
+  notesStore.on('change', () => launcher.rootItemsChanged());
   app.on('second-instance', () => launcher.show());
 
   const tray = new AppTray({

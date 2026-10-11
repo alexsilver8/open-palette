@@ -2,11 +2,13 @@ import { ChevronLeft } from 'lucide-react';
 import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Action, ActionContext, ActionResult, CommandRef, RootItem, View } from '../../shared/types';
 import { ActionPanel } from './components/ActionPanel';
+import { DetailPane } from './components/DetailPane';
+import { FilterTabs } from './components/FilterTabs';
 import { Footer, type Toast } from './components/Footer';
-import { optionId, ResultList } from './components/ResultList';
+import { optionId, QUICK_KEY_COUNT, ResultList } from './components/ResultList';
 import { isModKey, matchesShortcut } from './keys';
 import { type DisplayItem, type DisplaySection, filterView } from './model';
-import { buildRootSections } from './root-search';
+import { buildRootSections, countRootMatches, ROOT_FILTERS, type RootFilter } from './root-search';
 
 const palette = window.palette;
 const { platform } = palette;
@@ -23,9 +25,31 @@ interface Frame {
   /** The query `view` was rendered for, for commands that filter by themselves. */
   viewQuery?: string;
   selectedId?: string;
+  /** Root only: which kind of thing the search shows. */
+  filter?: RootFilter;
 }
 
 const ROOT: Frame = { id: 0, query: '' };
+
+const PLACEHOLDERS: Record<RootFilter, string> = {
+  all: 'Search apps, commands and notes…',
+  application: 'Search apps…',
+  command: 'Search commands…',
+  note: 'Search notes…',
+  clipboard: 'Search copied text…',
+};
+
+/** What a tab says when it has nothing to list yet. */
+const EMPTY_TABS: Record<RootFilter, string> = {
+  all: 'Loading apps and commands…',
+  application: 'No apps found.',
+  command: 'No commands.',
+  note: 'No notes yet. Run Create Note to write one.',
+  clipboard: 'Nothing copied yet, or clipboard history is turned off in Settings.',
+};
+
+const MOD_KEY = platform === 'darwin' ? 'Meta' : 'Control';
+const MOD_LABEL = platform === 'darwin' ? '⌘' : 'Ctrl';
 let nextFrameId = 1;
 
 function cleanError(error: unknown): string {
@@ -33,8 +57,9 @@ function cleanError(error: unknown): string {
   return message.replace(/^Error invoking remote method '[^']+': (Error: )?/, '');
 }
 
-function firstItem(view: View, query: string): DisplayItem | undefined {
-  return filterView(view, query).flatMap((section) => section.items)[0];
+/** The nth row of a view as it would show for `query`. */
+function nthItem(view: View, query: string, index: number): DisplayItem | undefined {
+  return filterView(view, query).flatMap((section) => section.items)[index];
 }
 
 export function App() {
@@ -43,6 +68,8 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
+  /** While ⌘ (Ctrl) is held, the first rows show their quick keys. */
+  const [modHeld, setModHeld] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const searchRequest = useRef(0);
   const busy = useRef(false);
@@ -74,6 +101,16 @@ export function App() {
     return () => clearTimeout(timer);
   }, [toast]);
 
+  // Clicks anywhere but a text field leave the keyboard with the search field, where every
+  // shortcut lives. Buttons and rows still get their click.
+  useEffect(() => {
+    const keepFocus = (event: MouseEvent) => {
+      if (!(event.target instanceof HTMLInputElement)) event.preventDefault();
+    };
+    document.addEventListener('mousedown', keepFocus);
+    return () => document.removeEventListener('mousedown', keepFocus);
+  }, []);
+
   // Root items: on start, whenever apps or extensions change, and each time the window opens
   // (so usage-based ranking is fresh).
   useEffect(() => {
@@ -99,12 +136,33 @@ export function App() {
     };
   }, [focusInput, showToast]);
 
+  const filter: RootFilter = isRoot ? (frame.filter ?? 'all') : 'all';
   const sections: DisplaySection[] = useMemo(() => {
-    if (isRoot || !frame.view) return buildRootSections(rootItems, frame.query);
+    if (isRoot || !frame.view) return buildRootSections(rootItems, frame.query, filter);
     return filterView(frame.view, frame.query);
-  }, [isRoot, rootItems, frame.view, frame.query]);
+  }, [isRoot, rootItems, frame.view, frame.query, filter]);
+  const counts = useMemo(
+    () => (isRoot && frame.query.trim() ? countRootMatches(rootItems, frame.query) : null),
+    [isRoot, rootItems, frame.query],
+  );
+
+  useEffect(() => {
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key === MOD_KEY) setModHeld(event.type === 'keydown');
+    };
+    const release = () => setModHeld(false);
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('keyup', onKey);
+    window.addEventListener('blur', release);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keyup', onKey);
+      window.removeEventListener('blur', release);
+    };
+  }, []);
 
   const items = useMemo(() => sections.flatMap((section) => section.items), [sections]);
+  const showDetail = useMemo(() => items.some((item) => item.detail), [items]);
   const selectedIndex = Math.max(
     0,
     items.findIndex((item) => item.id === frame.selectedId),
@@ -212,18 +270,24 @@ export function App() {
     [frame, applyResult, showToast, focusInput],
   );
 
-  /** ↵ / ⌘↵: if a self-filtering list hasn't caught up with the typing yet, wait for it first. */
-  const activate = async (secondary: boolean) => {
+  /**
+   * Runs an action of a row: the selected one for ↵ / ⌘↵, or the nth for ⌘1–9. If a
+   * self-filtering list hasn't caught up with the typing yet, waits for it first, so the row
+   * that runs is the one for what was typed.
+   */
+  const activate = async (secondary: boolean, index?: number) => {
+    const action = secondary ? 1 : 0;
     if (stale && frameRef) {
       if (busy.current) return;
       const from = frame;
       const view = await refreshView(from.id, frameRef, from.query);
       if (!view) return;
-      const first = firstItem(view, from.query);
-      void run(first, first?.actions[secondary ? 1 : 0], { ...from, view, viewQuery: from.query });
+      const target = nthItem(view, from.query, index ?? 0);
+      void run(target, target?.actions[action], { ...from, view, viewQuery: from.query });
       return;
     }
-    void run(selected, selected?.actions[secondary ? 1 : 0]);
+    const target = index === undefined ? selected : items[index];
+    void run(target, target?.actions[action]);
   };
 
   const pop = useCallback(() => {
@@ -240,15 +304,29 @@ export function App() {
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    // Keys that pick or confirm an input-method candidate aren't ours.
+    if (event.nativeEvent.isComposing) return;
     const mod = isModKey(event, platform);
     const key = event.key;
     const plain = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey;
 
     // The selected item's own shortcuts win over the launcher's.
     const shortcutAction = selected?.actions.find((a) => a.shortcut && matchesShortcut(event, a.shortcut, platform));
+    // By physical key, so it works on layouts where the digits need Shift (AZERTY).
+    const digit = /^(?:Digit|Numpad)([1-9])$/.exec(event.code)?.[1];
+    const quickIndex = mod && !event.shiftKey && !event.altKey && digit ? Number(digit) - 1 : -1;
     if (shortcutAction) {
       event.preventDefault();
       void run(selected, shortcutAction);
+    } else if (quickIndex >= 0 && quickIndex < QUICK_KEY_COUNT) {
+      event.preventDefault();
+      void activate(false, quickIndex);
+    } else if (key === 'Tab' && isRoot && !mod && !event.altKey) {
+      event.preventDefault();
+      const index = ROOT_FILTERS.findIndex((f) => f.id === filter);
+      const step = event.shiftKey ? -1 : 1;
+      const next = ROOT_FILTERS[(index + step + ROOT_FILTERS.length) % ROOT_FILTERS.length];
+      if (next) updateTop({ filter: next.id, selectedId: undefined });
     } else if (key === 'ArrowDown' || (event.ctrlKey && key === 'n')) {
       event.preventDefault();
       move(1);
@@ -271,6 +349,7 @@ export function App() {
       event.preventDefault();
       if (!isRoot) pop();
       else if (frame.query) updateTop({ query: '', selectedId: undefined });
+      else if (filter !== 'all') updateTop({ filter: 'all', selectedId: undefined });
       else palette.hide();
     } else if (key === 'Backspace' && plain && !isRoot && frame.query === '') {
       event.preventDefault();
@@ -278,11 +357,11 @@ export function App() {
     }
   };
 
-  const placeholder = isRoot ? 'Search apps and commands…' : (frame.view?.searchPlaceholder ?? 'Search…');
+  const placeholder = isRoot ? PLACEHOLDERS[filter] : (frame.view?.searchPlaceholder ?? 'Search…');
   const emptyText = isRoot
     ? frame.query
       ? `Nothing matches “${frame.query}”.`
-      : 'Loading apps and commands…'
+      : EMPTY_TABS[filter]
     : loading
       ? undefined
       : (frame.view?.emptyText ?? (frame.query ? `Nothing matches “${frame.query}”.` : 'Nothing here yet.'));
@@ -290,6 +369,11 @@ export function App() {
   return (
     <div className="launcher">
       <header className="search" data-loading={loading || undefined}>
+        {isRoot && (
+          <svg className="search__icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14z M20 20l-4.2-4.2" />
+          </svg>
+        )}
         {!isRoot && (
           <button type="button" className="search__back" onClick={pop} aria-label="Back">
             <ChevronLeft size={16} strokeWidth={2.25} />
@@ -315,14 +399,30 @@ export function App() {
         {!isRoot && frame.view?.title && <span className="search__crumb">{frame.view.title}</span>}
       </header>
 
-      <main className="content">
-        <ResultList
-          sections={sections}
-          selectedId={selected?.id}
-          emptyText={emptyText}
-          onSelect={(item) => updateTop({ selectedId: item.id })}
-          onActivate={(item) => void run(item, item.actions[0])}
+      {isRoot && (
+        <FilterTabs
+          value={filter}
+          counts={counts}
+          platform={platform}
+          onChange={(next) => {
+            updateTop({ filter: next, selectedId: undefined });
+            focusInput();
+          }}
         />
+      )}
+
+      <main className="content" data-detail={showDetail || undefined}>
+        <div className="content__list">
+          <ResultList
+            sections={sections}
+            selectedId={selected?.id}
+            emptyText={emptyText}
+            quickKeyModifier={modHeld ? MOD_LABEL : null}
+            onSelect={(item) => updateTop({ selectedId: item.id })}
+            onActivate={(item) => void run(item, item.actions[0])}
+          />
+        </div>
+        {showDetail && <DetailPane item={selected} />}
       </main>
 
       <Footer

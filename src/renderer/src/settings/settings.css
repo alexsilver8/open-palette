@@ -1,6 +1,6 @@
 /*
- * Settings window: frosted glass like the launcher, with the section list on a lighter strip.
- * Each section keeps the icon colour of its launcher command.
+ * Settings window, in the launcher's liquid glass: a floating sidebar of brighter glass,
+ * and each group of settings on its own rounded card.
  */
 
 @import "../base.css";
@@ -32,38 +32,38 @@ select {
 }
 
 .settings {
-  display: grid;
-  grid-template-columns: 196px 1fr;
-  grid-template-rows: 44px 1fr;
-  grid-template-areas:
-    "titlebar titlebar"
-    "nav content";
+  display: flex;
+  gap: 8px;
   height: 100%;
+  padding: 8px;
   background: var(--glass);
 }
 
-/* ── Title bar and navigation ───────────────────────────── */
-
-.settings__titlebar {
-  grid-area: titlebar;
-  display: grid;
-  place-items: center;
-  border-bottom: 1px solid var(--hairline);
-  color: var(--ink-muted);
-  font-size: 13px;
-  font-weight: 600;
-  user-select: none;
-  -webkit-app-region: drag;
-}
+/* ── Sidebar ────────────────────────────────────────────── */
 
 .settings__nav {
-  grid-area: nav;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 12px 10px;
-  border-right: 1px solid var(--hairline);
-  background: var(--glass-bar);
+  width: 208px;
+  flex: none;
+  padding: 8px;
+  border: 1px solid var(--glass-raised-border);
+  border-radius: 18px;
+  background: var(--glass-raised);
+  box-shadow: inset 0 1px 0 var(--glass-sheen);
+  overflow-y: auto;
+}
+
+.settings__nav-top {
+  flex: none;
+  height: 4px;
+}
+
+/* The window buttons sit inside the sidebar on macOS, and the space around them drags the window. */
+[data-platform="darwin"] .settings__nav-top {
+  height: 34px;
+  -webkit-app-region: drag;
 }
 
 .settings__nav-item {
@@ -71,12 +71,27 @@ select {
   align-items: center;
   gap: 10px;
   height: 34px;
+  flex: none;
   padding: 0 8px;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
   background: none;
   text-align: left;
   font-weight: 500;
+}
+
+.settings__nav-item .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.settings__nav-item .icon--tile {
+  border-radius: 6px;
+}
+
+.settings__nav-item .icon--tile svg {
+  width: 13px;
+  height: 13px;
 }
 
 .settings__nav-item:hover {
@@ -84,57 +99,104 @@ select {
 }
 
 .settings__nav-item[aria-current="page"] {
-  background: var(--selected);
+  border-color: var(--selected-border);
+  background: var(--selected-pane);
+  box-shadow: var(--selected-shadow);
 }
 
+/* A quiet ring, only when you're moving around with the keyboard. */
 .settings__nav-item:focus-visible,
 .button:focus-visible,
 .toggle:focus-visible,
 .hotkey__field:focus-visible,
 .select:focus-visible,
 .link:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline: 2px solid color-mix(in oklab, var(--accent) 75%, transparent);
+  outline-offset: 2px;
 }
 
 /* ── Content ────────────────────────────────────────────── */
 
 .settings__content {
-  grid-area: content;
+  flex: 1;
+  min-width: 0;
   min-height: 0;
   overflow-y: auto;
-  padding: 24px 36px 40px;
+  padding: 10px 18px 28px;
+  outline: none;
 }
 
 .settings__content > * {
-  max-width: 600px;
+  max-width: 620px;
+}
+
+.settings__header {
+  padding: 4px 4px 14px;
+}
+
+[data-platform="darwin"] .settings__header {
+  padding-top: 10px;
+  -webkit-app-region: drag;
 }
 
 .settings__heading {
-  margin: 0 0 14px;
-  font-size: 20px;
+  margin: 0;
+  font-size: 22px;
   font-weight: 650;
   letter-spacing: -0.01em;
 }
 
 .section__intro {
-  margin: 0 0 16px;
+  margin: 0 4px 14px;
   color: var(--ink-muted);
   font-size: 13px;
   line-height: 1.55;
 }
 
-.section__subheading {
-  margin: 28px 0 8px;
+.group {
+  margin: 0 0 18px;
+}
+
+.group__title {
+  margin: 0 4px 8px;
   font-size: 13px;
   font-weight: 600;
   color: var(--ink-muted);
 }
 
-.section__empty {
-  margin: 0 0 8px;
-  color: var(--ink-faint);
+.group__card {
+  border: 1px solid var(--glass-raised-border);
+  border-radius: 14px;
+  background: var(--glass-raised);
+  box-shadow: inset 0 1px 0 var(--glass-sheen);
+  overflow: hidden;
+}
+
+/* Rows are divided by hairlines that start at the text, not the card's edge. */
+.group__card > *,
+.extension,
+.folder {
+  position: relative;
+}
+
+.group__card > * + *::before,
+.extension + .extension::before,
+.folder + .folder::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 0;
+  height: 1px;
+  background: var(--hairline);
+}
+
+.group__empty {
+  margin: 0;
+  padding: 14px 16px;
+  color: var(--ink-muted);
   font-size: 13px;
+  line-height: 1.45;
 }
 
 .row-setting {
@@ -142,13 +204,8 @@ select {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  min-height: 60px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--hairline);
-}
-
-.row-setting:first-of-type {
-  border-top: 1px solid var(--hairline);
+  min-height: 58px;
+  padding: 12px 16px;
 }
 
 .row-setting__text {
@@ -185,11 +242,12 @@ select {
 /* ── Controls ───────────────────────────────────────────── */
 
 .button {
-  height: 28px;
-  padding: 0 12px;
+  height: 30px;
+  padding: 0 13px;
   border: 1px solid var(--control-border);
-  border-radius: 7px;
+  border-radius: 9px;
   background: var(--control);
+  box-shadow: inset 0 1px 0 var(--glass-sheen);
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
@@ -213,7 +271,7 @@ select {
 }
 
 .button-row--start {
-  margin: 4px 0 8px;
+  margin: 0 0 18px;
 }
 
 .link {
@@ -228,13 +286,14 @@ select {
 
 .toggle {
   position: relative;
-  width: 38px;
-  height: 22px;
+  width: 44px;
+  height: 26px;
   padding: 0;
   border: none;
-  border-radius: 11px;
+  border-radius: 13px;
   background: var(--track);
-  transition: background-color 140ms ease;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.12);
+  transition: background-color 160ms ease;
 }
 
 .toggle[aria-checked="true"] {
@@ -247,73 +306,27 @@ select {
 
 .toggle__thumb {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
-  transition: transform 140ms ease;
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 0.25),
+    0 0 0 0.5px rgb(0 0 0 / 0.04);
+  transition: transform 180ms cubic-bezier(0.3, 0.7, 0.4, 1.2);
 }
 
 .toggle[aria-checked="true"] .toggle__thumb {
-  transform: translateX(16px);
-}
-
-.segmented {
-  display: inline-flex;
-  margin: 0;
-  padding: 2px;
-  border: none;
-  border-radius: 8px;
-  background: var(--keycap);
-}
-
-.segmented__option {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  height: 26px;
-  padding: 0 12px;
-  border-radius: 6px;
-  color: var(--ink-muted);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.segmented__option input {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  opacity: 0;
-}
-
-.segmented__option[data-checked] {
-  background: var(--control-strong);
-  color: var(--ink);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
-}
-
-.segmented__option:has(input:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+  transform: translateX(18px);
 }
 
 .select {
-  height: 28px;
+  height: 30px;
   padding: 0 8px;
   border: 1px solid var(--control-border);
-  border-radius: 7px;
+  border-radius: 9px;
   background: var(--control);
   font-size: 13px;
 }
@@ -329,12 +342,20 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 132px;
-  height: 32px;
-  padding: 0 10px;
+  min-width: 120px;
+  height: 34px;
+  padding: 0 6px;
   border: 1px solid var(--control-border);
-  border-radius: 8px;
+  border-radius: 11px;
   background: var(--control);
+  box-shadow: inset 0 1px 0 var(--glass-sheen);
+}
+
+.hotkey__field .keycap {
+  min-width: 26px;
+  height: 24px;
+  border-radius: 7px;
+  font-size: 13px;
 }
 
 .hotkey__field[data-recording] {
@@ -343,6 +364,7 @@ select {
 }
 
 .hotkey__prompt {
+  padding: 0 6px;
   color: var(--ink-muted);
   font-size: 13px;
 }
@@ -354,6 +376,109 @@ select {
   text-align: right;
 }
 
+/* ── Appearance ─────────────────────────────────────────── */
+
+.themes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
+  border: none;
+}
+
+.theme {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* The whole label picks the theme, so the hidden radio needn't catch clicks itself. */
+.theme input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.theme[data-checked] {
+  color: var(--ink);
+}
+
+/* Each choice is a little launcher window in that appearance. */
+.theme__preview {
+  --preview-bg: #f4f4f6;
+  --preview-bar: #ffffff;
+  --preview-line: #c6cad3;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--preview-bg);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.1),
+    0 4px 12px rgb(0 0 0 / 0.08);
+  transition: box-shadow 140ms ease;
+}
+
+.theme__preview[data-theme="dark"] {
+  --preview-bg: #26262c;
+  --preview-bar: #3a3a43;
+  --preview-line: #565a66;
+}
+
+.theme__preview[data-theme="system"] {
+  --preview-bar: rgb(140 140 152 / 0.45);
+  --preview-line: #8a8f99;
+  background: linear-gradient(135deg, #f4f4f6 0 50%, #26262c 50% 100%);
+}
+
+.theme[data-checked] .theme__preview {
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 0 0 5px color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+.theme:has(input:focus-visible) .theme__preview {
+  outline: 2px solid color-mix(in oklab, var(--accent) 75%, transparent);
+  outline-offset: 4px;
+}
+
+.theme__search {
+  height: 12px;
+  flex: none;
+  border-radius: 6px;
+  background: var(--preview-bar);
+}
+
+.theme__line {
+  height: 6px;
+  flex: none;
+  width: 78%;
+  border-radius: 3px;
+  background: var(--preview-line);
+}
+
+.theme__line:nth-child(3) {
+  width: 58%;
+  opacity: 0.75;
+}
+
+.theme__line:nth-child(4) {
+  width: 68%;
+  opacity: 0.55;
+}
+
 /* ── Lists ──────────────────────────────────────────────── */
 
 .extension-list,
@@ -361,19 +486,17 @@ select {
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--hairline);
 }
 
 .extension,
 .folder {
   display: flex;
-  border-bottom: 1px solid var(--hairline);
+  padding: 10px 16px;
 }
 
 .extension {
   flex-direction: column;
   gap: 2px;
-  padding: 10px 0;
 }
 
 .extension__title {
@@ -397,7 +520,6 @@ select {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 8px 0;
 }
 
 /* ── About ──────────────────────────────────────────────── */
@@ -406,7 +528,7 @@ select {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin: 4px 0 18px;
+  margin: 0 4px 16px;
 }
 
 .about .palette-mark {
@@ -427,7 +549,8 @@ select {
 
 @media (prefers-reduced-motion: reduce) {
   .toggle,
-  .toggle__thumb {
+  .toggle__thumb,
+  .theme__preview {
     transition: none;
   }
 }

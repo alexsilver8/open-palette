@@ -1,6 +1,6 @@
-import { notePreview, noteTitle } from '../../shared/notes';
+import { countWords, type Note, notePreview, noteTitle } from '../../shared/notes';
 import { timeAgo } from '../../shared/time';
-import type { ListItem, View } from '../../shared/types';
+import type { ItemDetail, ListItem, RootItem, View } from '../../shared/types';
 import type { NotesStore } from '../notes/store';
 import type { NotesWindow } from '../notes/window';
 import type { BuiltinExtension } from './types';
@@ -9,6 +9,40 @@ const REVEAL_LABEL: Record<string, string> = {
   darwin: 'Show in Finder',
   win32: 'Show in File Explorer',
 };
+
+const PREVIEW_LENGTH = 4000;
+
+function noteDetail(note: Note): ItemDetail {
+  const words = countWords(note.text);
+  return {
+    body: note.text.length > PREVIEW_LENGTH ? `${note.text.slice(0, PREVIEW_LENGTH)}…` : note.text,
+    metadata: [
+      { label: 'Edited', value: timeAgo(note.updatedAt) },
+      { label: 'Words', value: words.toLocaleString('en-US') },
+    ],
+  };
+}
+
+/** Every note, for the root search and its Notes tab. */
+export async function noteRootItems(store: NotesStore): Promise<RootItem[]> {
+  const notes = await store.list();
+  return notes.map((note) => ({
+    id: `note:${note.id}`,
+    kind: 'note',
+    title: noteTitle(note.text),
+    subtitle: notePreview(note.text),
+    icon: { builtin: 'note', tint: 'yellow' },
+    keywords: [note.text.slice(0, 2000)],
+    accessory: timeAgo(note.updatedAt),
+    frecency: 0,
+    detail: noteDetail(note),
+    actions: [
+      { type: 'open-command', ref: { extension: 'notes', command: 'open' }, argument: note.id, title: 'Open Note' },
+      { type: 'copy', text: note.text, title: 'Copy Note' },
+      { type: 'reveal-path', path: store.pathOf(note.id), title: REVEAL_LABEL[process.platform] ?? 'Show in Folder' },
+    ],
+  }));
+}
 
 /** Launcher commands for Notes. The notes themselves live in the Notes window. */
 export function notesExtension(store: NotesStore, notesWindow: NotesWindow): BuiltinExtension {
@@ -22,6 +56,7 @@ export function notesExtension(store: NotesStore, notesWindow: NotesWindow): Bui
       // Search the whole note, not just its title.
       keywords: [note.text.slice(0, 5000)],
       accessory: timeAgo(note.updatedAt),
+      detail: noteDetail(note),
       actions: [
         { type: 'callback', id: 'open', payload: note.id, title: 'Open Note' },
         { type: 'copy', text: note.text, title: 'Copy Note' },
@@ -93,8 +128,9 @@ export function notesExtension(store: NotesStore, notesWindow: NotesWindow): Bui
         },
       },
       open: {
-        run() {
-          notesWindow.open();
+        // Opened from a note in the root search, the argument is that note's id.
+        run(ctx) {
+          notesWindow.open(ctx.argument || undefined);
           return { hide: true };
         },
       },

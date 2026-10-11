@@ -108,6 +108,11 @@ Calls time out after 10 seconds.
           accessory: 'Today',            // right-aligned
           icon: '🔖',                    // emoji, image path, or { builtin: 'globe', tint: 'blue' }
           keywords: ['docs'],
+          detail: {                      // optional: shows a preview pane beside the list
+            title: 'Electron documentation',
+            body: '# Read later\n- [ ] Window options\n- [x] Clipboard API',
+            metadata: [{ label: 'Added', value: 'Today' }],
+          },
           actions: [/* … */],
         },
       ],
@@ -117,6 +122,18 @@ Calls time out after 10 seconds.
 ```
 
 `items: [...]` at the top level is a shortcut for a single untitled section.
+
+### Previews
+
+When any item in a view has a `detail`, the launcher splits in two: the list on the left and a preview of the selected item on the right. Items without one show their icon, title and subtitle there instead.
+
+| Field | |
+| --- | --- |
+| `body` | The text to show, up to 20,000 characters. Lines starting with `#` are headings, `- ` bullets, and `- [ ]` / `- [x]` checkboxes. Everything else is plain text; there's no other Markdown. |
+| `title` | Optional heading above the body, up to 200 characters. |
+| `metadata` | Optional `{ label, value }` pairs listed at the bottom, up to 12. |
+
+Every result also gets a quick key while you hold <kbd>⌘</kbd> (<kbd>Ctrl</kbd> on Windows and Linux): <kbd>⌘</kbd><kbd>1</kbd> to <kbd>⌘</kbd><kbd>9</kbd> run the first action of the first nine rows.
 
 Built-in icons: `alert`, `app`, `calculator`, `clipboard`, `copy`, `extension`, `file`, `folder`, `globe`, `link`, `lock`, `moon`, `note`, `power`, `refresh`, `search`, `settings`, `sparkles`, `terminal`, `text`, `trash`. Tints: `red`, `orange`, `yellow`, `green`, `teal`, `blue`, `purple`, `pink`, `gray`.
 

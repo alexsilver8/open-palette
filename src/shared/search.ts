@@ -33,11 +33,37 @@ function scoreText(query: string, text: string): TextScore | null {
   return { score, positions: match.positions };
 }
 
+/**
+ * Long or multi-line keywords are content (a note's text, a copied paragraph), where loose fuzzy matching
+ * finds letters scattered across sentences. Those match only when every word of the query
+ * appears in them, and rank below good title matches.
+ */
+const CONTENT_LENGTH = 64;
+const CONTENT_SCORE = 1;
+const CONTENT_WORD_START_BONUS = 0.25;
+
+function contentScore(query: string, content: string): number | null {
+  const haystack = content.toLowerCase();
+  let score = CONTENT_SCORE;
+  for (const word of query.toLowerCase().split(/\s+/).filter(Boolean)) {
+    const at = haystack.indexOf(word);
+    if (at === -1) return null;
+    if (at === 0 || /[\s\-_/.,;:([]/.test(haystack[at - 1] as string)) score += CONTENT_WORD_START_BONUS;
+  }
+  return score;
+}
+
 function bestKeywordScore(query: string, keywords: readonly string[]): number | null {
   let best: number | null = null;
   for (const keyword of keywords) {
-    const result = scoreText(query, keyword);
-    if (result && (best === null || result.score * KEYWORD_WEIGHT > best)) best = result.score * KEYWORD_WEIGHT;
+    let score: number | null;
+    if (keyword.length > CONTENT_LENGTH || keyword.includes('\n')) {
+      score = contentScore(query, keyword);
+    } else {
+      const result = scoreText(query, keyword);
+      score = result ? result.score * KEYWORD_WEIGHT : null;
+    }
+    if (score !== null && (best === null || score > best)) best = score;
   }
   return best;
 }

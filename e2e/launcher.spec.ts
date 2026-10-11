@@ -23,6 +23,13 @@ test.beforeEach(async () => {
     mkdirSync(join(userData, 'notes'));
     for (let i = 1; i <= 12; i++) writeFileSync(join(userData, 'notes', `note-${i}.md`), `Note number ${i}`);
   }
+  if (test.info().title.includes('preview')) {
+    mkdirSync(join(userData, 'notes'));
+    writeFileSync(
+      join(userData, 'notes', 'launch.md'),
+      '# Launch plan\n\nShip the glass look.\n\n- [x] Settings window\n- [ ] Record a demo',
+    );
+  }
   writeFileSync(
     join(userData, 'settings.json'),
     JSON.stringify({ hideOnBlur: false, clipboardHistory: { enabled: false } }),
@@ -120,11 +127,65 @@ test('lists every note, with no cap', async () => {
   await expect(page.getByRole('option')).toHaveCount(1);
 });
 
+test('switches what the root lists with the filter tabs', async () => {
+  const tab = (name: string) => page.getByRole('tab', { name, exact: true });
+  await expect(tab('All')).toHaveAttribute('aria-selected', 'true');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(tab('Commands')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('combobox')).toHaveAttribute('placeholder', 'Search commands…');
+  await expect(page.locator('.results__heading')).toHaveText(['Commands']);
+  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('Shift+Tab');
+  await expect(tab('Clipboard')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByText('Nothing copied yet, or clipboard history is turned off in Settings.')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(tab('All')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('option', { name: /Clipboard History/ })).toBeVisible();
+});
+
+test('finds notes from the root and shows a preview', async () => {
+  await page.keyboard.type('glass look');
+  const note = page.getByRole('option', { name: /Launch plan/ });
+  await expect(note).toBeVisible();
+  await expect(page.getByRole('tab', { name: /^Notes/ })).toHaveText('Notes1');
+
+  // In the Notes tab the note is first, and the preview shows its body.
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(note).toHaveAttribute('aria-selected', 'true');
+  const preview = page.getByRole('complementary', { name: 'Preview of Launch plan' });
+  await expect(preview.getByText('Ship the glass look.')).toBeVisible();
+  await expect(preview.getByText('Done: Settings window')).toBeAttached();
+  await expect(preview.getByText('Words')).toBeVisible();
+
+  // Clicking the preview leaves the keyboard with the search field.
+  await preview.click();
+  await expect(page.getByRole('combobox')).toBeFocused();
+
+  const [notes] = await Promise.all([app.waitForEvent('window'), page.keyboard.press('Enter')]);
+  await expect(notes.locator('.notes__item[aria-current]')).toContainText('Launch plan');
+});
+
+test('runs a result by its number', async () => {
+  await page.keyboard.type('generate uuid');
+  await expect(page.getByRole('option').first()).toContainText('Generate UUID');
+  await page.keyboard.down(mod);
+  await expect(page.getByRole('option').first().locator('.keycap')).toHaveText([mod === 'Meta' ? '⌘' : 'Ctrl', '1']);
+  await page.keyboard.press('1');
+  await page.keyboard.up(mod);
+  await expect(page.locator('.search__crumb')).toHaveText('Generate UUID');
+});
+
 test('changes settings in the Settings window', async () => {
   const settingsFile = () => JSON.parse(readFileSync(join(userData, 'settings.json'), 'utf8'));
   await page.keyboard.type('open settings');
   const [settings] = await Promise.all([app.waitForEvent('window'), page.keyboard.press('Enter')]);
   await expect(settings.getByRole('heading', { name: 'General' })).toBeVisible();
+  // The page starts focused on its content, not on a section button.
+  await expect(settings.getByRole('main')).toBeFocused();
 
   await settings.getByText('Dark', { exact: true }).click();
   await expect.poll(() => settingsFile().theme).toBe('dark');

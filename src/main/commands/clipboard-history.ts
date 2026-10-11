@@ -1,5 +1,5 @@
 import { timeAgo } from '../../shared/time';
-import type { Action, ListItem, View } from '../../shared/types';
+import type { Action, ItemDetail, ListItem, RootItem, View } from '../../shared/types';
 import type { ClipboardEntry, ClipboardHistory } from '../clipboard/history';
 import type { BuiltinExtension } from './types';
 
@@ -17,6 +17,51 @@ function describe(text: string): string {
 
 function isUrl(text: string): boolean {
   return /^https?:\/\/\S+$/i.test(text.trim());
+}
+
+const PREVIEW_LENGTH = 4000;
+
+function entryDetail(entry: ClipboardEntry): ItemDetail {
+  const lines = entry.text.split(/\r?\n/).length;
+  return {
+    body: entry.text.length > PREVIEW_LENGTH ? `${entry.text.slice(0, PREVIEW_LENGTH)}…` : entry.text,
+    metadata: [
+      { label: 'Copied', value: timeAgo(entry.copiedAt) },
+      { label: 'Characters', value: entry.text.length.toLocaleString('en-US') },
+      ...(lines > 1 ? [{ label: 'Lines', value: lines.toLocaleString('en-US') }] : []),
+    ],
+  };
+}
+
+/**
+ * How many recent entries the root search carries. Each holds its whole text, so the whole
+ * history (up to thousands of entries) would be a lot to send every time the launcher opens;
+ * Clipboard History searches all of it.
+ */
+export const CLIPBOARD_ROOT_LIMIT = 200;
+
+/** Recent clipboard entries, for the root search and its Clipboard tab. */
+export function clipboardRootItems(history: ClipboardHistory, isEnabled: () => boolean): RootItem[] {
+  if (!isEnabled()) return [];
+  return history
+    .entries()
+    .slice(0, CLIPBOARD_ROOT_LIMIT)
+    .map((entry) => {
+      const actions: Action[] = [{ type: 'copy', text: entry.text, title: 'Copy to Clipboard' }];
+      if (isUrl(entry.text)) actions.push({ type: 'open-url', url: entry.text.trim(), title: 'Open in Browser' });
+      return {
+        id: `clipboard:${entry.id}`,
+        kind: 'clipboard',
+        title: preview(entry.text),
+        subtitle: describe(entry.text),
+        icon: { builtin: isUrl(entry.text) ? 'link' : 'text', tint: 'orange' },
+        keywords: [entry.text.slice(0, 2000)],
+        accessory: timeAgo(entry.copiedAt),
+        frecency: 0,
+        detail: entryDetail(entry),
+        actions,
+      };
+    });
 }
 
 function toItem(entry: ClipboardEntry): ListItem {
@@ -47,6 +92,7 @@ function toItem(entry: ClipboardEntry): ListItem {
     // Lets the search match text beyond the first line.
     keywords: [entry.text.slice(0, 2000)],
     accessory: timeAgo(entry.copiedAt),
+    detail: entryDetail(entry),
     actions,
   };
 }

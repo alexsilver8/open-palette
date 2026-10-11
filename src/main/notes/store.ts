@@ -7,6 +7,8 @@ import type { Note } from '../../shared/notes';
 import { debounce } from '../json-file';
 
 const EXTENSION = '.md';
+/** How long a listing is trusted without word from the watcher, in case it misses a change. */
+const CACHE_MS = 10_000;
 
 /** Any file name in the folder is a valid id, as long as it can't escape the folder. */
 function assertValidId(id: string): void {
@@ -29,6 +31,12 @@ function createdAtFromId(id: string): number | undefined {
  */
 export class NotesStore extends EventEmitter<{ change: [] }> {
   private watcher: FSWatcher | undefined;
+  /**
+   * While watching, the folder is read once and kept until something changes. Each change
+   * bumps the generation, so a read that overlapped a write is never kept.
+   */
+  private cache: { notes: Promise<Note[]>; generation: number; readAt: number } | undefined;
+  private generation = 0;
   private readonly announce = debounce(() => this.emit('change'), 250);
 
   constructor(
@@ -46,6 +54,7 @@ export class NotesStore extends EventEmitter<{ change: [] }> {
   setDirectory(dir: string): void {
     if (dir === this.dir) return;
     this.dir = dir;
+    this.invalidate();
     if (this.watcher) {
       this.unwatch();
       void this.watch();
@@ -60,6 +69,25 @@ export class NotesStore extends EventEmitter<{ change: [] }> {
 
   /** All notes, most recently edited first. */
   async list(): Promise<Note[]> {
+    if (!this.watcher) return this.readAll();
+    const cached = this.cache;
+    if (cached && cached.generation === this.generation && Date.now() - cached.readAt < CACHE_MS) {
+      return [...(await cached.notes)];
+    }
+    const entry = { notes: this.readAll(), generation: this.generation, readAt: Date.now() };
+    entry.notes.catch(() => {
+      if (this.cache === entry) this.cache = undefined;
+    });
+    this.cache = entry;
+    return [...(await entry.notes)];
+  }
+
+  private invalidate(): void {
+    this.generation += 1;
+    this.cache = undefined;
+  }
+
+  private async readAll(): Promise<Note[]> {
     await mkdir(this.dir, { recursive: true });
     const entries = await readdir(this.dir, { withFileTypes: true });
     const notes = await Promise.all(
@@ -77,26 +105,42 @@ export class NotesStore extends EventEmitter<{ change: [] }> {
   async create(text = ''): Promise<Note> {
     await mkdir(this.dir, { recursive: true });
     const id = `${Date.now().toString(36)}-${randomBytes(2).toString('hex')}`;
-    await this.write(id, text);
+    try {
+      await this.write(id, text);
+    } finally {
+      this.invalidate();
+    }
     return this.read(id);
   }
 
   async update(id: string, text: string): Promise<Note> {
     await mkdir(this.dir, { recursive: true });
-    await this.write(id, text);
+    try {
+      await this.write(id, text);
+    } finally {
+      this.invalidate();
+    }
     return this.read(id);
   }
 
   /** Moves a note to the system Trash, so a mistake can be undone. */
   async trash(id: string): Promise<void> {
-    await this.trashFile(this.pathOf(id));
+    try {
+      await this.trashFile(this.pathOf(id));
+    } finally {
+      this.invalidate();
+    }
   }
 
   /** Deletes a note for good, but only if there's nothing in it. */
   async discardIfEmpty(id: string): Promise<boolean> {
     const note = await this.get(id);
     if (!note || note.text.trim()) return false;
-    await rm(this.pathOf(id), { force: true });
+    try {
+      await rm(this.pathOf(id), { force: true });
+    } finally {
+      this.invalidate();
+    }
     return true;
   }
 
@@ -104,7 +148,10 @@ export class NotesStore extends EventEmitter<{ change: [] }> {
     if (this.watcher) return;
     await mkdir(this.dir, { recursive: true });
     try {
-      this.watcher = watch(this.dir, () => this.announce());
+      this.watcher = watch(this.dir, () => {
+        this.invalidate();
+        this.announce();
+      });
     } catch (error) {
       console.warn('[notes] Could not watch the notes folder:', error);
     }
@@ -113,6 +160,9 @@ export class NotesStore extends EventEmitter<{ change: [] }> {
   unwatch(): void {
     this.watcher?.close();
     this.watcher = undefined;
+    this.invalidate();
+    // A change still waiting to be announced would reach windows that are already gone.
+    this.announce.cancel();
   }
 
   private async read(id: string): Promise<Note> {

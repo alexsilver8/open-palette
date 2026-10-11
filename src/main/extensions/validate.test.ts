@@ -121,6 +121,29 @@ describe('sanitizeView', () => {
     });
   });
 
+  it('keeps a valid detail and drops broken metadata', () => {
+    const view = sanitizeView({
+      type: 'list',
+      items: [
+        {
+          title: 'Groceries',
+          detail: {
+            title: 'Groceries',
+            body: '- oat milk',
+            metadata: [{ label: 'Edited', value: 'now' }, { label: 7 }],
+          },
+        },
+        { title: 'No body', detail: { title: 'x' } },
+      ],
+    });
+    expect(view.sections[0]?.items[0]?.detail).toEqual({
+      title: 'Groceries',
+      body: '- oat milk',
+      metadata: [{ label: 'Edited', value: 'now' }],
+    });
+    expect(view.sections[0]?.items[1]?.detail).toBeUndefined();
+  });
+
   it('makes item ids unique', () => {
     const view = sanitizeView({ type: 'list', items: [{ title: 'A' }, { title: 'A' }, { id: 'A', title: 'B' }] });
     expect(view.sections[0]?.items.map((i) => i.id)).toEqual(['A', 'A#2', 'A#3']);

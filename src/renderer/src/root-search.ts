@@ -1,10 +1,31 @@
 import { calculate, formatResult } from '../../shared/calculator';
 import { rankItems } from '../../shared/search';
-import type { RootItem } from '../../shared/types';
+import type { RootItem, RootKind } from '../../shared/types';
 import type { DisplayItem, DisplaySection } from './model';
 
 const MAX_SUGGESTIONS = 5;
 const MAX_RESULTS = 60;
+/** In "All", notes and clipboard entries are a short taste; their own tabs show everything. */
+const MAX_NOTES_IN_ALL = 4;
+const MAX_CLIPBOARD_IN_ALL = 3;
+const MAX_IN_TAB = 300;
+
+export type RootFilter = 'all' | RootKind;
+
+export const ROOT_FILTERS: ReadonlyArray<{ id: RootFilter; label: string }> = [
+  { id: 'all', label: 'All' },
+  { id: 'application', label: 'Apps' },
+  { id: 'command', label: 'Commands' },
+  { id: 'note', label: 'Notes' },
+  { id: 'clipboard', label: 'Clipboard' },
+];
+
+const TAB_TITLES: Record<RootKind, { recent: string; matches: string }> = {
+  application: { recent: 'Applications', matches: 'Applications' },
+  command: { recent: 'Commands', matches: 'Commands' },
+  note: { recent: 'Recent notes', matches: 'Notes' },
+  clipboard: { recent: 'Recently copied', matches: 'Clipboard' },
+};
 
 const URL_WITH_SCHEME = /^https?:\/\/\S+$/i;
 const BARE_DOMAIN =
@@ -26,18 +47,51 @@ function quote(query: string): string {
   return query.length > 32 ? `${query.slice(0, 31)}…` : query;
 }
 
-/** Builds the root list: suggestions and commands when empty, ranked results when searching. */
-export function buildRootSections(items: readonly RootItem[], rawQuery: string): DisplaySection[] {
+function ofKind(items: readonly RootItem[], kinds: readonly RootKind[]): RootItem[] {
+  return items.filter((item) => kinds.includes(item.kind));
+}
+
+function ranked(items: readonly RootItem[], query: string): DisplayItem[] {
+  return rankItems(items, query, usageBoost).map(({ item, titlePositions }) => ({
+    ...asRootRow(item),
+    titlePositions,
+  }));
+}
+
+/** How many items of each kind match the query, for the filter tabs. */
+export function countRootMatches(items: readonly RootItem[], rawQuery: string): Record<RootFilter, number> {
   const query = rawQuery.trim();
+  const counts: Record<RootFilter, number> = { all: 0, application: 0, command: 0, note: 0, clipboard: 0 };
+  const matching = query ? rankItems(items, query).map((r) => r.item) : items;
+  for (const item of matching) {
+    counts[item.kind] += 1;
+    counts.all += 1;
+  }
+  return counts;
+}
+
+/**
+ * Builds the root list. "All" shows suggestions and commands when empty, and ranked results
+ * when searching; a kind's tab shows everything of that kind.
+ */
+export function buildRootSections(
+  items: readonly RootItem[],
+  rawQuery: string,
+  filter: RootFilter = 'all',
+): DisplaySection[] {
+  const query = rawQuery.trim();
+  if (filter !== 'all') return buildTab(items, query, filter);
+
   const sections: DisplaySection[] = [];
+  const launchable = ofKind(items, ['command', 'application']);
 
   if (!query) {
-    const suggestions = items
+    const suggestions = launchable
       .filter((item) => item.frecency > 0)
       .sort((a, b) => b.frecency - a.frecency)
       .slice(0, MAX_SUGGESTIONS);
     const suggested = new Set(suggestions.map((item) => item.id));
-    const commands = items
+    const commands = launchable
       .filter((item) => item.kind === 'command' && !suggested.has(item.id))
       .sort((a, b) => a.title.localeCompare(b.title));
     if (suggestions.length > 0) sections.push({ title: 'Suggestions', items: suggestions.map(asRootRow) });
@@ -83,10 +137,14 @@ export function buildRootSections(items: readonly RootItem[], rawQuery: string):
     });
   }
 
-  const results = rankItems(items, query, usageBoost)
-    .slice(0, MAX_RESULTS)
-    .map(({ item, titlePositions }) => ({ ...asRootRow(item), titlePositions }));
+  const results = ranked(launchable, query).slice(0, MAX_RESULTS);
   if (results.length > 0) sections.push({ title: 'Results', items: results });
+
+  const notes = ranked(ofKind(items, ['note']), query).slice(0, MAX_NOTES_IN_ALL);
+  if (notes.length > 0) sections.push({ title: 'Notes', items: notes });
+
+  const copied = ranked(ofKind(items, ['clipboard']), query).slice(0, MAX_CLIPBOARD_IN_ALL);
+  if (copied.length > 0) sections.push({ title: 'Clipboard', items: copied });
 
   const fallbacks: DisplayItem[] = items
     .filter((item) => item.fallback)
@@ -107,7 +165,22 @@ export function buildRootSections(items: readonly RootItem[], rawQuery: string):
   return sections;
 }
 
+function buildTab(items: readonly RootItem[], query: string, kind: RootKind): DisplaySection[] {
+  const pool = ofKind(items, [kind]);
+  const titles = TAB_TITLES[kind];
+  if (!query) {
+    // Notes and clipboard entries arrive newest first; apps and commands read best A to Z.
+    const ordered =
+      kind === 'note' || kind === 'clipboard' ? pool : [...pool].sort((a, b) => a.title.localeCompare(b.title));
+    const rows = ordered.slice(0, MAX_IN_TAB).map(asRootRow);
+    return rows.length > 0 ? [{ title: titles.recent, items: rows }] : [];
+  }
+  const rows = ranked(pool, query).slice(0, MAX_IN_TAB);
+  return rows.length > 0 ? [{ title: titles.matches, items: rows }] : [];
+}
+
 function asRootRow(item: RootItem): DisplayItem {
-  const { kind: _kind, frecency: _frecency, fallback: _fallback, ...row } = item;
-  return { ...row, rootItemId: item.id };
+  const { kind, frecency: _frecency, fallback: _fallback, ...row } = item;
+  // Only launching apps and commands teaches the ranking what you use.
+  return kind === 'command' || kind === 'application' ? { ...row, rootItemId: item.id } : row;
 }
