@@ -33,7 +33,9 @@ describe('normalizeSettings', () => {
   it('pastes into apps unless turned off', () => {
     expect(DEFAULT_SETTINGS.pasteIntoApps).toBe(true);
     expect(normalizeSettings({ pasteIntoApps: false }).settings.pasteIntoApps).toBe(false);
-    expect(normalizeSettings({ pasteIntoApps: 'no' }).problems).toEqual(['Ignoring invalid value for "pasteIntoApps".']);
+    expect(normalizeSettings({ pasteIntoApps: 'no' }).problems).toEqual([
+      'Ignoring invalid value for "pasteIntoApps".',
+    ]);
   });
 
   it('rejects non-object settings', () => {
