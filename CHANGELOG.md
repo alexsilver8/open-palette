@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.4.0](https://github.com/alexsilver8/open-palette/compare/v1.3.0...v1.4.0) (2026-10-11)
+
+
+### Features
+
+* **notes:** rich formatting with a floating toolbar, still saved as Markdown ([#16](https://github.com/alexsilver8/open-palette/issues/16)) ([899a866](https://github.com/alexsilver8/open-palette/commit/899a866e6945df53010f3aa94225a0a97d92a7b2))
+
+
+### Bug Fixes
+
+* open Notes and Settings over full-screen apps instead of switching desktops ([#12](https://github.com/alexsilver8/open-palette/issues/12)) ([4631f52](https://github.com/alexsilver8/open-palette/commit/4631f526d7c28a253c659616ea73fd7941367a50))
+
+
+### Documentation
+
+* add a landing page, published with GitHub Pages ([#13](https://github.com/alexsilver8/open-palette/issues/13)) ([de8877b](https://github.com/alexsilver8/open-palette/commit/de8877b273effaa54fa5d19cd6b89b453fdc112e))
+* show formatted notes on the landing page ([#15](https://github.com/alexsilver8/open-palette/issues/15)) ([27b8e44](https://github.com/alexsilver8/open-palette/commit/27b8e443afab7e271bd7a6d88f20bfedbfe328df))
+
 ## [1.3.0](https://github.com/alexsilver8/open-palette/compare/v1.2.0...v1.3.0) (2026-10-11)
 
 
