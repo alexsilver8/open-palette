@@ -128,7 +128,6 @@ Built-in commands implement the same interface as extensions, so anything a buil
 
 - Form views and full Markdown detail views for extensions
 - An `@open-palette/api` package with types and helpers
-- Markdown preview and checklists in Notes
 - Quicklinks and snippets
 - Window management
 - Code-signed, auto-updating releases
