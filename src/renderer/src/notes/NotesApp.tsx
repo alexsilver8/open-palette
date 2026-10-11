@@ -4,6 +4,7 @@ import { countWords, type Note, notePreview, noteTitle } from '../../../shared/n
 import { rankItems } from '../../../shared/search';
 import { timeAgo } from '../../../shared/time';
 import { isModKey } from '../keys';
+import { NoteEditor } from './NoteEditor';
 
 const api = window.notes;
 const { platform } = api;
@@ -23,7 +24,6 @@ export function NotesApp() {
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
   const [, setTick] = useState(0);
 
-  const editor = useRef<HTMLTextAreaElement>(null);
   const search = useRef<HTMLInputElement>(null);
   const pending = useRef<{ id: string; text: string; timer: ReturnType<typeof setTimeout> } | null>(null);
   const ready = useRef(false);
@@ -59,12 +59,9 @@ export function NotesApp() {
     pending.current = { id, text, timer: setTimeout(() => void saveNow(), SAVE_DELAY_MS) };
   };
 
-  // Focus after React has rendered the change: the editor may only just have become enabled.
+  // Focus after React has rendered the change: the editor may only just have become editable.
   const [focusRequest, setFocusRequest] = useState(0);
   const focusEditor = useCallback(() => setFocusRequest((n) => n + 1), []);
-  useEffect(() => {
-    if (focusRequest > 0 && currentId) editor.current?.focus();
-  }, [focusRequest, currentId]);
 
   /** Switches to a note, saving the current one and dropping it if you never wrote anything. */
   const select = useCallback(
@@ -264,7 +261,13 @@ export function NotesApp() {
         >
           <PanelLeft size={16} />
         </button>
-        <h1 className="notes__title">{noteTitle(draft)}</h1>
+        <div className="notes__heading">
+          <h1 className="notes__title">{noteTitle(draft)}</h1>
+          <p className="notes__subtitle">
+            {words} {words === 1 ? 'word' : 'words'}
+            {current && ` · Edited ${timeAgo(current.updatedAt)}`}
+          </p>
+        </div>
         <button
           type="button"
           className="notes__tool"
@@ -332,28 +335,15 @@ export function NotesApp() {
         </aside>
       )}
 
-      <main className="notes__body">
-        <textarea
-          ref={editor}
-          className="notes__editor"
-          value={draft}
-          onChange={(event) => {
-            const text = event.target.value;
-            setDraft(text);
-            if (currentId) scheduleSave(currentId, text);
-          }}
-          placeholder="Start writing…"
-          aria-label="Note"
-          disabled={!currentId}
-        />
-      </main>
-
-      <footer className="notes__footer">
-        <span>
-          {words} {words === 1 ? 'word' : 'words'}
-        </span>
-        {current && <span>Edited {timeAgo(current.updatedAt)}</span>}
-      </footer>
+      <NoteEditor
+        noteId={currentId}
+        text={draft}
+        focusRequest={focusRequest}
+        onChange={(text) => {
+          setDraft(text);
+          if (currentId) scheduleSave(currentId, text);
+        }}
+      />
     </div>
   );
 }

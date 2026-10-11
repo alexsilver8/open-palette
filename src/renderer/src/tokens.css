@@ -13,6 +13,7 @@
   --font-ui:
     -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, Cantarell, Ubuntu, "Noto Sans",
     sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
 
   /* Icon colours. */
   --pigment-red: #f2555a;

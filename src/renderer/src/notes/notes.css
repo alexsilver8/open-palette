@@ -34,8 +34,8 @@ button {
   --pigment: var(--pigment-yellow);
   --sidebar-width: 216px;
   display: grid;
-  grid-template-columns: 0 1fr;
-  grid-template-rows: 46px 1fr 30px;
+  grid-template-columns: 0 minmax(0, 1fr);
+  grid-template-rows: 46px 1fr 58px;
   grid-template-areas:
     "header header"
     "sidebar body"
@@ -45,7 +45,7 @@ button {
 }
 
 .notes[data-sidebar] {
-  grid-template-columns: calc(var(--sidebar-width) + 8px) 1fr;
+  grid-template-columns: calc(var(--sidebar-width) + 8px) minmax(0, 1fr);
 }
 
 /* ── Header ─────────────────────────────────────────────── */
@@ -92,17 +92,35 @@ button {
   outline-offset: -2px;
 }
 
-.notes__title {
+.notes__heading {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
   margin: 0 8px;
+}
+
+.notes__title,
+.notes__subtitle {
+  max-width: 100%;
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--ink-muted);
+}
+
+.notes__title {
+  color: var(--ink);
   font-size: 13px;
-  font-weight: 500;
-  text-align: center;
+  font-weight: 600;
+}
+
+.notes__subtitle {
+  color: var(--ink-faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Sidebar ────────────────────────────────────────────── */
@@ -229,32 +247,437 @@ button {
   display: flex;
 }
 
-.notes__editor {
+.notes__scroller {
   flex: 1;
-  width: 100%;
-  padding: 20px 28px;
-  border: none;
-  outline: none;
-  resize: none;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  font-size: 15px;
-  line-height: 1.65;
-  caret-color: var(--accent);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
-.notes__editor::placeholder {
+/* The note reads like a document; each line is a paragraph, so they sit close together. */
+.notes__editor {
+  flex: 1;
+  min-height: 100%;
+  padding: 18px 28px 24px;
+  outline: none;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.6;
+  caret-color: var(--accent);
+  overflow-wrap: anywhere;
+  user-select: text;
+  cursor: text;
+}
+
+.notes__scroller[hidden] {
+  display: none;
+}
+
+/* A note the editor can't show is edited as the Markdown it is. */
+.notes__source {
+  flex: 1;
+  width: 100%;
+  border: none;
+  resize: none;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+
+.notes__notice {
+  max-width: 520px;
+  margin: 0;
+  padding: 9px 14px;
+  border: 1px solid var(--glass-raised-border);
+  border-radius: 12px;
+  background: var(--glass-raised);
+  color: var(--ink-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.notes__editor[contenteditable="false"] {
+  cursor: default;
+}
+
+.notes__editor > * + * {
+  margin-top: 0;
+}
+
+.notes__editor p {
+  margin: 0;
+}
+
+.notes__editor :is(h1, h2, h3) {
+  margin: 0.7em 0 0.25em;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.notes__editor > :is(h1, h2, h3):first-child {
+  margin-top: 0;
+}
+
+.notes__editor h1 {
+  font-size: 24px;
+}
+
+.notes__editor h2 {
+  font-size: 19px;
+}
+
+.notes__editor h3 {
+  font-size: 16px;
+}
+
+.notes__editor strong {
+  font-weight: 650;
+}
+
+.notes__editor s {
+  color: var(--ink-muted);
+}
+
+.notes__editor a {
+  color: var(--accent-ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+  text-underline-offset: 2px;
+  cursor: text;
+}
+
+.notes__editor code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--keycap);
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+}
+
+.notes__editor pre {
+  margin: 0.5em 0;
+  padding: 10px 14px;
+  border: 1px solid var(--glass-raised-border);
+  border-radius: 10px;
+  background: var(--glass-raised);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.notes__editor pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+}
+
+.notes__editor blockquote {
+  margin: 0.4em 0;
+  padding: 0 0 0 14px;
+  border-left: 3px solid var(--track);
+  color: var(--ink-muted);
+}
+
+.notes__editor :is(ul, ol) {
+  margin: 0.15em 0;
+  padding-left: 1.5em;
+}
+
+.notes__editor li > p {
+  margin: 0;
+}
+
+.notes__editor li::marker {
   color: var(--ink-faint);
 }
+
+/* Checklists: a box you can click, and a struck-through line once it's done. */
+.notes__editor ul[data-type="taskList"] {
+  padding-left: 0.2em;
+  list-style: none;
+}
+
+.notes__editor ul[data-type="taskList"] > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.notes__editor ul[data-type="taskList"] > li > label {
+  flex: none;
+  display: flex;
+  padding-top: 0.28em;
+  user-select: none;
+}
+
+.notes__editor ul[data-type="taskList"] > li > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.notes__editor ul[data-type="taskList"] > li input[type="checkbox"] {
+  appearance: none;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1.5px solid var(--ink-faint);
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.notes__editor ul[data-type="taskList"] > li input[type="checkbox"]:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.notes__editor ul[data-type="taskList"] > li input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4.5px;
+  top: 1.5px;
+  width: 3.5px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 1.75px 1.75px 0;
+  transform: rotate(45deg);
+}
+
+.notes__editor ul[data-type="taskList"] > li input[type="checkbox"]:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--accent) 75%, transparent);
+  outline-offset: 2px;
+}
+
+.notes__editor ul[data-type="taskList"] > li[data-checked="true"] > div {
+  color: var(--ink-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--ink-faint);
+}
+
+.notes__editor hr {
+  margin: 1em 0;
+  border: none;
+  border-top: 1px solid var(--hairline);
+}
+
+.notes__editor .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+.notes__editor .ProseMirror-gapcursor::after {
+  border-top-color: var(--ink);
+}
+
+/* ── Footer and formatting toolbar ──────────────────────── */
 
 .notes__footer {
   grid-area: footer;
+  min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 16px 0 28px;
-  color: var(--ink-faint);
-  font-size: 12px;
+  justify-content: center;
+  padding: 0 12px 10px;
   user-select: none;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 42px;
+  padding: 0 5px;
+  border: 1px solid var(--glass-raised-border);
+  border-radius: 14px;
+  background: var(--glass-raised);
+  box-shadow:
+    inset 0 1px 0 var(--glass-sheen),
+    0 6px 18px rgb(0 0 0 / 0.08);
+  color: var(--ink-muted);
+  /* In a narrow window the toolbar scrolls rather than pushing the window wider. */
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.toolbar__menu {
+  display: flex;
+  flex: none;
+}
+
+.toolbar__button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: none;
+  color: inherit;
+}
+
+.toolbar__button--menu {
+  padding: 0 5px 0 7px;
+}
+
+.toolbar__chevron {
+  opacity: 0.7;
+}
+
+.toolbar__button:hover:not(:disabled) {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.toolbar__button:is([aria-pressed="true"], [data-active], [aria-expanded="true"]) {
+  color: var(--ink);
+}
+
+.toolbar__button:is([aria-pressed="true"], [aria-expanded="true"]) {
+  border-color: var(--selected-border);
+  background: var(--selected-pane);
+}
+
+.toolbar__button:disabled {
+  opacity: 0.4;
+}
+
+.toolbar__button:focus-visible,
+.toolbar__item:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--accent) 75%, transparent);
+  outline-offset: -1px;
+}
+
+.toolbar__divider {
+  flex: none;
+  width: 1px;
+  height: 18px;
+  margin: 0 4px;
+  background: var(--hairline);
+}
+
+/* Menus and the link field open above the toolbar, as their own sheet of glass. */
+.toolbar__popover {
+  position: fixed;
+  z-index: 10;
+  max-width: calc(100vw - 16px);
+  border: 1px solid var(--glass-raised-border);
+  border-radius: 12px;
+  background: var(--glass-panel);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  backdrop-filter: blur(28px) saturate(1.8);
+  box-shadow:
+    inset 0 1px 0 var(--glass-sheen),
+    var(--shadow-popover);
+  animation: popover-in 120ms ease-out;
+}
+
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.toolbar__list {
+  display: flex;
+  flex-direction: column;
+  min-width: 240px;
+  padding: 5px;
+}
+
+.toolbar__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  font-size: 13.5px;
+}
+
+.toolbar__item:hover,
+.toolbar__item:focus-visible {
+  background: var(--hover);
+}
+
+.toolbar__item-icon {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  color: var(--ink-muted);
+}
+
+.toolbar__item-label {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.toolbar__item-check {
+  color: var(--accent);
+}
+
+.toolbar__item .keycaps {
+  margin-left: 6px;
+}
+
+.link-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 340px;
+  height: 44px;
+  padding: 0 5px 0 12px;
+  color: var(--ink-muted);
+}
+
+.link-field__icon {
+  flex: none;
+}
+
+.link-field__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 6px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13.5px;
+  caret-color: var(--accent);
+}
+
+.link-field__input[aria-invalid="true"] {
+  color: var(--pigment-red);
+  text-decoration: underline wavy color-mix(in oklab, var(--pigment-red) 60%, transparent);
+  text-underline-offset: 3px;
+}
+
+.link-field__input::placeholder {
+  color: var(--ink-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolbar__popover {
+    animation: none;
+  }
 }

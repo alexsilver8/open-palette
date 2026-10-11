@@ -3,3 +3,9 @@
 allowBuilds:
   esbuild: true
   electron-winstaller: false
+
+# Keep every Tiptap package on the same release: @tiptap/react's optional menus would
+# otherwise float to a newer one than the core they plug into.
+overrides:
+  "@tiptap/extension-bubble-menu": 3.31.3
+  "@tiptap/extension-floating-menu": 3.31.3

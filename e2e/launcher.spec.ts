@@ -23,6 +23,11 @@ test.beforeEach(async () => {
     mkdirSync(join(userData, 'notes'));
     for (let i = 1; i <= 12; i++) writeFileSync(join(userData, 'notes', `note-${i}.md`), `Note number ${i}`);
   }
+  if (test.info().title.includes('safe')) {
+    mkdirSync(join(userData, 'notes'));
+    writeFileSync(join(userData, 'notes', 'budget.md'), '# Budget\n\n| item | cost |\n|---|---|\n| rent | 900 |');
+    writeFileSync(join(userData, 'notes', 'todo.md'), 'Fix main.py\n\n- step one');
+  }
   if (test.info().title.includes('preview')) {
     mkdirSync(join(userData, 'notes'));
     writeFileSync(
@@ -106,14 +111,94 @@ test('creates a note and saves it as a Markdown file', async () => {
   await expect(editor).toBeFocused();
   await editor.pressSequentially('Groceries\n- oat milk');
   await expect(notes.locator('.notes__item[aria-current]')).toContainText('Groceries');
-  await expect.poll(savedNotes).toEqual(['Groceries\n- oat milk']);
+  // Typing "- " starts a list, saved as Markdown.
+  await expect(editor.getByRole('listitem')).toHaveText('oat milk');
+  await expect.poll(savedNotes).toEqual(['Groceries\n\n- oat milk']);
+});
+
+test('formats a note with the toolbar, shortcuts and Markdown', async () => {
+  await page.keyboard.type('create note');
+  const [notes] = await Promise.all([app.waitForEvent('window'), page.keyboard.press('Enter')]);
+  const editor = notes.getByRole('textbox', { name: 'Note', exact: true });
+  await expect(editor).toBeFocused();
+
+  await notes.keyboard.type('Trip');
+  await notes.getByRole('button', { name: 'Heading' }).click();
+  await notes.getByRole('menuitemradio', { name: /Heading 1/ }).click();
+  await expect(editor.getByRole('heading', { level: 1 })).toHaveText('Trip');
+
+  await notes.keyboard.press('Enter');
+  await notes.keyboard.type('Pack ');
+  await notes.keyboard.press(`${mod}+b`);
+  await notes.keyboard.type('light');
+  await notes.keyboard.press(`${mod}+b`);
+  await notes.keyboard.press('Enter');
+
+  await notes.getByRole('button', { name: 'List' }).click();
+  await notes.getByRole('menuitemradio', { name: /Checklist/ }).click();
+  await notes.keyboard.type('Book trains ');
+  await notes.keyboard.press(`${mod}+k`);
+  const address = notes.getByRole('textbox', { name: 'Link address' });
+  await expect(address).toBeFocused();
+  await address.fill('sbb.ch');
+  await address.press('Enter');
+  await expect(editor).toBeFocused();
+  await expect(editor.getByRole('link', { name: 'sbb.ch' })).toHaveAttribute('href', 'https://sbb.ch');
+
+  // ⌘-click (Ctrl-click) opens the link in the browser.
+  await app.evaluate(({ shell }) => {
+    const opened: string[] = [];
+    Object.assign(globalThis, { opened });
+    shell.openExternal = async (url: string) => {
+      opened.push(url);
+    };
+  });
+  await editor.getByRole('link', { name: 'sbb.ch' }).click({ modifiers: ['ControlOrMeta'] });
+  await expect.poll(() => app.evaluate(() => (globalThis as { opened?: string[] }).opened)).toEqual(['https://sbb.ch']);
+
+  await notes.getByRole('checkbox', { name: /Book trains/ }).check();
+  await expect.poll(savedNotes).toEqual(['# Trip\n\nPack **light**\n\n- [x] Book trains [sbb.ch](https://sbb.ch)']);
+});
+
+test('keeps notes safe from what the editor would change', async () => {
+  const note = (name: string) => readFileSync(join(userData, 'notes', name), 'utf8');
+  await page.keyboard.type('open notes');
+  const [notes] = await Promise.all([app.waitForEvent('window'), page.keyboard.press('Enter')]);
+  const editor = notes.getByRole('textbox', { name: 'Note', exact: true });
+
+  // A table can't be shown formatted, so the note is edited as Markdown and keeps it.
+  await notes.getByRole('button', { name: /Budget/ }).click();
+  await expect(editor).toHaveValue(note('budget.md'));
+  await expect(notes.getByRole('status')).toContainText('Shown as Markdown');
+  await editor.press('ControlOrMeta+End');
+  await editor.pressSequentially('\n| food | 300 |');
+  await expect
+    .poll(() => note('budget.md'))
+    .toBe('# Budget\n\n| item | cost |\n|---|---|\n| rent | 900 |\n| food | 300 |');
+
+  // Opening a note doesn't turn file names into links.
+  await notes.getByRole('button', { name: /Fix main\.py/ }).click();
+  await expect(editor).toContainText('Fix main.py');
+  await expect(editor.getByRole('link')).toHaveCount(0);
+  await expect(notes.getByRole('toolbar', { name: 'Formatting' })).toBeVisible();
+
+  // An edit made elsewhere shows up, and undo can't bring back the old text over it.
+  writeFileSync(join(userData, 'notes', 'todo.md'), 'Changed elsewhere');
+  await expect(editor).toHaveText('Changed elsewhere');
+  await editor.focus();
+  await notes.keyboard.press('ControlOrMeta+z');
+  await notes.waitForTimeout(700);
+  expect(note('todo.md')).toBe('Changed elsewhere');
+  expect(note('budget.md')).toContain('| food | 300 |');
 });
 
 test('turns launcher text into a note with the Create Note fallback', async () => {
   await page.keyboard.type('remember to call the bank');
   const createNote = page.getByRole('option', { name: /Create Note/ }).last();
   const [notes] = await Promise.all([app.waitForEvent('window'), createNote.click()]);
-  await expect(notes.getByRole('textbox', { name: 'Note', exact: true })).toHaveValue('remember to call the bank\n');
+  await expect(notes.getByRole('textbox', { name: 'Note', exact: true })).toHaveText('remember to call the bank');
+  // Showing a note never rewrites its file.
+  await notes.waitForTimeout(700);
   expect(savedNotes()).toEqual(['remember to call the bank\n']);
 });
 
