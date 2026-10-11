@@ -141,6 +141,50 @@
         <path d="M5 12h14" />
         <path d="m12 5 7 7-7 7" />
       </symbol>
+      <symbol id="i-plug" viewBox="0 0 24 24">
+        <path d="M12 22v-5" />
+        <path d="M9 8V2" />
+        <path d="M15 8V2" />
+        <path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z" />
+      </symbol>
+      <symbol id="i-sparkles" viewBox="0 0 24 24">
+        <path
+          d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.13a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.13 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.13a.5.5 0 0 1-.96 0z"
+        />
+        <path d="M20 3v4" />
+        <path d="M22 5h-4" />
+      </symbol>
+      <symbol id="i-smile" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+        <path d="M9 9h.01" />
+        <path d="M15 9h.01" />
+      </symbol>
+      <symbol id="i-commit" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M3 12h6" />
+        <path d="M15 12h6" />
+      </symbol>
+      <symbol id="i-clipboard" viewBox="0 0 24 24">
+        <rect x="8" y="2" width="8" height="4" rx="1" />
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      </symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24">
+        <rect x="5" y="11" width="14" height="10" rx="2" />
+        <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+      </symbol>
+      <symbol id="i-contrast" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 2a10 10 0 0 1 0 20Z" fill="currentColor" />
+      </symbol>
+      <symbol id="i-puzzle" viewBox="0 0 24 24">
+        <path
+          d="M15.39 4.39a1 1 0 0 0 1.68-.47 2.5 2.5 0 1 1 3.01 3.01 1 1 0 0 0-.47 1.68l1.68 1.68a2.41 2.41 0 0 1 0 3.42l-1.68 1.68a1 1 0 0 1-1.68-.47 2.5 2.5 0 1 0-3.01 3.01 1 1 0 0 1 .47 1.68l-1.68 1.68a2.41 2.41 0 0 1-3.42 0l-1.68-1.68a1 1 0 0 0-1.68.47 2.5 2.5 0 1 1-3.01-3.01 1 1 0 0 0 .47-1.68l-1.68-1.68a2.41 2.41 0 0 1 0-3.42l1.68-1.68a1 1 0 0 1 1.68.47 2.5 2.5 0 1 0 3.01-3.01 1 1 0 0 1-.47-1.68l1.68-1.68a2.41 2.41 0 0 1 3.42 0z"
+        />
+      </symbol>
     </svg>
 
     <header class="nav">
@@ -520,6 +564,106 @@
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="included" id="included" aria-labelledby="included-title">
+        <span class="included-glow" aria-hidden="true"></span>
+        <div class="included-head reveal">
+          <div class="eyebrow">
+            <span class="pill-ind" aria-hidden="true"
+              ><span class="pill-dot"></span><span class="pill-dot"></span
+              ><span class="pill-dot on" style="--c: var(--amber)"></span
+            ></span>
+            <span class="label" style="color: var(--amber-ink)">Included</span>
+          </div>
+          <h2 id="included-title">Comes with the commands you'd install first.</h2>
+          <p class="body">
+            Every one of these ships with Open Palette. The extensions use the same API yours will, and their source is
+            in the repo.
+          </p>
+        </div>
+
+        <div class="marquees reveal" style="--d: 0.1s">
+          <div class="marquee" data-speed="40">
+            <div class="marquee-track">
+              <ul class="marquee-list" aria-label="Commands from the bundled extensions">
+                <li class="chip">
+                  <span class="tile" style="--c: #22a6c0"><svg class="i" aria-hidden="true"><use href="#i-plug" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Open Ports</span><span class="chip-from">Port Manager</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #ec5b9b"><svg class="i" aria-hidden="true"><use href="#i-sparkles" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Search Gitmoji</span><span class="chip-from">Gitmoji</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #f5843c"><svg class="i" aria-hidden="true"><use href="#i-smile" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Search Emoji</span><span class="chip-from">Emoji</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #2fb47c"><svg class="i" aria-hidden="true"><use href="#i-commit" /></svg></span>
+                  <span class="chip-text"
+                    ><span class="chip-title">Write Commit Message</span><span class="chip-from">Conventional Commits</span></span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="marquee marquee-reverse" data-speed="32">
+            <div class="marquee-track">
+              <ul class="marquee-list" aria-label="Built-in commands">
+                <li class="chip">
+                  <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Create Note</span><span class="chip-from">Notes</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #f5843c"><svg class="i" aria-hidden="true"><use href="#i-clipboard" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Clipboard History</span><span class="chip-from">Clipboard</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #4c6ef5"><svg class="i" aria-hidden="true"><use href="#i-globe" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Search Google</span><span class="chip-from">Web Search</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #7a8494"><svg class="i" aria-hidden="true"><use href="#i-lock" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Lock Screen</span><span class="chip-from">System</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-search" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Search Notes</span><span class="chip-from">Notes</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #8b5cf6"><svg class="i" aria-hidden="true"><use href="#i-moon" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Sleep</span><span class="chip-from">System</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #f5843c"><svg class="i" aria-hidden="true"><use href="#i-search" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Search DuckDuckGo</span><span class="chip-from">Web Search</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #7a8494"><svg class="i" aria-hidden="true"><use href="#i-contrast" /></svg></span>
+                  <span class="chip-text"
+                    ><span class="chip-title">Toggle System Appearance</span><span class="chip-from">System</span></span
+                  >
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #8b5cf6"><svg class="i" aria-hidden="true"><use href="#i-puzzle" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Manage Extensions</span><span class="chip-from">Open Palette</span></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-row included-cta reveal" style="--d: 0.2s">
+          <a class="btn btn-amber btn-lg" href="https://github.com/alexsilver8/open-palette/blob/main/docs/extensions.md">
+            <span>Write your own</span>
+            <svg class="i" aria-hidden="true"><use href="#i-arrow" /></svg>
+          </a>
+          <a class="btn btn-ghost btn-lg" href="https://github.com/alexsilver8/open-palette/tree/main/extensions">
+            <svg class="i" aria-hidden="true"><use href="#i-code" /></svg>
+            <span>Browse their source</span>
+          </a>
         </div>
       </section>
 
