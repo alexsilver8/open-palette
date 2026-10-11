@@ -1,0 +1,33 @@
+{
+  "name": "timestamps",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Convert between Unix timestamps, ISO 8601 and readable dates.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "Timestamps",
+    "icon": "🕐",
+    "commands": [
+      {
+        "name": "convert",
+        "title": "Convert Timestamp",
+        "mode": "view",
+        "icon": "🕐",
+        "keywords": [
+          "unix",
+          "epoch",
+          "timestamp",
+          "date",
+          "time",
+          "iso",
+          "8601",
+          "utc",
+          "now",
+          "milliseconds"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "name": "github",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Your GitHub pull requests, issues and repositories.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "GitHub",
+    "icon": "🐙",
+    "commands": [
+      {
+        "name": "pull-requests",
+        "title": "My Pull Requests",
+        "mode": "view",
+        "icon": "🐙",
+        "keywords": [
+          "github",
+          "pr",
+          "pull request",
+          "review",
+          "code review"
+        ]
+      },
+      {
+        "name": "issues",
+        "title": "My Issues",
+        "mode": "view",
+        "icon": "🐙",
+        "keywords": [
+          "github",
+          "issue",
+          "bug",
+          "assigned",
+          "ticket"
+        ]
+      },
+      {
+        "name": "repos",
+        "title": "Search GitHub Repositories",
+        "mode": "view",
+        "icon": "🐙",
+        "keywords": [
+          "github",
+          "repo",
+          "repository",
+          "clone",
+          "project"
+        ]
+      }
+    ]
+  }
+}

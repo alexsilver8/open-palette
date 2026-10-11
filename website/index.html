@@ -185,6 +185,57 @@
           d="M15.39 4.39a1 1 0 0 0 1.68-.47 2.5 2.5 0 1 1 3.01 3.01 1 1 0 0 0-.47 1.68l1.68 1.68a2.41 2.41 0 0 1 0 3.42l-1.68 1.68a1 1 0 0 1-1.68-.47 2.5 2.5 0 1 0-3.01 3.01 1 1 0 0 1 .47 1.68l-1.68 1.68a2.41 2.41 0 0 1-3.42 0l-1.68-1.68a1 1 0 0 0-1.68.47 2.5 2.5 0 1 1-3.01-3.01 1 1 0 0 0 .47-1.68l-1.68-1.68a2.41 2.41 0 0 1 0-3.42l1.68-1.68a1 1 0 0 1 1.68.47 2.5 2.5 0 1 0 3.01-3.01 1 1 0 0 1-.47-1.68l1.68-1.68a2.41 2.41 0 0 1 3.42 0z"
         />
       </symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24">
+        <path
+          d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+        />
+      </symbol>
+      <symbol id="i-pull-request" viewBox="0 0 24 24">
+        <circle cx="18" cy="18" r="3" />
+        <circle cx="6" cy="6" r="3" />
+        <path d="M13 6h3a2 2 0 0 1 2 2v7" />
+        <path d="M6 9v12" />
+      </symbol>
+      <symbol id="i-activity" viewBox="0 0 24 24">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+      </symbol>
+      <symbol id="i-box" viewBox="0 0 24 24">
+        <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+        <path d="m3.3 7 8.7 5 8.7-5" />
+        <path d="M12 22V12" />
+      </symbol>
+      <symbol id="i-binary" viewBox="0 0 24 24">
+        <rect x="14" y="14" width="4" height="6" rx="2" />
+        <rect x="6" y="4" width="4" height="6" rx="2" />
+        <path d="M6 20h4" />
+        <path d="M14 10h4" />
+        <path d="M6 14h2v6" />
+        <path d="M14 4h2v6" />
+      </symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 6v6l4 2" />
+      </symbol>
+      <symbol id="i-pipette" viewBox="0 0 24 24">
+        <path d="m2 22 1-1h3l9-9" />
+        <path d="M3 21v-3l9-9" />
+        <path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z" />
+      </symbol>
+      <symbol id="i-book" viewBox="0 0 24 24">
+        <path d="M12 7v14" />
+        <path
+          d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"
+        />
+      </symbol>
+      <symbol id="i-beer" viewBox="0 0 24 24">
+        <path d="M17 11h1a3 3 0 0 1 0 6h-1" />
+        <path d="M9 12v6" />
+        <path d="M13 12v6" />
+        <path
+          d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.72.5-2.5.5a2.5 2.5 0 0 1 0-5c.78 0 1.57.5 2.5.5S9.44 2 11 2s2 1.5 3 1.5 1.72-.5 2.5-.5a2.5 2.5 0 0 1 0 5c-.78 0-1.5-.5-2.5-.5Z"
+        />
+        <path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8" />
+      </symbol>
     </svg>
 
     <header class="nav">
@@ -605,6 +656,42 @@
                   <span class="chip-text"
                     ><span class="chip-title">Write Commit Message</span><span class="chip-from">Conventional Commits</span></span
                   >
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #8b5cf6"><svg class="i" aria-hidden="true"><use href="#i-pull-request" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">My Pull Requests</span><span class="chip-from">GitHub</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #4c6ef5"><svg class="i" aria-hidden="true"><use href="#i-box" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Search Docker Containers</span><span class="chip-from">Docker</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #22a6c0"><svg class="i" aria-hidden="true"><use href="#i-clock" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Convert Timestamp</span><span class="chip-from">Timestamps</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-beer" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Search Homebrew</span><span class="chip-from">Homebrew</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #ec5b9b"><svg class="i" aria-hidden="true"><use href="#i-pipette" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Convert Color</span><span class="chip-from">Colors</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #f5843c"><svg class="i" aria-hidden="true"><use href="#i-folder" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Search Git Repositories</span><span class="chip-from">Git Repositories</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #2fb47c"><svg class="i" aria-hidden="true"><use href="#i-activity" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Search Processes</span><span class="chip-from">Processes</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #4c6ef5"><svg class="i" aria-hidden="true"><use href="#i-book" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Search MDN</span><span class="chip-from">MDN</span></span>
+                </li>
+                <li class="chip">
+                  <span class="tile" style="--c: #7a8494"><svg class="i" aria-hidden="true"><use href="#i-binary" /></svg></span>
+                  <span class="chip-text"><span class="chip-title">Encode or Decode Text</span><span class="chip-from">Encode &amp; Decode</span></span>
                 </li>
               </ul>
             </div>

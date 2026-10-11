@@ -1,0 +1,31 @@
+{
+  "name": "processes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Search running programs, see their CPU and memory, and quit them.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "Processes",
+    "icon": "⚙️",
+    "commands": [
+      {
+        "name": "processes",
+        "title": "Search Processes",
+        "mode": "view",
+        "icon": "⚙️",
+        "keywords": [
+          "process",
+          "kill",
+          "force quit",
+          "task manager",
+          "activity monitor",
+          "cpu",
+          "memory",
+          "pid"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "encode-decode",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Base64, URL and HTML encoding, JWT decoding and hashes of any text.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "Encode & Decode",
+    "icon": "🔣",
+    "commands": [
+      {
+        "name": "transform",
+        "title": "Encode or Decode Text",
+        "mode": "view",
+        "icon": "🔣",
+        "keywords": [
+          "base64",
+          "url",
+          "encode",
+          "decode",
+          "jwt",
+          "token",
+          "hash",
+          "sha256",
+          "md5",
+          "html",
+          "entities"
+        ],
+        "fallback": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "name": "docker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Start, stop and clean up Docker containers and images.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "Docker",
+    "icon": "🐳",
+    "commands": [
+      {
+        "name": "containers",
+        "title": "Search Docker Containers",
+        "mode": "view",
+        "icon": "🐳",
+        "keywords": [
+          "docker",
+          "container",
+          "compose",
+          "start",
+          "stop",
+          "restart",
+          "logs",
+          "orbstack"
+        ]
+      },
+      {
+        "name": "images",
+        "title": "Search Docker Images",
+        "mode": "view",
+        "icon": "🐳",
+        "keywords": [
+          "docker",
+          "image",
+          "pull",
+          "rmi",
+          "remove",
+          "clean"
+        ]
+      }
+    ]
+  }
+}
