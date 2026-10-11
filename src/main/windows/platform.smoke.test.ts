@@ -13,6 +13,22 @@ import { x11Backend } from './x11';
 
 const enabled = process.env.OPEN_PALETTE_SMOKE === '1';
 
+/**
+ * Whether a window landed where it should. Apps round sizes to what they support, and won't go
+ * below their smallest size (a Finder window is wider than a third of a small screen), so the
+ * position must match and the size match or be bigger.
+ */
+function fits(actual: Rect, expected: Rect, slack = 12): boolean {
+  const near = (a: number, b: number) => Math.abs(a - b) <= slack;
+  const sizeFits = (a: number, b: number) => near(a, b) || a > b;
+  return (
+    near(actual.x, expected.x) &&
+    near(actual.y, expected.y) &&
+    sizeFits(actual.width, expected.width) &&
+    sizeFits(actual.height, expected.height)
+  );
+}
+
 /** macOS: the main display's work area from AppKit, flipped to top-left coordinates. */
 async function macWorkAreas(): Promise<Rect[]> {
   const script = `ObjC.import('AppKit');
@@ -67,8 +83,7 @@ describe.runIf(enabled)(`moving a real window on ${process.platform}`, () => {
         const after = await backend.front();
         console.log(layout, 'expected', expected, 'got', after?.window.bounds);
         expect(after?.window.key).toBe(first.window.key);
-        // Apps may round a size to what they support; a few pixels either way is fine.
-        expect(expected && after && sameBounds(after.window.bounds, expected, 12), layout).toBe(true);
+        expect(expected && after && fits(after.window.bounds, expected), layout).toBe(true);
       }
 
       await manager.apply(backend, 'restore');

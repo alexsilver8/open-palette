@@ -29,7 +29,15 @@ export function parsePlist(xml: string): Record<string, string | number | boolea
     if (!key) continue;
     if (bool) values[key] = bool === 'true';
     else if (integer !== undefined) values[key] = Number(integer);
-    else if (text !== undefined) values[key] = text.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    // &amp; last, so "&amp;lt;" stays "&lt;".
+    else if (text !== undefined) {
+      values[key] = text
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .replace(/&amp;/g, '&');
+    }
   }
   return values;
 }
