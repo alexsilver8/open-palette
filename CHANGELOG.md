@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.1](https://github.com/alexsilver8/open-palette/compare/v1.5.0...v1.5.1) (2026-10-11)
+
+
+### Documentation
+
+* move the website to openpalette.alexsilver.dev ([#22](https://github.com/alexsilver8/open-palette/issues/22)) ([b09a877](https://github.com/alexsilver8/open-palette/commit/b09a877e24207538a1dd0fed2971d825fd74e7d1))
+* show the included commands on the landing page ([#20](https://github.com/alexsilver8/open-palette/issues/20)) ([53e1a02](https://github.com/alexsilver8/open-palette/commit/53e1a02e7d55be30639ee57dfa18510fb46cc64e))
+
 ## [1.5.0](https://github.com/alexsilver8/open-palette/compare/v1.4.0...v1.5.0) (2026-10-11)
 
 
