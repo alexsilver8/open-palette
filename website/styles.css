@@ -346,6 +346,7 @@ kbd {
 /* Full-width sections clip their own glows, so nothing pushes the page sideways on a phone. */
 .hero,
 .chapter,
+.included,
 .source,
 .finale {
   overflow-x: clip;
@@ -1820,6 +1821,213 @@ h2 {
 
   .notes-side {
     display: none;
+  }
+}
+
+/* ── Included commands ──────────────────────────────────── */
+
+.included {
+  position: relative;
+  padding: 180px 0 0;
+}
+
+.included-glow {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: min(760px, 90%);
+  height: 300px;
+  border-radius: 50%;
+  background: var(--amber);
+  filter: blur(150px);
+  opacity: 0.14;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.included-head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  max-width: 800px;
+  margin: 0 auto 64px;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.included-head .body {
+  max-width: 560px;
+}
+
+.marquees {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Standing still (no script, or reduced motion), each row wraps and centres. */
+.marquee-track {
+  display: flex;
+  justify-content: center;
+  padding: 0 24px;
+}
+
+.marquee-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Moving: main.js repeats each row so it can slide forever, fading out at the edges. */
+.marquee.is-moving {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.is-moving .marquee-track {
+  justify-content: flex-start;
+  width: max-content;
+  padding: 0;
+  animation: marquee var(--duration, 60s) linear infinite;
+}
+
+.marquee-reverse.is-moving .marquee-track {
+  animation-direction: reverse;
+}
+
+.is-moving .marquee-list {
+  flex-wrap: nowrap;
+  padding-right: 14px;
+}
+
+.marquee.is-moving:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.chip {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  height: 60px;
+  padding: 0 22px 0 12px;
+  border-radius: 18px;
+  background: rgb(255 255 255 / 0.045);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.1),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+  white-space: nowrap;
+}
+
+.marquee-reverse .chip {
+  background: rgb(255 255 255 / 0.03);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+.chip .tile {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.chip .tile .i {
+  width: 19px;
+  height: 19px;
+  stroke-width: 2.2;
+}
+
+.chip-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-align: left;
+}
+
+.chip-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.chip-from {
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+
+.included-cta {
+  position: relative;
+  margin-top: 56px;
+  padding: 0 24px;
+}
+
+.btn-amber {
+  background: var(--amber);
+  color: #1a1305;
+}
+
+.btn-amber:hover {
+  background: var(--amber-ink);
+  color: #1a1305;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .included {
+    padding-top: 140px;
+  }
+
+  .marquee.is-moving {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+
+  .marquees,
+  .marquee-list {
+    gap: 10px;
+  }
+
+  .is-moving .marquee-list {
+    padding-right: 10px;
+  }
+
+  .chip {
+    gap: 10px;
+    height: 52px;
+    padding: 0 16px 0 10px;
+    border-radius: 15px;
+  }
+
+  .chip .tile {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+
+  .chip .tile .i {
+    width: 16px;
+    height: 16px;
+  }
+
+  .chip-title {
+    font-size: 14.5px;
+  }
+
+  .chip-from {
+    font-size: 12px;
   }
 }
 
