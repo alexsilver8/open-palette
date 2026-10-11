@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/alexsilver8/open-palette/compare/v1.2.0...v1.3.0) (2026-10-11)
+
+
+### Features
+
+* liquid-glass launcher with filter tabs, previews and quick keys ([#10](https://github.com/alexsilver8/open-palette/issues/10)) ([e53826e](https://github.com/alexsilver8/open-palette/commit/e53826e90efa7a41623c4d0e13d8fa9155c00f6d))
+
 ## [1.2.0](https://github.com/alexsilver8/open-palette/compare/v1.1.0...v1.2.0) (2026-10-10)
 
 
