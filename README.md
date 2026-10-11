@@ -7,6 +7,8 @@
 
 An open-source, keyboard-first launcher for macOS, Windows and Linux, in the spirit of Raycast. Press <kbd>⌥</kbd> <kbd>Space</kbd>, type a few letters, press <kbd>↵</kbd>.
 
+Website: [alexsilver8.github.io/open-palette](https://alexsilver8.github.io/open-palette/)
+
 ![Open Palette finding a note, with its preview beside the results](docs/images/launcher.png)
 
 ## What it does
@@ -105,6 +107,7 @@ pnpm dist         # installers for your OS in release/
 - `src/extension-host` — loads extensions and runs their commands in a separate process.
 - `src/renderer` — the launcher and Notes windows. Root search and the calculator run here, so typing never waits on IPC.
 - `src/shared` — types, fuzzy matching and the calculator, shared by all three.
+- `website` — the landing page: plain HTML, CSS and JavaScript with no build step. Serve the folder to preview it (`npx serve website`); pushes to `main` publish it to GitHub Pages.
 
 Built-in commands implement the same interface as extensions, so anything a built-in can do, an extension can too.
 
