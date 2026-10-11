@@ -4,6 +4,19 @@ import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { NotesStore } from './store';
 
+/** Random bytes for note ids, queued by a test; real ones otherwise. */
+const idBytes = vi.hoisted(() => ({ queue: [] as string[] }));
+vi.mock('node:crypto', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:crypto')>();
+  return {
+    ...actual,
+    randomBytes: (size: number) => {
+      const next = size === 2 ? idBytes.queue.shift() : undefined;
+      return next ? Buffer.from(next, 'hex') : actual.randomBytes(size);
+    },
+  };
+});
+
 function setup() {
   const dir = join(mkdtempSync(join(tmpdir(), 'notes-')), 'notes');
   const trashed: string[] = [];
@@ -22,6 +35,25 @@ describe('NotesStore', () => {
     expect(readFileSync(join(dir, `${first.id}.md`), 'utf8')).toBe('# First');
     expect((await store.list()).map((n) => n.id)).toEqual([second.id, first.id]);
     expect(first.createdAt).toBeGreaterThan(Date.now() - 60_000);
+  });
+
+  it('never gives two notes the same file, even when created in the same millisecond', async () => {
+    const { dir, store } = setup();
+    const now = vi.spyOn(Date, 'now').mockReturnValue(1_791_727_005_000);
+    try {
+      idBytes.queue.push('abcd');
+      const existing = await store.create('existing');
+      // Every new note first draws the same bytes as `existing`, then new ones.
+      idBytes.queue.push('abcd', 'abcd', '1234', 'abcd', '5678');
+      const created = await Promise.all([store.create('one'), store.create('two')]);
+      const ids = [existing.id, ...created.map((note) => note.id)];
+      expect(new Set(ids).size).toBe(3);
+      expect(readFileSync(join(dir, `${existing.id}.md`), 'utf8')).toBe('existing');
+      expect(created.map((note) => note.text)).toEqual(['one', 'two']);
+    } finally {
+      now.mockRestore();
+      idBytes.queue.length = 0;
+    }
   });
 
   it('has no limit on the number of notes', async () => {
