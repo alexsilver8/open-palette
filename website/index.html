@@ -236,6 +236,12 @@
         />
         <path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8" />
       </symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24">
+        <path
+          d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+        />
+        <circle cx="12" cy="12" r="3" />
+      </symbol>
     </svg>
 
     <header class="nav">
@@ -752,6 +758,301 @@
             <span>Browse their source</span>
           </a>
         </div>
+      </section>
+
+      <section class="details" id="details" aria-labelledby="details-title">
+        <div class="details-glow" aria-hidden="true">
+          <span class="details-orb" style="--c: var(--blue); left: 4%; top: 18%"></span>
+          <span class="details-orb" style="--c: var(--pink); right: 6%; top: 34%"></span>
+        </div>
+        <div class="details-head reveal">
+          <div class="eyebrow">
+            <span class="pill-ind" aria-hidden="true"
+              ><span class="pill-dot on" style="--c: var(--blue)"></span
+              ><span class="pill-dot on" style="--c: var(--pink)"></span
+              ><span class="pill-dot on" style="--c: var(--amber)"></span
+            ></span>
+            <span class="label" style="color: var(--ink-2)">Details</span>
+          </div>
+          <h2 id="details-title">The small things add up.</h2>
+        </div>
+
+        <div class="bento">
+          <!-- Quick keys: the first nine results, each a keystroke away. -->
+          <article class="bento-card bento-keys reveal">
+            <div class="bento-visual" aria-hidden="true">
+              <div class="qk-stack">
+                <div class="qk-row sel">
+                  <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>
+                  <span class="qk-title">Release checklist</span>
+                  <span class="qk-keys"><kbd data-key-mod>⌘</kbd><kbd>1</kbd></span>
+                </div>
+                <div class="qk-row">
+                  <span class="tile" style="--c: #22a6c0"><svg class="i" aria-hidden="true"><use href="#i-plug" /></svg></span>
+                  <span class="qk-title">Open Ports</span>
+                  <span class="qk-keys"><kbd data-key-mod>⌘</kbd><kbd>2</kbd></span>
+                </div>
+                <div class="qk-row">
+                  <span class="tile" style="--c: #f5843c"><svg class="i" aria-hidden="true"><use href="#i-clipboard" /></svg></span>
+                  <span class="qk-title">Clipboard History</span>
+                  <span class="qk-keys"><kbd data-key-mod>⌘</kbd><kbd>3</kbd></span>
+                </div>
+                <div class="qk-row">
+                  <span class="tile" style="--c: #8b5cf6"><svg class="i" aria-hidden="true"><use href="#i-pull-request" /></svg></span>
+                  <span class="qk-title">My Pull Requests</span>
+                  <span class="qk-keys"><kbd data-key-mod>⌘</kbd><kbd>4</kbd></span>
+                </div>
+                <div class="qk-row">
+                  <span class="tile" style="--c: #4c6ef5"><svg class="i" aria-hidden="true"><use href="#i-box" /></svg></span>
+                  <span class="qk-title">Search Docker Containers</span>
+                  <span class="qk-keys"><kbd data-key-mod>⌘</kbd><kbd>5</kbd></span>
+                </div>
+                <div class="qk-row">
+                  <span class="tile" style="--c: #ec5b9b"><svg class="i" aria-hidden="true"><use href="#i-pipette" /></svg></span>
+                  <span class="qk-title">Convert Color</span>
+                  <span class="qk-keys"><kbd data-key-mod>⌘</kbd><kbd>6</kbd></span>
+                </div>
+              </div>
+            </div>
+            <div class="bento-text">
+              <h3 class="bento-title">Quick keys</h3>
+              <p class="bento-sub">Hold <span data-key-mod>⌘</span> and press 1–9 to run a result</p>
+            </div>
+          </article>
+
+          <!-- Use "…" with: whatever you typed, handed to a command. -->
+          <article class="bento-card bento-with reveal" style="--d: 0.06s">
+            <div class="bento-visual" aria-hidden="true">
+              <div class="launcher uw-win">
+                <div class="search search-sm">
+                  <svg class="i search-icon" aria-hidden="true"><use href="#i-search" /></svg>
+                  <span>fix the sign-in redirect</span><span class="caret"></span>
+                </div>
+                <div class="results">
+                  <p class="heading">Use “fix the sign-in redirect” with…</p>
+                  <div class="row sel">
+                    <span class="tile" style="--c: #2fb47c"><svg class="i" aria-hidden="true"><use href="#i-commit" /></svg></span>
+                    <span class="row-text"><span class="row-title">Write Commit Message</span></span>
+                    <span class="acc">Command</span>
+                  </div>
+                  <div class="row">
+                    <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>
+                    <span class="row-text"><span class="row-title">Create Note</span></span>
+                    <span class="acc">Command</span>
+                  </div>
+                  <div class="row">
+                    <span class="tile" style="--c: #4c6ef5"><svg class="i" aria-hidden="true"><use href="#i-globe" /></svg></span>
+                    <span class="row-text"><span class="row-title">Search Google</span></span>
+                    <span class="acc">Command</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bento-text">
+              <h3 class="bento-title">Type first, choose later</h3>
+              <p class="bento-sub">Send it to a note, a commit message or a search</p>
+            </div>
+          </article>
+
+          <!-- Actions: ⌘ K over a note in Search Notes. -->
+          <article class="bento-card bento-actions reveal" style="--d: 0.12s">
+            <div class="bento-visual" aria-hidden="true">
+              <div class="launcher ac-win">
+                <div class="search search-sm">
+                  <span class="crumb">Notes</span><span class="ph-static">Search notes…</span>
+                </div>
+                <div class="content">
+                  <div class="results">
+                    <p class="heading">12 notes</p>
+                    <div class="row sel">
+                      <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>
+                      <span class="row-text"><span class="row-title">Release checklist</span></span>
+                      <span class="acc">just now</span>
+                    </div>
+                    <div class="row">
+                      <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>
+                      <span class="row-text"><span class="row-title">Groceries</span></span>
+                      <span class="acc">1h ago</span>
+                    </div>
+                    <div class="row">
+                      <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>
+                      <span class="row-text"><span class="row-title">Standup</span></span>
+                      <span class="acc">Yesterday</span>
+                    </div>
+                    <div class="row">
+                      <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>
+                      <span class="row-text"><span class="row-title">Reading list</span></span>
+                      <span class="acc">Mon</span>
+                    </div>
+                    <div class="row">
+                      <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>
+                      <span class="row-text"><span class="row-title">Trip packing</span></span>
+                      <span class="acc">Sep 20</span>
+                    </div>
+                    <div class="row">
+                      <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>
+                      <span class="row-text"><span class="row-title">Talk outline</span></span>
+                      <span class="acc">Sep 14</span>
+                    </div>
+                    <div class="row">
+                      <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>
+                      <span class="row-text"><span class="row-title">Book notes</span></span>
+                      <span class="acc">Sep 3</span>
+                    </div>
+                  </div>
+                  <div class="preview">
+                    <p class="preview-title">Release checklist</p>
+                    <div class="preview-body">
+                      <p>Ship rich notes with the new toolbar.</p>
+                      <p class="check"><span class="box"></span>Record a demo</p>
+                      <p class="check done"><span class="box"></span>Update the site</p>
+                      <p class="check"><span class="box"></span>Tag the release</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="bar">
+                  <span class="bar-context">
+                    <svg class="mark" width="16" height="10" aria-hidden="true"><use href="#mark" /></svg>
+                    Notes
+                  </span>
+                  <span class="bar-actions">
+                    <span class="bar-more ac-on">Actions <kbd data-key-mod>⌘</kbd><kbd>K</kbd></span>
+                  </span>
+                </div>
+                <div class="ac-panel">
+                  <p class="ac-heading">Release checklist</p>
+                  <div class="ac-list">
+                    <div class="ac-item sel"><span>Open Note</span><kbd>↵</kbd></div>
+                    <div class="ac-item">
+                      <span>Copy Note</span><span class="ac-keys"><kbd data-key-mod>⌘</kbd><kbd>↵</kbd></span>
+                    </div>
+                    <div class="ac-item"><span data-reveal>Show in Finder</span></div>
+                    <div class="ac-item ac-danger">
+                      <span>Move to Trash</span><span class="ac-keys"><kbd data-key-mod>⌘</kbd><kbd>⌫</kbd></span>
+                    </div>
+                  </div>
+                  <p class="ac-filter">Search actions…</p>
+                </div>
+              </div>
+            </div>
+            <div class="bento-text">
+              <h3 class="bento-title">Actions on everything</h3>
+              <p class="bento-sub"><span data-key-mod>⌘</span> K shows what you can do with the selected item</p>
+            </div>
+          </article>
+
+          <!-- Clipboard history leaves out anything marked private. -->
+          <article class="bento-card bento-private reveal">
+            <div class="bento-visual" aria-hidden="true">
+              <span class="pw-streak"></span>
+              <div class="pw-pill">
+                <svg class="i pw-lock" aria-hidden="true"><use href="#i-lock" /></svg>
+                <span class="pw-dots"
+                  ><i style="--n: 0"></i><i style="--n: 1"></i><i style="--n: 2"></i><i style="--n: 3"></i
+                  ><i style="--n: 4"></i><i style="--n: 5"></i><i style="--n: 6"></i><i style="--n: 7"></i
+                  ><i style="--n: 8"></i><i style="--n: 9"></i><i style="--n: 10"></i><i style="--n: 11"></i
+                ></span>
+              </div>
+            </div>
+            <div class="bento-text">
+              <h3 class="bento-title">Passwords stay out</h3>
+              <p class="bento-sub">Clipboard history skips anything marked private</p>
+            </div>
+          </article>
+
+          <!-- The Settings window, General section. -->
+          <article class="bento-card bento-settings reveal" style="--d: 0.06s">
+            <div class="bento-visual" aria-hidden="true">
+              <div class="st-win">
+                <div class="st-nav">
+                  <span class="st-lights"><i></i><i></i><i></i></span>
+                  <span class="st-item on"
+                    ><span class="tile" style="--c: #7a8494"><svg class="i" aria-hidden="true"><use href="#i-settings" /></svg></span
+                    >General</span
+                  >
+                  <span class="st-item"
+                    ><span class="tile" style="--c: #f5843c"><svg class="i" aria-hidden="true"><use href="#i-clipboard" /></svg></span
+                    >Clipboard</span
+                  >
+                  <span class="st-item"
+                    ><span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span
+                    >Notes</span
+                  >
+                  <span class="st-item"
+                    ><span class="tile" style="--c: #8b5cf6"><svg class="i" aria-hidden="true"><use href="#i-puzzle" /></svg></span
+                    >Extensions</span
+                  >
+                  <span class="st-item"
+                    ><span class="tile" style="--c: #ec5b9b"><svg class="i" aria-hidden="true"><use href="#i-sparkles" /></svg></span
+                    >About</span
+                  >
+                </div>
+                <div class="st-main">
+                  <p class="st-h">General</p>
+                  <div class="st-card">
+                    <div class="st-row">
+                      <span>Launcher shortcut</span>
+                      <span class="st-hotkey"
+                        ><kbd data-key-open>⌥ Space</kbd><span class="st-prompt">Press a shortcut…</span></span
+                      >
+                    </div>
+                    <div class="st-row"><span>Close when you click elsewhere</span><span class="st-toggle on"></span></div>
+                    <div class="st-row"><span>Paste into the app you were in</span><span class="st-toggle on"></span></div>
+                    <div class="st-row"><span>Open at login</span><span class="st-toggle"></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bento-text">
+              <h3 class="bento-title">Settings</h3>
+              <p class="bento-sub">Shortcut, theme, clipboard and notes</p>
+            </div>
+          </article>
+
+          <!-- One launcher, half light and half dark. -->
+          <article class="bento-card bento-theme reveal" style="--d: 0.12s">
+            <div class="bento-visual" aria-hidden="true">
+              <div class="th">
+                <div class="th-win th-light">
+                  <div class="th-search"><svg class="i" aria-hidden="true"><use href="#i-search" /></svg>Search apps, commands and notes…</div>
+                  <div class="th-row sel">
+                    <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>Release checklist
+                  </div>
+                  <div class="th-row">
+                    <span class="tile" style="--c: #f5843c"><svg class="i" aria-hidden="true"><use href="#i-clipboard" /></svg></span>Clipboard
+                    History
+                  </div>
+                  <div class="th-row">
+                    <span class="tile" style="--c: #4c6ef5"><svg class="i" aria-hidden="true"><use href="#i-globe" /></svg></span>Search Google
+                  </div>
+                </div>
+                <div class="th-win th-dark">
+                  <div class="th-search"><svg class="i" aria-hidden="true"><use href="#i-search" /></svg>Search apps, commands and notes…</div>
+                  <div class="th-row sel">
+                    <span class="tile" style="--c: #f0b429"><svg class="i" aria-hidden="true"><use href="#i-note" /></svg></span>Release checklist
+                  </div>
+                  <div class="th-row">
+                    <span class="tile" style="--c: #f5843c"><svg class="i" aria-hidden="true"><use href="#i-clipboard" /></svg></span>Clipboard
+                    History
+                  </div>
+                  <div class="th-row">
+                    <span class="tile" style="--c: #4c6ef5"><svg class="i" aria-hidden="true"><use href="#i-globe" /></svg></span>Search Google
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bento-text">
+              <h3 class="bento-title">Light or dark</h3>
+              <p class="bento-sub">Glass either way, or follow your system</p>
+            </div>
+          </article>
+        </div>
+
+        <p class="bento-more reveal">
+          <a href="https://github.com/alexsilver8/open-palette/blob/main/CHANGELOG.md"
+            >Everything new, in the changelog <svg class="i arrow" aria-hidden="true"><use href="#i-arrow" /></svg
+          ></a>
+        </p>
       </section>
 
       <section class="source" id="source">
