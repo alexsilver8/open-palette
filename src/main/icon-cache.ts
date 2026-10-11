@@ -53,3 +53,31 @@ export class IconCache {
 export function fileIconSize(platform: NodeJS.Platform): 'normal' | 'large' {
   return platform === 'linux' ? 'large' : 'normal';
 }
+
+/** The ways of asking the OS for an icon, passed in so the choice between them can be tested. */
+export interface IconSources {
+  /** The icon Finder shows, drawn by Quick Look (macOS and Windows). */
+  thumbnail(path: string): Promise<Uint8Array | undefined>;
+  /** Electron's file icon. On macOS it's the icon of the file's type, not of the file. */
+  fileIcon(path: string): Promise<Uint8Array | undefined>;
+  realpath(path: string): Promise<string>;
+}
+
+/**
+ * A file's own icon as a PNG. On macOS, `app.getFileIcon` gives every app the same generic
+ * application icon, so Quick Look draws it instead, from the real path: some apps, like
+ * Safari, are symlinks, and Quick Look would draw the symlink. The file icon is the fallback.
+ */
+export async function loadFileIcon(path: string, platform: NodeJS.Platform, sources: IconSources): Promise<Uint8Array> {
+  if (platform === 'darwin') {
+    try {
+      const png = await sources.thumbnail(await sources.realpath(path));
+      if (png && png.length > 0) return png;
+    } catch {
+      // Not something Quick Look can draw; the file icon will do.
+    }
+  }
+  const png = await sources.fileIcon(path);
+  if (!png || png.length === 0) throw new Error(`No icon for ${path}`);
+  return png;
+}
