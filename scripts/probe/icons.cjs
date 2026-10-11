@@ -1,35 +1,30 @@
-// Temporary: compares app.getFileIcon with nativeImage.createThumbnailFromPath on real apps.
-const { createHash } = require('node:crypto');
+// Temporary: compares ways of getting an app's icon on macOS. One notice per image (24 px).
+const { execFileSync } = require('node:child_process');
+const { readFileSync } = require('node:fs');
 const { app, nativeImage } = require('electron');
-const apps = [
-  '/System/Applications/Calculator.app',
-  '/System/Applications/App Store.app',
-  '/Applications/Safari.app',
-  '/System/Applications/Utilities/Activity Monitor.app',
-  '/Applications/Xcode.app',
-];
-const hash = (buffer) => createHash('sha1').update(buffer).digest('hex').slice(0, 10);
+const apps = ['/System/Applications/Calculator.app', '/System/Applications/App Store.app', '/Applications/Safari.app'];
+const say = (kind, title, text) => console.log(`::${kind} title=${title}::${text}`);
 app.whenReady().then(async () => {
+  say('warning', 'macOS', `${process.getSystemVersion()} electron ${process.versions.electron}`);
   for (const path of apps) {
-    const name = path.split('/').pop();
+    const name = path.split('/').pop().replace('.app', '');
     try {
-      const fileIcon = await app.getFileIcon(path, { size: 'normal' });
-      const png = fileIcon.toPNG();
-      console.log(`::notice title=getFileIcon ${name}::${hash(png)} ${JSON.stringify(fileIcon.getSize())}`);
-      if (name === 'Calculator.app') console.log(`::notice title=PNG getFileIcon ${name}::${png.toString('base64')}`);
+      const started = Date.now();
+      const thumb = await nativeImage.createThumbnailFromPath(path, { width: 32, height: 32 });
+      say('notice', `QL ${name}`, thumb.resize({ width: 24, height: 24 }).toPNG().toString('base64'));
+      say('warning', `QL size ${name}`, `${JSON.stringify(thumb.getSize())} ${Date.now() - started}ms`);
     } catch (error) {
-      console.log(`::warning title=getFileIcon ${name}::${error.message}`);
+      say('warning', `QL ${name}`, error.message);
     }
     try {
       const started = Date.now();
-      const thumb = await nativeImage.createThumbnailFromPath(path, { width: 48, height: 48 });
-      const png = thumb.resize({ width: 48 }).toPNG();
-      console.log(`::notice title=thumbnail ${name}::${hash(thumb.toPNG())} ${JSON.stringify(thumb.getSize())} ${Date.now() - started}ms`);
-      if (name === 'Calculator.app' || name === 'Safari.app') console.log(`::notice title=PNG thumbnail ${name}::${png.toString('base64')}`);
+      const out = `/tmp/${name.replace(/ /g, '_')}.png`;
+      execFileSync('osascript', ['-l', 'JavaScript', `${__dirname}/nsworkspace-icon.js`, path, out, '24']);
+      say('notice', `NSW ${name}`, readFileSync(out).toString('base64'));
+      say('warning', `NSW time ${name}`, `${Date.now() - started}ms`);
     } catch (error) {
-      console.log(`::warning title=thumbnail ${name}::${error.message}`);
+      say('warning', `NSW ${name}`, String(error.message).slice(0, 300));
     }
   }
-  console.log(`::notice title=macOS::${process.getSystemVersion()} electron ${process.versions.electron}`);
   app.quit();
 });
