@@ -1,0 +1,31 @@
+{
+  "name": "colors",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Convert colours between hex, rgb(), hsl(), oklch() and CSS names, and check their contrast.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "Colors",
+    "icon": "🎨",
+    "commands": [
+      {
+        "name": "convert",
+        "title": "Convert Color",
+        "mode": "view",
+        "icon": "🎨",
+        "keywords": [
+          "color",
+          "colour",
+          "hex",
+          "rgb",
+          "hsl",
+          "oklch",
+          "css",
+          "contrast"
+        ]
+      }
+    ]
+  }
+}

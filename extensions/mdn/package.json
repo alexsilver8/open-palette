@@ -1,0 +1,33 @@
+{
+  "name": "mdn",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Search MDN Web Docs and open the page.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "MDN Web Docs",
+    "icon": "📘",
+    "commands": [
+      {
+        "name": "search",
+        "title": "Search MDN",
+        "mode": "view",
+        "icon": "📘",
+        "keywords": [
+          "mdn",
+          "docs",
+          "javascript",
+          "css",
+          "html",
+          "web",
+          "api",
+          "reference",
+          "mozilla"
+        ],
+        "fallback": true
+      }
+    ]
+  }
+}

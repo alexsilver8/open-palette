@@ -1,0 +1,52 @@
+{
+  "name": "homebrew",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Search, install, upgrade and uninstall Homebrew formulae and casks.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "Homebrew",
+    "icon": "🍺",
+    "commands": [
+      {
+        "name": "search",
+        "title": "Search Homebrew",
+        "mode": "view",
+        "icon": "🍺",
+        "keywords": [
+          "brew",
+          "homebrew",
+          "formula",
+          "cask",
+          "install",
+          "package"
+        ],
+        "platforms": [
+          "darwin",
+          "linux"
+        ]
+      },
+      {
+        "name": "installed",
+        "title": "Manage Homebrew Packages",
+        "mode": "view",
+        "icon": "🍺",
+        "keywords": [
+          "brew",
+          "homebrew",
+          "installed",
+          "outdated",
+          "upgrade",
+          "uninstall",
+          "update"
+        ],
+        "platforms": [
+          "darwin",
+          "linux"
+        ]
+      }
+    ]
+  }
+}

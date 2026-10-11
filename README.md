@@ -82,6 +82,15 @@ These come with Open Palette and are written with the same [extension API](docs/
 | **Search Gitmoji** | The [gitmoji](https://gitmoji.dev) list by name or meaning. <kbd>↵</kbd> pastes the emoji, <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>C</kbd> copies its `:code:`. Recently used come first. |
 | **Search Emoji** | Every emoji by name, keyword or `:shortcode:`, recently used first. <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>T</kbd> picks the skin tone for all of them. |
 | **Write Commit Message** | A [Conventional Commits](https://www.conventionalcommits.org) message, checked as you type, with what it does to the version. Pick a type, or just describe the change: it suggests the type, also from the launcher's **Use “…” with**. |
+| **Search Git Repositories** | The repositories in your code folders (`~/Developer`, `~/Projects`, `~/code`…), most recently changed first. <kbd>↵</kbd> opens one in your editor (VS Code, Cursor, Zed, Sublime Text, JetBrains IDEs…), <kbd>⌘</kbd> <kbd>T</kbd> in a terminal. Type a folder like `~/work` to search it too. |
+| **My Pull Requests**, **My Issues**, **Search GitHub Repositories** | Pull requests waiting for your review and your own, your issues, and your repositories. Uses your [GitHub CLI](https://cli.github.com) sign-in, or a token you paste in once, which is kept in Open Palette's data folder (`extension-data/github`). |
+| **Search Processes** | Every running program with its CPU and memory, busiest first. <kbd>↵</kbd> quits it, <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>⌫</kbd> forces it. Programs the system needs can't be quit. |
+| **Search Docker Containers**, **Search Docker Images** | Start, stop and restart containers, open the ports they publish, copy their logs, and remove what you no longer need. Works with Docker Desktop, OrbStack, Colima and Rancher Desktop. |
+| **Encode or Decode Text** | Base64, URL and HTML encoding both ways, a JWT's header and claims, and SHA-256, SHA-1, SHA-512 and MD5 hashes. Also from **Use “…” with**. |
+| **Convert Timestamp** | A Unix timestamp (seconds to nanoseconds), an ISO 8601 or RFC 2822 date, or nothing for now, in every common format. |
+| **Convert Color** | Hex, `rgb()`, `hsl()`, `oklch()` or a CSS name, in all of those forms, with its contrast against white and black text. |
+| **Search MDN** | [MDN Web Docs](https://developer.mozilla.org) as you type. Also from **Use “…” with**. |
+| **Search Homebrew**, **Manage Homebrew Packages** | Every formula and cask, and what you've installed, out-of-date first. Installing, upgrading and uninstalling run in a Terminal window, so you can see brew work. macOS and Linux. |
 
 <kbd>↵</kbd> in Gitmoji, Emoji and Commit Message pastes into the app you were in. The first time on macOS, allow Open Palette under **System Settings → Privacy & Security → Accessibility** (and **Automation** for System Events). On Linux, pasting needs `xdotool` (X11) or `wtype` (Wayland); without them the text is copied instead. Turn off **Paste into the app you were in** in Settings to always copy.
 

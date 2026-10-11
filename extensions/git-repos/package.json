@@ -1,0 +1,33 @@
+{
+  "name": "git-repos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Find the git repositories on your computer and open them in your editor or terminal.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "Git Repositories",
+    "icon": "📂",
+    "commands": [
+      {
+        "name": "repos",
+        "title": "Search Git Repositories",
+        "mode": "view",
+        "icon": "📂",
+        "keywords": [
+          "git",
+          "repo",
+          "repository",
+          "project",
+          "code",
+          "editor",
+          "vscode",
+          "cursor",
+          "terminal",
+          "clone"
+        ]
+      }
+    ]
+  }
+}
