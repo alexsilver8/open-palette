@@ -347,6 +347,7 @@ kbd {
 .hero,
 .chapter,
 .included,
+.details,
 .source,
 .finale {
   overflow-x: clip;
@@ -2028,6 +2029,994 @@ h2 {
 
   .chip-from {
     font-size: 12px;
+  }
+}
+
+/* ── Details: a bento of the smaller things ───────────────
+ * Two wide cards beside a tall one, then three across. Each card draws a corner of the app
+ * with the launcher's own glass, and its words sit bottom-left on a wash of the card colour.
+ */
+
+.details {
+  position: relative;
+  padding: 200px 24px 0;
+}
+
+.details-glow {
+  position: absolute;
+  inset: 320px 0 0;
+  pointer-events: none;
+}
+
+.details-orb {
+  position: absolute;
+  width: 520px;
+  max-width: 70%;
+  height: 520px;
+  border-radius: 50%;
+  background: var(--c);
+  filter: blur(160px);
+  opacity: 0.14;
+}
+
+.details-head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  max-width: 800px;
+  margin: 0 auto 64px;
+  text-align: center;
+}
+
+.bento {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bento-card {
+  --card: #0c0d14;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: 340px;
+  border-radius: 24px;
+  background:
+    radial-gradient(110% 80% at 80% 0%, rgb(255 255 255 / 0.055), transparent 62%),
+    linear-gradient(180deg, #12131c, var(--card));
+}
+
+/* A wash of the card's own colour under the words, so the picture never competes with them. */
+.bento-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(75% 62% at 0% 100%, var(--card) 28%, rgb(12 13 20 / 0.7) 58%, transparent 100%);
+  pointer-events: none;
+}
+
+/* The edge is drawn over everything, so the glass inside never covers it. */
+.bento-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.09),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+  pointer-events: none;
+  transition: box-shadow 0.3s ease;
+}
+
+.bento-card:hover::after {
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.16),
+    inset 0 1px 0 rgb(255 255 255 / 0.1);
+}
+
+.bento-keys {
+  --glow: var(--blue);
+  --gx: 78%;
+  --gy: 30%;
+  grid-column: 1 / 4;
+  grid-row: 1;
+}
+
+.bento-with {
+  --glow: var(--pink);
+  --gx: 50%;
+  --gy: 18%;
+  grid-column: 1 / 4;
+  grid-row: 2;
+}
+
+.bento-actions {
+  --glow: var(--blue);
+  --gx: 70%;
+  --gy: 40%;
+  grid-column: 4 / 7;
+  grid-row: 1 / 3;
+  height: auto;
+}
+
+/* Its window ends above the words, so there's nothing to wash out. */
+.bento-actions::before {
+  content: none;
+}
+
+.bento-private {
+  --glow: var(--amber);
+  --gx: 80%;
+  --gy: 30%;
+  grid-column: 1 / 3;
+  grid-row: 3;
+  height: 260px;
+}
+
+.bento-settings {
+  --glow: var(--blue);
+  --gx: 80%;
+  --gy: 20%;
+  grid-column: 3 / 5;
+  grid-row: 3;
+  height: 260px;
+}
+
+.bento-theme {
+  --glow: var(--pink);
+  --gx: 75%;
+  --gy: 30%;
+  grid-column: 5 / 7;
+  grid-row: 3;
+  height: 260px;
+}
+
+.bento-visual {
+  position: absolute;
+  inset: 0;
+}
+
+/* A light behind the glass, in one of the icon's colours. */
+.bento-visual::before {
+  content: "";
+  position: absolute;
+  left: var(--gx);
+  top: var(--gy);
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: var(--glow);
+  filter: blur(110px);
+  opacity: 0.3;
+  transform: translate(-50%, -50%);
+}
+
+.qk-stack,
+.uw-win,
+.ac-panel,
+.pw-pill,
+.st-win,
+.th {
+  transition:
+    transform 0.8s var(--ease-out),
+    clip-path 0.8s var(--ease-out),
+    opacity 0.4s ease;
+}
+
+.bento-text {
+  position: absolute;
+  left: 32px;
+  right: 32px;
+  bottom: 28px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bento-title {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+
+.bento-sub {
+  max-width: 460px;
+  color: var(--ink-2);
+  font-size: 15.5px;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+/* Quick keys: result rows stacked in depth, each with its keystroke. */
+.qk-stack {
+  position: absolute;
+  top: 4px;
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(380px, calc(100% - 60px));
+  transform: perspective(1000px) rotateX(24deg) rotateY(-24deg) rotateZ(6deg);
+  transform-origin: 100% 0;
+}
+
+.bento-keys:hover .qk-stack {
+  transform: perspective(1000px) rotateX(18deg) rotateY(-18deg) rotateZ(4deg) translateY(4px);
+}
+
+.qk-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 52px;
+  padding: 0 12px;
+  border-radius: 15px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.035));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.1),
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    0 7px 0 -1px rgb(255 255 255 / 0.04),
+    0 22px 34px rgb(0 0 0 / 0.4);
+  color: var(--l-ink);
+  font-size: 15.5px;
+  white-space: nowrap;
+}
+
+.qk-row:nth-child(2) {
+  opacity: 0.8;
+}
+
+.qk-row:nth-child(3) {
+  opacity: 0.62;
+}
+
+.qk-row:nth-child(4) {
+  opacity: 0.46;
+}
+
+.qk-row:nth-child(5) {
+  opacity: 0.32;
+}
+
+.qk-row:nth-child(6) {
+  opacity: 0.2;
+}
+
+.qk-row.sel {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.09));
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.2),
+    inset 0 1px 0 rgb(255 255 255 / 0.32),
+    0 7px 0 -1px rgb(255 255 255 / 0.06),
+    0 22px 44px rgb(76 110 245 / 0.32);
+}
+
+.qk-row .tile {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.qk-row .tile .i {
+  width: 16px;
+  height: 16px;
+}
+
+.qk-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qk-keys {
+  display: flex;
+  gap: 4px;
+  color: var(--l-muted);
+}
+
+.qk-row .qk-keys kbd {
+  display: grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 7px;
+  background: var(--keycap, rgb(255 255 255 / 0.1));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    inset 0 -1px 0 rgb(0 0 0 / 0.3);
+  color: inherit;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.qk-row.sel .qk-keys {
+  --keycap: rgb(255 255 255 / 0.18);
+  color: var(--l-ink);
+}
+
+/* Use "…" with: the launcher, tipped back. */
+.uw-win {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  width: min(500px, calc(100% - 48px));
+  padding: 8px;
+  border-radius: 20px;
+  transform: translateX(-50%) perspective(1100px) rotateX(32deg);
+  transform-origin: 50% 0;
+}
+
+.bento-with:hover .uw-win {
+  transform: translateX(-50%) perspective(1100px) rotateX(22deg);
+}
+
+.uw-win .row {
+  height: 38px;
+}
+
+/* Actions: Search Notes with the action panel open, as in the app. */
+.ac-win {
+  position: absolute;
+  top: 40px;
+  left: 32px;
+  right: 32px;
+  bottom: 140px;
+}
+
+.ac-win .content {
+  overflow: hidden;
+}
+
+.ac-win .content .results {
+  flex: 0 0 290px;
+}
+
+.ac-win .row {
+  height: 40px;
+}
+
+.ac-on {
+  border-color: var(--l-selected-border);
+  background: var(--l-selected);
+  box-shadow: var(--l-selected-shadow);
+  color: var(--l-ink);
+}
+
+.ac-panel {
+  position: absolute;
+  right: 16px;
+  bottom: 62px;
+  display: flex;
+  flex-direction: column;
+  width: min(300px, calc(100% - 32px));
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 16px;
+  background: rgb(38 39 48 / 0.94);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  backdrop-filter: blur(28px) saturate(1.8);
+  box-shadow:
+    0 30px 60px rgb(0 0 0 / 0.55),
+    0 2px 8px rgb(0 0 0 / 0.3),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+.bento-actions:hover .ac-panel {
+  transform: translateY(-6px);
+}
+
+.ac-heading {
+  padding: 12px 16px 6px;
+  color: var(--l-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ac-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 6px 6px;
+}
+
+.ac-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+.ac-item.sel {
+  border-color: var(--l-selected-border);
+}
+
+.ac-danger {
+  color: #f2555a;
+}
+
+.ac-keys {
+  display: flex;
+  gap: 4px;
+}
+
+.ac-panel .ac-item kbd {
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--l-keycap);
+  color: var(--l-muted);
+  font-size: 11.5px;
+  line-height: 20px;
+}
+
+.ac-filter {
+  height: 40px;
+  padding: 0 16px;
+  border-top: 1px solid var(--l-line);
+  color: rgb(255 255 255 / 0.4);
+  line-height: 40px;
+}
+
+/* Passwords stay out: a field of glass whose dots never land in the history. */
+.pw-streak {
+  position: absolute;
+  top: -80px;
+  left: 54%;
+  width: 120px;
+  height: 400px;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.09), transparent);
+  transform: rotate(24deg);
+}
+
+.pw-pill {
+  position: absolute;
+  top: 36px;
+  left: 30%;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 380px;
+  height: 92px;
+  padding: 0 30px;
+  border-radius: 46px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.09), rgb(255 255 255 / 0.02));
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 24px 60px rgb(0 0 0 / 0.5),
+    inset 0 0 24px rgb(255 255 255 / 0.04);
+}
+
+/* The rim, bright where the light catches it. */
+.pw-pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: linear-gradient(
+    100deg,
+    rgb(255 255 255 / 0.9),
+    rgb(255 255 255 / 0.16) 34%,
+    rgb(255 255 255 / 0.08) 62%,
+    rgb(255 255 255 / 0.5)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.bento-private:hover .pw-pill {
+  transform: translateX(-18px);
+}
+
+.pw-lock {
+  width: 26px;
+  height: 26px;
+  color: rgb(255 255 255 / 0.72);
+  stroke-width: 1.8;
+}
+
+.pw-dots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pw-dots i {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 12px rgb(255 255 255 / 0.45);
+  animation: pw-shimmer 2.8s ease-in-out calc(var(--n) * 0.1s) infinite;
+}
+
+@keyframes pw-shimmer {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.78);
+  }
+
+  40% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Settings: the window's General section, in miniature. */
+.st-win {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  display: flex;
+  gap: 6px;
+  width: min(340px, calc(100% - 44px));
+  height: 230px;
+  padding: 6px;
+  border-radius: 18px;
+  background: rgb(26 26 34 / 0.6);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  backdrop-filter: blur(30px) saturate(1.6);
+  box-shadow:
+    0 30px 70px rgb(0 0 0 / 0.5),
+    inset 0 0 0 1px var(--l-edge);
+  color: var(--l-ink);
+  font-size: 11px;
+  white-space: nowrap;
+  -webkit-mask-image: linear-gradient(180deg, #000 42%, transparent 78%);
+  mask-image: linear-gradient(180deg, #000 42%, transparent 78%);
+  transform: perspective(1000px) rotateY(-20deg) rotateX(8deg);
+  transform-origin: 0 50%;
+}
+
+.bento-settings:hover .st-win {
+  transform: perspective(1000px) rotateY(-12deg) rotateX(5deg);
+}
+
+.st-nav {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 2px;
+  width: 108px;
+  padding: 6px;
+  border: 1px solid var(--l-raised-border);
+  border-radius: 13px;
+  background: var(--l-raised);
+  box-shadow: inset 0 1px 0 var(--l-sheen);
+}
+
+.st-lights {
+  display: flex;
+  gap: 5px;
+  padding: 4px 4px 10px;
+}
+
+.st-lights i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+
+.st-lights i:nth-child(2) {
+  background: #febc2e;
+}
+
+.st-lights i:nth-child(3) {
+  background: #28c840;
+}
+
+.st-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.st-item.on {
+  border-color: var(--l-selected-border);
+  background: var(--l-selected);
+  box-shadow: var(--l-selected-shadow);
+}
+
+.st-item .tile {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+}
+
+.st-item .tile .i {
+  width: 10px;
+  height: 10px;
+}
+
+.st-main {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 8px;
+}
+
+.st-h {
+  margin: 0 2px 10px;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.st-card {
+  border: 1px solid var(--l-raised-border);
+  border-radius: 11px;
+  background: var(--l-raised);
+  box-shadow: inset 0 1px 0 var(--l-sheen);
+}
+
+.st-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  height: 36px;
+  padding: 0 10px;
+}
+
+.st-row + .st-row {
+  border-top: 1px solid var(--l-line);
+}
+
+/* Narrow cards cut the label short, never the control. */
+.st-row > :first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.st-hotkey {
+  position: relative;
+  flex: none;
+}
+
+.st-row .st-hotkey kbd {
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--l-keycap);
+  color: var(--l-ink);
+  font-size: 11px;
+  line-height: 20px;
+  transition: opacity 0.3s ease;
+}
+
+/* Hovering starts recording a new shortcut, as clicking the field does. */
+.st-prompt {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: #262734;
+  box-shadow: 0 0 0 1.5px var(--accent);
+  color: var(--l-muted);
+  line-height: 20px;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.3s ease;
+}
+
+.bento-settings:hover .st-hotkey kbd {
+  opacity: 0;
+}
+
+.bento-settings:hover .st-prompt {
+  opacity: 1;
+}
+
+.st-toggle {
+  position: relative;
+  flex: none;
+  width: 26px;
+  height: 15px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.16);
+}
+
+.st-toggle::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+}
+
+.st-toggle.on {
+  background: var(--accent);
+}
+
+.st-toggle.on::after {
+  left: 13px;
+}
+
+/* Light or dark: one launcher, cut on the diagonal. Hovering swipes the light across. */
+.th {
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  width: min(340px, calc(100% - 48px));
+  height: 196px;
+  -webkit-mask-image: linear-gradient(180deg, #000 46%, transparent 82%);
+  mask-image: linear-gradient(180deg, #000 46%, transparent 82%);
+  transform: translateX(-50%) perspective(1000px) rotateX(20deg);
+  transform-origin: 50% 0;
+}
+
+.th::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  box-shadow: 0 30px 60px rgb(0 0 0 / 0.5);
+}
+
+.th-win {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 18px;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: clip-path 0.8s var(--ease-out);
+}
+
+.th-light {
+  background: linear-gradient(180deg, #f7f8fc, #e8eaf2);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.9);
+  color: rgb(0 0 0 / 0.86);
+  clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%);
+}
+
+.th-dark {
+  background: linear-gradient(180deg, #2b2c3a, #20212b);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.16);
+  color: var(--l-ink);
+  clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%);
+}
+
+.bento-theme:hover .th-light {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.bento-theme:hover .th-dark {
+  clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+}
+
+.th-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 40px;
+  margin-bottom: 2px;
+  padding: 0 12px;
+  border-radius: 12px;
+}
+
+.th-win .th-search .i {
+  width: 15px;
+  height: 15px;
+}
+
+.th-light .th-search {
+  background: rgb(255 255 255 / 0.75);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.06),
+    inset 0 1px 0 #fff;
+  color: rgb(0 0 0 / 0.4);
+}
+
+.th-dark .th-search {
+  background: var(--l-raised);
+  box-shadow:
+    inset 0 0 0 1px var(--l-raised-border),
+    inset 0 1px 0 var(--l-sheen);
+  color: rgb(255 255 255 / 0.4);
+}
+
+.th-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+.th-row .tile {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+
+.th-row .tile .i {
+  width: 13px;
+  height: 13px;
+}
+
+.th-light .th-row.sel {
+  border-color: rgb(0 0 0 / 0.05);
+  background: rgb(255 255 255 / 0.9);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 4px 14px rgb(30 40 70 / 0.1);
+}
+
+.bento-more {
+  position: relative;
+  margin-top: 44px;
+  text-align: center;
+}
+
+.bento-more a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--ink-2);
+  font-size: 17px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgb(238 240 247 / 0.3);
+  text-underline-offset: 5px;
+}
+
+.bento-more a:hover {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+
+.bento-more a:hover .arrow {
+  transform: translateX(3px);
+}
+
+/* Tablets: the wide cards and the tall one take a row each, then two and one. */
+@media (max-width: 960px) {
+  .bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bento-keys,
+  .bento-with,
+  .bento-actions,
+  .bento-theme {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .bento-private,
+  .bento-settings {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .bento-actions {
+    height: 640px;
+  }
+
+  .ac-win {
+    right: auto;
+    width: min(640px, calc(100% - 64px));
+  }
+}
+
+/* Phones: one column, with a little less room around the words. */
+@media (max-width: 640px) {
+  .details {
+    padding-top: 140px;
+  }
+
+  .details-head {
+    margin-bottom: 44px;
+  }
+
+  .bento {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .bento-private,
+  .bento-settings {
+    grid-column: 1 / -1;
+  }
+
+  .bento-keys,
+  .bento-with {
+    height: 300px;
+  }
+
+  .bento-actions {
+    height: 600px;
+  }
+
+  .bento-private,
+  .bento-settings,
+  .bento-theme {
+    height: 260px;
+  }
+
+  .bento-card {
+    border-radius: 20px;
+  }
+
+  .bento-text {
+    left: 22px;
+    right: 22px;
+    bottom: 22px;
+  }
+
+  .bento-title {
+    font-size: 18px;
+  }
+
+  .bento-sub {
+    font-size: 14.5px;
+  }
+
+  .ac-win {
+    top: 22px;
+    left: 16px;
+    bottom: 150px;
+    width: calc(100% - 32px);
+  }
+
+  .ac-win .content .results {
+    flex: 1;
+  }
+
+  .ac-win .bar-more {
+    display: inline-flex;
+  }
+
+  .qk-stack {
+    right: 20px;
+  }
+
+  .qk-row:nth-child(n + 5),
+  .uw-win .results > :nth-child(4) {
+    display: none;
+  }
+
+  .pw-pill {
+    left: 22%;
+  }
+
+  .st-nav {
+    width: 96px;
   }
 }
 

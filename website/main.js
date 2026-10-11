@@ -37,6 +37,10 @@ if (os === 'windows' || os === 'linux') {
   for (const el of document.querySelectorAll('[data-key-open]')) el.textContent = 'Alt Space';
   for (const el of document.querySelectorAll('[data-key-mod]')) el.textContent = 'Ctrl';
   for (const el of document.querySelectorAll('[data-key-tab]')) el.textContent = 'Tab';
+  // The note action that shows the file, named for the system's file manager.
+  for (const el of document.querySelectorAll('[data-reveal]')) {
+    el.textContent = os === 'windows' ? 'Show in Explorer' : 'Show in Folder';
+  }
 }
 
 // ── Download links ───────────────────────────────────────
