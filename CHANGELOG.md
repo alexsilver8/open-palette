@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.6.0](https://github.com/alexsilver8/open-palette/compare/v1.5.1...v1.6.0) (2026-10-11)
+
+
+### Features
+
+* add nine developer extensions ([#23](https://github.com/alexsilver8/open-palette/issues/23)) ([9ec79e5](https://github.com/alexsilver8/open-palette/commit/9ec79e5d42d0b4b31abcddc3e7ee5bf8dc80587d))
+
+
+### Bug Fixes
+
+* **notes:** never give two new notes the same file ([#27](https://github.com/alexsilver8/open-palette/issues/27)) ([6e91871](https://github.com/alexsilver8/open-palette/commit/6e91871d48936367e38c0c9b276b5d1132c27d22))
+
 ## [1.5.1](https://github.com/alexsilver8/open-palette/compare/v1.5.0...v1.5.1) (2026-10-11)
 
 
