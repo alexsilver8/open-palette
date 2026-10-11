@@ -7,7 +7,7 @@
 
 An open-source, keyboard-first launcher for macOS, Windows and Linux, in the spirit of Raycast. Press <kbd>⌥</kbd> <kbd>Space</kbd>, type a few letters, press <kbd>↵</kbd>.
 
-Website: [alexsilver8.github.io/open-palette](https://alexsilver8.github.io/open-palette/)
+Website: [openpalette.alexsilver.dev](https://openpalette.alexsilver.dev/)
 
 ![Open Palette finding a note, with its preview beside the results](docs/images/launcher.png)
 
