@@ -1,4 +1,4 @@
-import { countWords, type Note, notePreview, noteTitle } from '../../shared/notes';
+import { countWords, type Note, notePreview, noteTitle, readableMarkdown } from '../../shared/notes';
 import { timeAgo } from '../../shared/time';
 import type { ItemDetail, ListItem, RootItem, View } from '../../shared/types';
 import type { NotesStore } from '../notes/store';
@@ -15,7 +15,7 @@ const PREVIEW_LENGTH = 4000;
 function noteDetail(note: Note): ItemDetail {
   const words = countWords(note.text);
   return {
-    body: note.text.length > PREVIEW_LENGTH ? `${note.text.slice(0, PREVIEW_LENGTH)}…` : note.text,
+    body: readableMarkdown(note.text.length > PREVIEW_LENGTH ? `${note.text.slice(0, PREVIEW_LENGTH)}…` : note.text),
     metadata: [
       { label: 'Edited', value: timeAgo(note.updatedAt) },
       { label: 'Words', value: words.toLocaleString('en-US') },

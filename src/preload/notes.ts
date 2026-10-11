@@ -14,6 +14,7 @@ const api: NotesApi = {
   getState: () => ipcRenderer.invoke(NotesChannel.getState),
   setState: (patch) => ipcRenderer.send(NotesChannel.setState, patch),
   setCurrent: (id) => ipcRenderer.send(NotesChannel.setCurrent, id),
+  openLink: (url) => ipcRenderer.send(NotesChannel.openLink, url),
   onOpen: (listener) => {
     const handler = (_event: Electron.IpcRendererEvent, id: string) => listener(id);
     ipcRenderer.on(NotesChannel.open, handler);

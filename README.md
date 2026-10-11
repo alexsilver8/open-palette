@@ -15,7 +15,7 @@ Website: [alexsilver8.github.io/open-palette](https://alexsilver8.github.io/open
 
 - **Finds everything from one box** — apps, commands, notes and copied text all show up as you type. <kbd>⇥</kbd> narrows the list to Apps, Commands, Notes or Clipboard, and a preview beside the results shows the note or copied text you've selected.
 - **Opens apps** — finds installed applications on every platform.
-- **Keeps notes, as many as you want** — a floating Notes window with search, autosave and a pin to keep it on top. Every note is a plain Markdown file, so you can sync, back up or edit them with anything. There's no limit on how many you keep.
+- **Keeps notes, as many as you want** — a floating Notes window with headings, checklists, links and code, plus search, autosave and a pin to keep it on top. Every note is a plain Markdown file, so you can sync, back up or edit them with anything. There's no limit on how many you keep.
 - **Calculates as you type** — `1200 * 1.077 + 2^5` shows `1,324.4`; <kbd>↵</kbd> copies it.
 - **Remembers your clipboard** — searchable history of copied text, skipping anything password managers mark as private.
 - **Searches the web** — anything that doesn't match falls back to Google, DuckDuckGo or any extension that offers itself.
@@ -44,7 +44,7 @@ Builds aren't code-signed yet, so your system will warn you the first time you o
 | <kbd>Esc</kbd> | Go back, clear the search, return to All, then close |
 | <kbd>⌘</kbd> <kbd>,</kbd> | Open settings |
 
-In the Notes window: <kbd>⌘</kbd> <kbd>N</kbd> new note, <kbd>⌘</kbd> <kbd>P</kbd> find a note, <kbd>⌘</kbd> <kbd>\</kbd> show or hide the list, <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>⌫</kbd> move the note to the Trash.
+In the Notes window: <kbd>⌘</kbd> <kbd>N</kbd> new note, <kbd>⌘</kbd> <kbd>P</kbd> find a note, <kbd>⌘</kbd> <kbd>\</kbd> show or hide the list, <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>⌫</kbd> move the note to the Trash. Formatting shortcuts are listed in the [Notes](#notes) section.
 
 On Windows and Linux, use <kbd>Ctrl</kbd> wherever you see <kbd>⌘</kbd>.
 
@@ -56,7 +56,20 @@ On Linux under Wayland, global shortcuts may not reach the app. Bind a shortcut 
 
 Run **Create Note** to start writing, or **Open Notes** to bring the window back. Notes show up in the launcher's search as you type, matching anything in them, not just the title; press <kbd>⇥</kbd> to see only notes, newest first, with a preview of the one you've selected. **Search Notes** lists them all on their own. **Create Note** also appears under **Use “…” with** for anything you type, so you can type a thought into the launcher and save it straight away.
 
-Notes are saved as you type, one `.md` file per note. Set `notesDirectory` to a synced folder (Dropbox, iCloud Drive, a git repo) to have them everywhere; Markdown files already in that folder show up as notes too. Notes you delete go to the system Trash.
+### Formatting
+
+The toolbar at the bottom of the window formats the selection or the line you're on, and Markdown you type turns into formatting as you go: `# ` starts a heading, `- ` a list, `[ ] ` a checklist, `> ` a quote and ` ``` ` a code block.
+
+| Keys | |
+| --- | --- |
+| <kbd>⌘</kbd> <kbd>⌥</kbd> <kbd>1</kbd>–<kbd>3</kbd>, <kbd>⌘</kbd> <kbd>⌥</kbd> <kbd>0</kbd> | Heading 1–3, back to text |
+| <kbd>⌘</kbd> <kbd>B</kbd>, <kbd>⌘</kbd> <kbd>I</kbd>, <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>S</kbd> | Bold, italic, strikethrough |
+| <kbd>⌘</kbd> <kbd>K</kbd> | Add or edit a link; <kbd>⌘</kbd>-click a link to open it |
+| <kbd>⌘</kbd> <kbd>E</kbd>, <kbd>⌘</kbd> <kbd>⌥</kbd> <kbd>C</kbd> | Inline code, code block |
+| <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>B</kbd> | Quote |
+| <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>8</kbd>, <kbd>7</kbd>, <kbd>9</kbd> | Bulleted list, numbered list, checklist |
+
+Notes are saved as you type, one `.md` file per note, and what you see is what's in the file: the formatting is Markdown, so it reads the same in any editor. A note is only rewritten when you change it, and then in a tidy form (for example `*` bullets become `-`). Notes with Markdown the editor can't show yet, like tables, images or front matter, open as plain Markdown instead, so nothing in them is lost. Set `notesDirectory` to a synced folder (Dropbox, iCloud Drive, a git repo) to have them everywhere; Markdown files already in that folder show up as notes too. Notes you delete go to the system Trash.
 
 ## Settings
 

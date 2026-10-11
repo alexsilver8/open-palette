@@ -1,5 +1,5 @@
 import { ipcMain, shell } from 'electron';
-import { NotesChannel, type NotesWindowState } from '../../shared/notes';
+import { isOpenableLink, NotesChannel, type NotesWindowState } from '../../shared/notes';
 import type { NotesStore } from './store';
 import type { NotesWindow } from './window';
 
@@ -40,6 +40,10 @@ export function registerNotesIpc(store: NotesStore, notesWindow: NotesWindow): v
   ipcMain.handle(NotesChannel.trash, (event, noteId: unknown) => {
     check(event);
     return store.trash(id(noteId));
+  });
+  ipcMain.on(NotesChannel.openLink, (event, url: unknown) => {
+    check(event);
+    if (typeof url === 'string' && isOpenableLink(url)) void shell.openExternal(url.trim());
   });
   ipcMain.on(NotesChannel.reveal, (event, noteId: unknown) => {
     check(event);
