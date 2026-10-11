@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.7.0](https://github.com/alexsilver8/open-palette/compare/v1.6.0...v1.7.0) (2026-10-11)
+
+
+### Features
+
+* add an Extensions tab to the launcher ([#28](https://github.com/alexsilver8/open-palette/issues/28)) ([c230389](https://github.com/alexsilver8/open-palette/commit/c23038939fd0a8e25741a214638aedfccda72bd1))
+
+
+### Bug Fixes
+
+* show each app's own icon on macOS ([#29](https://github.com/alexsilver8/open-palette/issues/29)) ([e5981ef](https://github.com/alexsilver8/open-palette/commit/e5981ef8992f9b5d4ac0e0b1109b257925ab758c))
+
 ## [1.6.0](https://github.com/alexsilver8/open-palette/compare/v1.5.1...v1.6.0) (2026-10-11)
 
 
