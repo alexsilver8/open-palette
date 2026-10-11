@@ -21,14 +21,17 @@ export type BuiltinIconName =
   | 'extension'
   | 'file'
   | 'folder'
+  | 'git-commit'
   | 'globe'
   | 'link'
   | 'lock'
   | 'moon'
   | 'note'
+  | 'plug'
   | 'power'
   | 'refresh'
   | 'search'
+  | 'server'
   | 'settings'
   | 'sparkles'
   | 'terminal'
@@ -48,6 +51,12 @@ export interface Shortcut {
   key: string;
   modifiers?: Array<'mod' | 'shift' | 'alt' | 'ctrl'>;
 }
+
+/**
+ * Where an extension comes from: compiled into the app (`builtin`), shipped with it but written
+ * against the extension API like any other (`bundled`), or added by you (`user`).
+ */
+export type ExtensionSource = 'builtin' | 'bundled' | 'user';
 
 /** Identifies a command: `extension` is the extension's name, `command` the command's name. */
 export interface CommandRef {
@@ -72,6 +81,8 @@ export type Action =
   | (ActionBase & { type: 'open-path'; path: string })
   | (ActionBase & { type: 'reveal-path'; path: string })
   | (ActionBase & { type: 'copy'; text: string })
+  /** Pastes the text into the app that was in front before the launcher opened. */
+  | (ActionBase & { type: 'paste'; text: string })
   /** Calls back into the command that produced the item (`onAction(id, payload)`). */
   | (ActionBase & { type: 'callback'; title: string; id: string; payload?: Json; style?: 'destructive' });
 
@@ -140,6 +151,12 @@ export interface ActionResult {
   pop?: boolean;
   /** Empty the search field, e.g. after its text was used to create something. */
   clearSearch?: boolean;
+  /** Put this text in the search field, e.g. to start a message the user finishes typing. */
+  search?: string;
+  /** Copy this text to the clipboard and close the launcher. */
+  copy?: string;
+  /** Paste this text into the app that was in front before the launcher, and close the launcher. */
+  paste?: string;
 }
 
 export interface CommandManifest {

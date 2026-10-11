@@ -1,0 +1,28 @@
+{
+  "name": "emoji",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Search every emoji and paste it, in the skin tone you like.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "Emoji",
+    "icon": "😀",
+    "commands": [
+      {
+        "name": "search",
+        "title": "Search Emoji",
+        "mode": "view",
+        "icon": "😀",
+        "keywords": [
+          "emoji",
+          "emoticon",
+          "smiley",
+          "symbols",
+          "picker"
+        ]
+      }
+    ]
+  }
+}

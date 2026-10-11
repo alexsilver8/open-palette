@@ -1,0 +1,30 @@
+{
+  "name": "conventional-commits",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Write commit messages that follow Conventional Commits, checked as you type.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "Conventional Commits",
+    "icon": "📝",
+    "commands": [
+      {
+        "name": "write",
+        "title": "Write Commit Message",
+        "mode": "view",
+        "icon": "📝",
+        "keywords": [
+          "conventional",
+          "commit",
+          "git",
+          "message",
+          "semver",
+          "changelog"
+        ],
+        "fallback": true
+      }
+    ]
+  }
+}

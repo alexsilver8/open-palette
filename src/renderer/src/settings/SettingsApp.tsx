@@ -264,6 +264,20 @@ function General({ state, update }: SectionProps) {
           />
         </Row>
         <Row
+          label="Paste into the app you were in"
+          description={
+            info.platform === 'linux'
+              ? 'Emoji, gitmoji and commit messages go straight into the app on ↵ (needs xdotool or wtype). Off, they’re copied.'
+              : 'Emoji, gitmoji and commit messages go straight into the app on ↵. Off, they’re copied for you to paste.'
+          }
+        >
+          <Toggle
+            label="Paste into the app you were in"
+            checked={settings.pasteIntoApps}
+            onChange={(pasteIntoApps) => update({ pasteIntoApps })}
+          />
+        </Row>
+        <Row
           label="Open at login"
           description={
             info.canLaunchAtLogin
@@ -371,7 +385,7 @@ function Notes({ state, update }: SectionProps) {
 function Extensions({ state, update, setState }: SectionProps) {
   const folders = state.settings.extensionDirectories;
   const user = state.extensions.filter((e) => e.source === 'user');
-  const builtin = state.extensions.filter((e) => e.source === 'builtin');
+  const builtin = state.extensions.filter((e) => e.source !== 'user');
   const [reloading, setReloading] = useState(false);
 
   const addFolder = async () => {
@@ -451,10 +465,14 @@ function Extensions({ state, update, setState }: SectionProps) {
       <Group title="Built in">
         <ul className="extension-list">
           {builtin.map((extension) => (
-            <li key={extension.name} className="extension">
+            <li
+              key={`${extension.name}:${extension.dir ?? ''}`}
+              className="extension"
+              data-failed={extension.error ? '' : undefined}
+            >
               <span className="extension__title">{extension.title}</span>
               <span className="extension__meta">
-                {extension.commands} command{extension.commands === 1 ? '' : 's'}
+                {extension.error ?? `${extension.commands} command${extension.commands === 1 ? '' : 's'}`}
               </span>
             </li>
           ))}

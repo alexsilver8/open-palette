@@ -10,6 +10,13 @@ files:
   - resources/**
   - package.json
   - '!**/*.map'
+# The extensions that come with the app load from its resources, like any other extension.
+extraResources:
+  - from: extensions
+    to: extensions
+    filter:
+      - '**/*'
+      - '!**/*.test.*'
 
 mac:
   category: public.app-category.productivity

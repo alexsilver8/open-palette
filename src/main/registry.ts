@@ -10,6 +10,7 @@ import type {
   CommandManifest,
   CommandRef,
   ExtensionManifest,
+  ExtensionSource,
   Platform,
   RootItem,
   View,
@@ -24,18 +25,18 @@ import type { UsageTracker } from './usage';
 
 export interface ExtensionInfo {
   manifest?: ExtensionManifest;
-  source: 'builtin' | 'user';
-  /** Folder of a user extension. */
+  source: ExtensionSource;
+  /** Folder of an extension that isn't compiled in. */
   dir?: string;
-  /** Why a user extension failed to load. */
+  /** Why an extension failed to load. */
   error?: string;
 }
 
 interface RegisteredExtension {
   manifest: ExtensionManifest;
-  source: 'builtin' | 'user';
+  source: ExtensionSource;
   dir?: string;
-  /** Only for built-ins; user extensions run in the extension host. */
+  /** Only for built-ins; the others run in the extension host. */
   commands?: Record<string, CommandImplementation>;
 }
 
@@ -47,6 +48,8 @@ export interface RegistryOptions {
   usage: UsageTracker;
   /** Folders to load user extensions from. */
   extensionRoots: () => string[];
+  /** Folders of the extensions shipped with the app. */
+  bundledRoots?: () => string[];
   /** Where extensions get their own writable folder. */
   supportRoot: string;
   /** More things the root search finds, like notes and clipboard entries. */
@@ -99,18 +102,27 @@ export class CommandRegistry extends EventEmitter<{ change: [] }> {
       [...this.extensions.values()].filter((e) => e.source === 'builtin').map((e) => e.manifest.name),
     );
     const failures: ExtensionInfo[] = [];
-    const toLoad: Array<{ host: HostExtension; manifest: ExtensionManifest }> = [];
+    const toLoad: Array<{ host: HostExtension; manifest: ExtensionManifest; source: ExtensionSource }> = [];
+    // The ones shipped with the app first, so their names win over a copy in your folder.
+    const discovered = [
+      ...discoverExtensions(this.options.bundledRoots?.() ?? []).map((found) => ({
+        ...found,
+        source: 'bundled' as const,
+      })),
+      ...discoverExtensions(this.options.extensionRoots()).map((found) => ({ ...found, source: 'user' as const })),
+    ];
 
-    for (const found of discoverExtensions(this.options.extensionRoots())) {
+    for (const found of discovered) {
+      const { source } = found;
       if (!found.parsed) {
-        failures.push({ source: 'user', dir: found.dir, error: found.error });
+        failures.push({ source, dir: found.dir, error: found.error });
         continue;
       }
       const { manifest, entry } = found.parsed;
       if (builtinNames.has(manifest.name) || toLoad.some((e) => e.manifest.name === manifest.name)) {
         failures.push({
           manifest,
-          source: 'user',
+          source,
           dir: found.dir,
           error: `Another extension is already called "${manifest.name}".`,
         });
@@ -118,6 +130,7 @@ export class CommandRegistry extends EventEmitter<{ change: [] }> {
       }
       toLoad.push({
         manifest,
+        source,
         host: {
           name: manifest.name,
           entry,
@@ -134,12 +147,12 @@ export class CommandRegistry extends EventEmitter<{ change: [] }> {
 
     // Swap the new set in all at once.
     for (const [name, extension] of this.extensions) {
-      if (extension.source === 'user') this.extensions.delete(name);
+      if (extension.source !== 'builtin') this.extensions.delete(name);
     }
-    for (const { manifest, host } of toLoad) {
+    for (const { manifest, host, source } of toLoad) {
       const failure = report.failed.find((f) => f.name === manifest.name);
-      if (failure) failures.push({ manifest, source: 'user', dir: host.dir, error: failure.error });
-      else this.extensions.set(manifest.name, { manifest, source: 'user', dir: host.dir });
+      if (failure) failures.push({ manifest, source, dir: host.dir, error: failure.error });
+      else this.extensions.set(manifest.name, { manifest, source, dir: host.dir });
     }
     this.failures = failures;
     for (const failure of failures) {

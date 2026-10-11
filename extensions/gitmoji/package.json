@@ -1,0 +1,27 @@
+{
+  "name": "gitmoji",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Search gitmoji and paste them into commit messages.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "Gitmoji",
+    "icon": "✨",
+    "commands": [
+      {
+        "name": "search",
+        "title": "Search Gitmoji",
+        "mode": "view",
+        "icon": "✨",
+        "keywords": [
+          "emoji",
+          "commit",
+          "git",
+          "gitmoji"
+        ]
+      }
+    ]
+  }
+}

@@ -2,7 +2,7 @@
 
 An extension adds commands to Open Palette. It's a folder with a `package.json` and a JavaScript module, and it runs in its own process (Electron's [utility process](https://www.electronjs.org/docs/latest/api/utility-process)), so a slow or crashing extension can't freeze the launcher.
 
-The quickest way to start is to copy [`examples/extensions/developer-utilities`](../examples/extensions/developer-utilities) into your extensions folder and change it. Run **Open Extensions Folder** from the launcher to find that folder, then **Reload Extensions** after each change.
+The quickest way to start is to copy [`examples/extensions/developer-utilities`](../examples/extensions/developer-utilities) into your extensions folder and change it. The extensions that come with Open Palette, in [`extensions/`](../extensions), use the same API and make good examples too: [Port Manager](../extensions/port-manager) runs system tools, [Emoji](../extensions/emoji) searches a big list itself and remembers what you used, and [Conventional Commits](../extensions/conventional-commits) builds its list from what you type. Run **Open Extensions Folder** from the launcher to find that folder, then **Reload Extensions** after each change.
 
 > Extensions have full Node.js access, like a package you `npm install`. Only install extensions you trust.
 
@@ -10,6 +10,7 @@ The quickest way to start is to copy [`examples/extensions/developer-utilities`]
 
 - The `extensions` folder inside Open Palette's data folder (run **Open Extensions Folder**).
 - Every path in `extensionDirectories` in your [settings](../README.md#settings). Each path can be one extension, or a folder of them — handy for working on an extension in its own repo.
+- The extensions that come with Open Palette: inside the app once installed, `extensions/` when running from source.
 - `examples/extensions` when running from source with `pnpm dev`.
 
 **Manage Extensions** lists everything that loaded, and why anything didn't.
@@ -135,7 +136,7 @@ When any item in a view has a `detail`, the launcher splits in two: the list on 
 
 Every result also gets a quick key while you hold <kbd>⌘</kbd> (<kbd>Ctrl</kbd> on Windows and Linux): <kbd>⌘</kbd><kbd>1</kbd> to <kbd>⌘</kbd><kbd>9</kbd> run the first action of the first nine rows.
 
-Built-in icons: `alert`, `app`, `calculator`, `clipboard`, `copy`, `extension`, `file`, `folder`, `globe`, `link`, `lock`, `moon`, `note`, `power`, `refresh`, `search`, `settings`, `sparkles`, `terminal`, `text`, `trash`. Tints: `red`, `orange`, `yellow`, `green`, `teal`, `blue`, `purple`, `pink`, `gray`.
+Built-in icons: `alert`, `app`, `calculator`, `clipboard`, `copy`, `extension`, `file`, `folder`, `git-commit`, `globe`, `link`, `lock`, `moon`, `note`, `plug`, `power`, `refresh`, `search`, `server`, `settings`, `sparkles`, `terminal`, `text`, `trash`. Tints: `red`, `orange`, `yellow`, `green`, `teal`, `blue`, `purple`, `pink`, `gray`.
 
 ## Actions
 
@@ -144,6 +145,7 @@ The first action of an item runs on <kbd>↵</kbd>, the second on <kbd>⌘</kbd>
 | `type` | Fields | Does |
 | --- | --- | --- |
 | `copy` | `text` | Copies the text and closes the launcher. |
+| `paste` | `text` | Closes the launcher and pastes the text into the app that was in front. |
 | `open-url` | `url` | Opens the URL in the default browser or app. |
 | `open-path` | `path` (absolute) | Opens a file, folder or app. |
 | `reveal-path` | `path` (absolute) | Shows the file in Finder / Explorer. |
@@ -164,8 +166,29 @@ Every action takes an optional `title` and `shortcut`, e.g. `{ key: 'Backspace',
 | `replace: view` | Replace the current list, e.g. after deleting an item. |
 | `pop: true` | Go back. |
 | `clearSearch: true` | Empty the search field. |
+| `search: text` | Put the text in the search field, e.g. the start of something to finish typing. |
+| `copy: text` | Copy the text and close the launcher. |
+| `paste: text` | Close the launcher and paste the text into the app that was in front. |
 
 If your code throws, the error message is shown as a failure toast.
+
+Returning `copy` or `paste` from `onAction` (instead of using a `copy` or `paste` action) lets you do something first, like remembering what was picked: the Emoji extension keeps its recently used list this way.
+
+### Pasting
+
+To paste, Open Palette puts the text on the clipboard, closes the launcher so the previous app is in front again, and presses the paste shortcut:
+
+- **macOS:** through System Events. The first time, macOS asks to let Open Palette control your computer (Accessibility) and System Events (Automation).
+- **Windows:** with SendKeys, nothing to set up.
+- **Linux:** with `xdotool` on X11 or `wtype` on Wayland, if one is installed.
+
+When it can't, the text stays on the clipboard and a notification says how to paste it yourself. People who'd rather paste themselves can turn off **Paste into the app you were in** in Settings; then `paste` copies.
+
+Don't give a `paste` action a shortcut with <kbd>⇧</kbd> or <kbd>⌥</kbd>: if the key is still held when the paste is typed, the app sees ⌘⇧V (often "paste and match style") instead.
+
+## Types
+
+The types in [`src/shared/extension-api.ts`](../src/shared/extension-api.ts) work in plain JavaScript through JSDoc, as in the examples. `pnpm typecheck` checks the bundled and example extensions that way, so a mistake in a view's shape shows up before you run it.
 
 ## Debugging
 

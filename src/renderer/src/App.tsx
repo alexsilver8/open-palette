@@ -222,13 +222,14 @@ export function App() {
         setPanelOpen(false);
         return;
       }
-      if (result.push || result.replace || result.clearSearch || result.pop) searchRequest.current++;
+      const search = result.clearSearch ? '' : result.search;
+      if (result.push || result.replace || search !== undefined || result.pop) searchRequest.current++;
       setStack((current) => {
         let next = current;
         if (result.pop && next.length > 1) next = next.slice(0, -1);
         const top = next[next.length - 1] ?? ROOT;
-        if (result.replace || result.clearSearch) {
-          const query = result.clearSearch ? '' : top.query;
+        if (result.replace || search !== undefined) {
+          const query = search ?? top.query;
           next = [
             ...next.slice(0, -1),
             { ...top, query, ...(result.replace ? { view: result.replace, viewQuery: query } : {}) },
@@ -275,19 +276,18 @@ export function App() {
    * self-filtering list hasn't caught up with the typing yet, waits for it first, so the row
    * that runs is the one for what was typed.
    */
-  const activate = async (secondary: boolean, index?: number) => {
-    const action = secondary ? 1 : 0;
+  const activate = async (pick: (item: DisplayItem) => Action | undefined, index?: number) => {
     if (stale && frameRef) {
       if (busy.current) return;
       const from = frame;
       const view = await refreshView(from.id, frameRef, from.query);
       if (!view) return;
       const target = nthItem(view, from.query, index ?? 0);
-      void run(target, target?.actions[action], { ...from, view, viewQuery: from.query });
+      void run(target, target && pick(target), { ...from, view, viewQuery: from.query });
       return;
     }
     const target = index === undefined ? selected : items[index];
-    void run(target, target?.actions[action]);
+    void run(target, target && pick(target));
   };
 
   const pop = useCallback(() => {
@@ -311,16 +311,26 @@ export function App() {
     const plain = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey;
 
     // The selected item's own shortcuts win over the launcher's.
-    const shortcutAction = selected?.actions.find((a) => a.shortcut && matchesShortcut(event, a.shortcut, platform));
+    const keys = {
+      key: event.key,
+      metaKey: event.metaKey,
+      ctrlKey: event.ctrlKey,
+      shiftKey: event.shiftKey,
+      altKey: event.altKey,
+    };
+    const byShortcut = (item: DisplayItem) =>
+      item.actions.find((a) => a.shortcut && matchesShortcut(keys, a.shortcut, platform));
+    const shortcutAction = selected && byShortcut(selected);
     // By physical key, so it works on layouts where the digits need Shift (AZERTY).
     const digit = /^(?:Digit|Numpad)([1-9])$/.exec(event.code)?.[1];
     const quickIndex = mod && !event.shiftKey && !event.altKey && digit ? Number(digit) - 1 : -1;
     if (shortcutAction) {
       event.preventDefault();
-      void run(selected, shortcutAction);
+      // Like ↵, waits for a list that builds itself from the search to catch up first.
+      void activate(byShortcut);
     } else if (quickIndex >= 0 && quickIndex < QUICK_KEY_COUNT) {
       event.preventDefault();
-      void activate(false, quickIndex);
+      void activate((item) => item.actions[0], quickIndex);
     } else if (key === 'Tab' && isRoot && !mod && !event.altKey) {
       event.preventDefault();
       const index = ROOT_FILTERS.findIndex((f) => f.id === filter);
@@ -335,7 +345,7 @@ export function App() {
       move(-1);
     } else if (key === 'Enter' && (plain || (mod && !event.shiftKey && !event.altKey))) {
       event.preventDefault();
-      void activate(mod);
+      void activate((item) => item.actions[mod ? 1 : 0]);
     } else if (mod && key.toLowerCase() === 'k') {
       event.preventDefault();
       if (selected && selected.actions.length > 0) setPanelOpen((open) => !open);
