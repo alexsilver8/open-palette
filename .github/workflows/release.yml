@@ -31,20 +31,27 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-      # Auto-merge waits for the required checks, which only run on a release PR opened with
-      # the PAT. The merge is then made with the PAT too, so it starts this workflow again,
-      # which tags the release and builds the installers.
+      # Auto-merge waits for the required checks, which only run on pushes made with the PAT,
+      # and main's ruleset wants the PR up to date. So the release PR is first brought up to
+      # date with main using the PAT, then set to merge. That merge is made with the PAT too,
+      # so it starts this workflow again, which tags the release and builds the installers.
+      # The PR is found by its label: release-please doesn't report a PR it left unchanged.
       - name: Merge the release PR once its checks pass
-        if: ${{ steps.release.outputs.prs_created == 'true' }}
+        if: ${{ steps.release.outputs.release_created != 'true' }}
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-          PR: ${{ fromJSON(steps.release.outputs.pr).number }}
         run: |
           if [ -z "$GH_TOKEN" ]; then
             echo "No RELEASE_PLEASE_TOKEN secret, so the release PR is left for you to merge."
             exit 0
           fi
-          gh pr merge "$PR" --auto --squash --repo "$GITHUB_REPOSITORY"
+          prs=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --label 'autorelease: pending' --json number --jq '.[].number')
+          for pr in $prs; do
+            # GitHub refuses when the PR is already up to date; that's fine.
+            gh api -X PUT "repos/$GITHUB_REPOSITORY/pulls/$pr/update-branch" --silent || true
+            gh pr merge "$pr" --auto --squash --repo "$GITHUB_REPOSITORY"
+            echo "Release PR #$pr will merge once its checks pass."
+          done
 
   # Build installers on each OS whenever a release is cut, and attach them to it.
   build:
