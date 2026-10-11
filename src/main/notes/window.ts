@@ -3,6 +3,7 @@ import { app, BrowserWindow } from 'electron';
 import { NotesChannel, type NotesWindowState } from '../../shared/notes';
 import { glassFor, glassWindowOptions, loadPage } from '../glass';
 import { debounce, readJsonFile, writeJsonFile } from '../json-file';
+import { showOnEverySpace } from '../spaces';
 
 const isMac = process.platform === 'darwin';
 
@@ -95,6 +96,7 @@ export class NotesWindow {
       },
     });
     this.window = window;
+    showOnEverySpace(window);
     this.applyAlwaysOnTop();
 
     const rememberBounds = debounce(() => {
@@ -114,11 +116,10 @@ export class NotesWindow {
     return window;
   }
 
+  /** Pinned, the window floats above other windows; either way it opens wherever you are. */
   private applyAlwaysOnTop(): void {
     const window = this.window;
     if (!window) return;
     window.setAlwaysOnTop(this.state.alwaysOnTop, 'floating');
-    if (isMac)
-      window.setVisibleOnAllWorkspaces(this.state.alwaysOnTop, { visibleOnFullScreen: this.state.alwaysOnTop });
   }
 }
