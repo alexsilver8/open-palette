@@ -1,0 +1,78 @@
+name: platforms
+
+# Runs the commands that talk to the operating system (moving windows, media, Wi-Fi, disks,
+# system info) on real macOS, Windows and Linux machines. CI's other checks run on Linux only,
+# and the scripts for the other systems can't be tried there.
+on:
+  pull_request:
+    paths:
+      - src/main/exec.ts
+      - src/main/windows/**
+      - src/main/system/**
+      - extensions/media-controls/**
+      - extensions/system-info/**
+      - .github/workflows/platforms.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # The tests need no Electron, so skip downloading it.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Open a window to move (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q xvfb openbox xdotool x11-utils x11-apps wmctrl playerctl
+          Xvfb :99 -screen 0 1920x1080x24 &
+          echo "DISPLAY=:99" >> "$GITHUB_ENV"
+          sleep 1
+          DISPLAY=:99 openbox &
+          sleep 1
+          DISPLAY=:99 xlogo -geometry 300x200+400+300 &
+          sleep 2
+          DISPLAY=:99 xdotool search --class xlogo windowactivate --sync
+      - name: Open a window to move (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          open ~
+          sleep 2
+          osascript -e 'tell application "Finder" to activate'
+          sleep 1
+      - name: Open a window to move (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Start-Process notepad
+          Start-Sleep -Seconds 3
+          (New-Object -ComObject WScript.Shell).AppActivate('Notepad') | Out-Null
+          Start-Sleep -Seconds 1
+
+      - name: Run the commands for real
+        env:
+          OPEN_PALETTE_SMOKE: '1'
+        run: pnpm exec vitest run --reporter=verbose platform.smoke

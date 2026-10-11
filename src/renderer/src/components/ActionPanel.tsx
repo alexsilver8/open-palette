@@ -42,6 +42,8 @@ export function ActionPanel({ item, platform, onRun, onClose }: ActionPanelProps
       setIndex((i) => Math.max(i - 1, 0));
     } else if (event.key === 'Enter') {
       event.preventDefault();
+      // A held ↵ repeats; only the first press runs the action.
+      if (event.repeat) return;
       const entry = actions[index];
       if (entry) onRun(entry.action);
     } else if (event.key === 'Escape' || (isModKey(event, platform) && event.key.toLowerCase() === 'k')) {

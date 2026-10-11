@@ -1,0 +1,60 @@
+{
+  "name": "media-controls",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Play, pause and skip whatever is playing, and see what it is.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "Media Controls",
+    "icon": "🎵",
+    "commands": [
+      {
+        "name": "play-pause",
+        "title": "Play or Pause",
+        "mode": "no-view",
+        "icon": "⏯️",
+        "keywords": [
+          "play",
+          "pause",
+          "resume"
+        ]
+      },
+      {
+        "name": "next",
+        "title": "Next Track",
+        "mode": "no-view",
+        "icon": "⏭️",
+        "keywords": [
+          "skip",
+          "next song"
+        ]
+      },
+      {
+        "name": "previous",
+        "title": "Previous Track",
+        "mode": "no-view",
+        "icon": "⏮️",
+        "keywords": [
+          "previous song"
+        ]
+      },
+      {
+        "name": "now-playing",
+        "title": "Now Playing",
+        "mode": "view",
+        "icon": "🎵",
+        "keywords": [
+          "music",
+          "song",
+          "track",
+          "media",
+          "spotify",
+          "playing",
+          "what's playing"
+        ]
+      }
+    ]
+  }
+}

@@ -310,6 +310,11 @@ export function App() {
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     // Keys that pick or confirm an input-method candidate aren't ours.
     if (event.nativeEvent.isComposing) return;
+    // A held ↵ repeats: that mustn't run the next view's first item too, like Restart Now.
+    if (event.key === 'Enter' && event.repeat) {
+      event.preventDefault();
+      return;
+    }
     const mod = isModKey(event, platform);
     const key = event.key;
     const plain = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey;

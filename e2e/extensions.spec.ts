@@ -138,3 +138,14 @@ test('suggests a type for a description typed in the launcher', async () => {
   await expect(page.getByRole('option').first()).toContainText('fix: fix the crash on start');
   await expect(page.getByRole('option').first()).toContainText('Patch release');
 });
+
+test('shows this computer’s details in System Info and copies one', async () => {
+  await open('system info');
+  await expect(page.locator('.results__heading')).toContainText(['Hardware', 'Network', 'System']);
+  await expect(page.getByRole('option', { name: /^CPU/ })).toBeVisible();
+  await expect(page.getByRole('option', { name: /^Memory/ })).toContainText(/of .* used/);
+  await expect(page.getByRole('option', { name: /^Disk/ })).toContainText(/free of/);
+  await page.keyboard.type('memory');
+  await page.keyboard.press('Enter');
+  await expect.poll(clipboardText).toMatch(/B of .*B used/);
+});

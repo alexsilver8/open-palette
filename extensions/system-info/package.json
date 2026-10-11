@@ -1,0 +1,33 @@
+{
+  "name": "system-info",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Battery, CPU, memory, disk space and your IP addresses at a glance.",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "openPalette": {
+    "title": "System Info",
+    "icon": "💻",
+    "commands": [
+      {
+        "name": "info",
+        "title": "System Info",
+        "mode": "view",
+        "icon": "💻",
+        "keywords": [
+          "battery",
+          "cpu",
+          "memory",
+          "ram",
+          "disk",
+          "storage",
+          "ip address",
+          "my ip",
+          "uptime",
+          "about this mac"
+        ]
+      }
+    ]
+  }
+}

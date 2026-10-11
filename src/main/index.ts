@@ -12,6 +12,7 @@ import { noteRootItems, notesExtension } from './commands/notes';
 import { paletteExtension } from './commands/palette';
 import { system } from './commands/system';
 import { webSearch } from './commands/web-search';
+import { windowManagementExtension } from './commands/window-management';
 import { ExtensionHostClient } from './extensions/host-client';
 import { HotkeyManager } from './hotkey';
 import { handleIconProtocol, registerIconScheme } from './icon-protocol';
@@ -96,6 +97,8 @@ async function main(): Promise<void> {
       notesExtension(notesStore, notesWindow),
       webSearch,
       system,
+      // The launcher is created below; window commands only reach for it when they run.
+      windowManagementExtension({ platform, launcher: () => launcher }),
       paletteExtension({ openSettings: () => settingsWindow.open(), extensionsDir, registry: () => registry }),
     ],
   });

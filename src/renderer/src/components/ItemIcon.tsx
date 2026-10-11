@@ -1,58 +1,150 @@
 import {
   AppWindow,
+  ArrowLeftFromLine,
+  ArrowRightFromLine,
+  Battery,
   Calculator,
   Clipboard,
   Copy,
+  Cpu,
+  Eject,
   File,
   Folder,
   GitCommitHorizontal,
   Globe,
+  HardDrive,
+  Info,
   Link,
   Lock,
-  type LucideIcon,
+  LogOut,
+  MemoryStick,
+  Monitor,
   Moon,
+  Music,
+  Network,
+  Pause,
+  Play,
   Plug,
   Power,
   Puzzle,
   RefreshCw,
+  RotateCcw,
   Search,
   Server,
   Settings,
+  SkipBack,
+  SkipForward,
   Sparkles,
   StickyNote,
   Terminal,
   TextAlignStart,
   Trash2,
   TriangleAlert,
+  Undo2,
+  Wifi,
+  WifiOff,
+  X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { type ComponentType, useState } from 'react';
 import type { BuiltinIconName, Icon } from '../../../shared/types';
 
-const GLYPHS: Record<BuiltinIconName, LucideIcon> = {
+type Glyph = ComponentType<{ size?: number; strokeWidth?: number }>;
+
+/**
+ * A screen outline with the region a window layout fills, drawn to sit beside the Lucide
+ * glyphs. `x`, `y`, `width` and `height` are fractions of the screen.
+ */
+function layoutGlyph([x, y, width, height]: [number, number, number, number]): Glyph {
+  // The inside of the outline, where the filled region goes.
+  const inner = { x: 3.5, y: 4.5, width: 17, height: 13 };
+  return function LayoutGlyph({ size = 24, strokeWidth = 2 }) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect
+          x="1.5"
+          y="2.5"
+          width="21"
+          height="17"
+          rx="3"
+          stroke="currentColor"
+          strokeWidth={strokeWidth * 0.8}
+          opacity="0.75"
+        />
+        <rect
+          x={inner.x + inner.width * x}
+          y={inner.y + inner.height * y}
+          width={inner.width * width}
+          height={inner.height * height}
+          rx="1.25"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  };
+}
+
+const GLYPHS: Record<BuiltinIconName, Glyph> = {
   alert: TriangleAlert,
   app: AppWindow,
+  battery: Battery,
   calculator: Calculator,
   clipboard: Clipboard,
+  close: X,
   copy: Copy,
+  cpu: Cpu,
+  eject: Eject,
   extension: Puzzle,
   file: File,
   folder: Folder,
   'git-commit': GitCommitHorizontal,
   globe: Globe,
+  'hard-drive': HardDrive,
+  info: Info,
   link: Link,
   lock: Lock,
+  'log-out': LogOut,
+  memory: MemoryStick,
+  monitor: Monitor,
   moon: Moon,
+  music: Music,
+  network: Network,
   note: StickyNote,
+  pause: Pause,
+  play: Play,
   plug: Plug,
   power: Power,
   refresh: RefreshCw,
+  restart: RotateCcw,
   search: Search,
   server: Server,
   settings: Settings,
+  'skip-back': SkipBack,
+  'skip-forward': SkipForward,
   sparkles: Sparkles,
   terminal: Terminal,
   text: TextAlignStart,
   trash: Trash2,
+  wifi: Wifi,
+  'wifi-off': WifiOff,
+  'window-left-half': layoutGlyph([0, 0, 1 / 2, 1]),
+  'window-right-half': layoutGlyph([1 / 2, 0, 1 / 2, 1]),
+  'window-top-half': layoutGlyph([0, 0, 1, 1 / 2]),
+  'window-bottom-half': layoutGlyph([0, 1 / 2, 1, 1 / 2]),
+  'window-top-left': layoutGlyph([0, 0, 1 / 2, 1 / 2]),
+  'window-top-right': layoutGlyph([1 / 2, 0, 1 / 2, 1 / 2]),
+  'window-bottom-left': layoutGlyph([0, 1 / 2, 1 / 2, 1 / 2]),
+  'window-bottom-right': layoutGlyph([1 / 2, 1 / 2, 1 / 2, 1 / 2]),
+  'window-first-third': layoutGlyph([0, 0, 1 / 3, 1]),
+  'window-center-third': layoutGlyph([1 / 3, 0, 1 / 3, 1]),
+  'window-last-third': layoutGlyph([2 / 3, 0, 1 / 3, 1]),
+  'window-first-two-thirds': layoutGlyph([0, 0, 2 / 3, 1]),
+  'window-last-two-thirds': layoutGlyph([1 / 3, 0, 2 / 3, 1]),
+  'window-maximize': layoutGlyph([0, 0, 1, 1]),
+  'window-almost-maximize': layoutGlyph([0.12, 0.14, 0.76, 0.72]),
+  'window-center': layoutGlyph([0.25, 0.22, 0.5, 0.56]),
+  'window-next-display': ArrowRightFromLine,
+  'window-previous-display': ArrowLeftFromLine,
+  'window-restore': Undo2,
 };
 
 function Tile({ name, tint }: { name: BuiltinIconName; tint?: string }) {

@@ -20,7 +20,9 @@ Website: [openpalette.alexsilver.dev](https://openpalette.alexsilver.dev/)
 - **Remembers your clipboard** — searchable history of copied text, skipping anything password managers mark as private.
 - **Searches the web** — anything that doesn't match falls back to Google, DuckDuckGo or any extension that offers itself.
 - **Learns what you use** — frequently used items rise to the top.
-- **Comes with extensions** — Port Manager, Gitmoji, Emoji and Conventional Commits, described [below](#included-extensions).
+- **Snaps windows** — halves, thirds, quarters, maximize, centre and the next display for the window you were using, and **Restore** to put it back. See [Windows](#windows).
+- **Runs your computer** — lock, sleep, restart, shut down, log out, empty the Trash, eject disks and turn Wi-Fi on or off, with a check before anything you can't undo. See [System](#system).
+- **Comes with extensions** — developer tools like Port Manager, Docker and GitHub, plus Media Controls and System Info, described [below](#included-extensions).
 - **Runs extensions** — commands written in JavaScript, each extension in a separate process. See [Writing extensions](docs/extensions.md).
 - **Everything has actions** — <kbd>⌘</kbd> <kbd>K</kbd> lists what you can do with the selected item.
 - **Looks at home on your desktop** — liquid-glass windows that blur what's behind them on macOS and Windows 11, in light or dark, with the search field, preview and action bar floating on brighter panes. Linux gets the same design on a solid background, since it has no system blur.
@@ -72,6 +74,34 @@ The toolbar at the bottom of the window formats the selection or the line you're
 
 Notes are saved as you type, one `.md` file per note, and what you see is what's in the file: the formatting is Markdown, so it reads the same in any editor. A note is only rewritten when you change it, and then in a tidy form (for example `*` bullets become `-`). Notes with Markdown the editor can't show yet, like tables, images or front matter, open as plain Markdown instead, so nothing in them is lost. Set `notesDirectory` to a synced folder (Dropbox, iCloud Drive, a git repo) to have them everywhere; Markdown files already in that folder show up as notes too. Notes you delete go to the system Trash.
 
+## Windows
+
+Type a layout and press <kbd>↵</kbd>: the launcher steps aside and the window you were using moves.
+
+| Command | |
+| --- | --- |
+| **Left Half**, **Right Half**, **Top Half**, **Bottom Half** | Half the screen |
+| **Top Left Quarter**, **Top Right Quarter**, **Bottom Left Quarter**, **Bottom Right Quarter** | A quarter |
+| **First Third**, **Center Third**, **Last Third**, **First Two Thirds**, **Last Two Thirds** | Thirds, side by side on a wide screen and stacked on a tall one |
+| **Maximize**, **Almost Maximize**, **Center** | Fill the screen, nine-tenths of it, or keep the size and centre it |
+| **Next Display**, **Previous Display** | The same place on another screen, scaled to fit |
+| **Restore** | Back where the window was before Open Palette first moved it |
+
+Windows fill the screen without the menu bar, Dock or taskbar. They're moved with System Events on macOS, which needs Open Palette allowed under **System Settings → Privacy & Security → Accessibility** (as pasting does), with Windows' own window calls on Windows, and with `xdotool` on Linux. Linux needs an X11 session: Wayland doesn't let one app move another's windows.
+
+## System
+
+| Command | |
+| --- | --- |
+| **Lock Screen**, **Sleep** | Right away (Sleep on macOS and Linux) |
+| **Restart**, **Shut Down**, **Log Out** | Asks first; open apps are asked to quit, so they can save |
+| **Empty Trash** (**Empty Recycle Bin** on Windows) | Asks first |
+| **Eject Disks** | USB drives, SD cards, disk images and network shares. <kbd>↵</kbd> ejects one; **Eject All** ejects them all |
+| **Toggle Wi-Fi** | Turns Wi-Fi off if it's on, and on if it's off |
+| **Toggle System Appearance** | Switches macOS between light and dark |
+
+On macOS, Empty Trash asks once to control Finder, and Restart, Shut Down and Log Out to control System Events. On Linux, Restart, Shut Down and Log Out go through GNOME, KDE, Xfce or Cinnamon, so apps can ask to save; on other desktops Restart and Shut Down use systemd, which closes apps without asking (the confirmation says so), and Log Out isn't available. Wi-Fi uses NetworkManager (`nmcli`) or `rfkill`, and ejecting uses `udisksctl`.
+
 ## Included extensions
 
 These come with Open Palette and are written with the same [extension API](docs/extensions.md) as any other, in [`extensions/`](extensions).
@@ -90,6 +120,8 @@ These come with Open Palette and are written with the same [extension API](docs/
 | **Convert Timestamp** | A Unix timestamp (seconds to nanoseconds), an ISO 8601 or RFC 2822 date, or nothing for now, in every common format. |
 | **Convert Color** | Hex, `rgb()`, `hsl()`, `oklch()` or a CSS name, in all of those forms, with its contrast against white and black text. |
 | **Search MDN** | [MDN Web Docs](https://developer.mozilla.org) as you type. Also from **Use “…” with**. |
+| **Play or Pause**, **Next Track**, **Previous Track**, **Now Playing** | Controls whatever is playing, and shows the track with buttons for it. On macOS, Spotify and Music are asked directly and other apps (a browser tab, Podcasts) get the media keys, once Open Palette is allowed under Accessibility; on Windows it uses the media controls in the volume flyout, and on Linux MPRIS, which most players and browsers support (through `playerctl` when it's installed). |
+| **System Info** | Battery, CPU, memory, disk space, your local and public IP addresses, the system version and uptime. <kbd>↵</kbd> copies a value, <kbd>⌘</kbd> <kbd>↵</kbd> opens Activity Monitor, Task Manager or the matching settings. The public IP comes from [api.ipify.org](https://www.ipify.org), asked when the list opens. |
 | **Search Homebrew**, **Manage Homebrew Packages** | Every formula and cask, and what you've installed, out-of-date first. Installing, upgrading and uninstalling run in a Terminal window, so you can see brew work. macOS and Linux. |
 
 <kbd>↵</kbd> in Gitmoji, Emoji and Commit Message pastes into the app you were in. The first time on macOS, allow Open Palette under **System Settings → Privacy & Security → Accessibility** (and **Automation** for System Events). On Linux, pasting needs `xdotool` (X11) or `wtype` (Wayland); without them the text is copied instead. Turn off **Paste into the app you were in** in Settings to always copy.
@@ -153,7 +185,7 @@ Built-in commands implement the same interface as extensions, so anything a buil
 - Form views and full Markdown detail views for extensions
 - An `@open-palette/api` package with types and helpers
 - Quicklinks and snippets
-- Window management
+- Keyboard shortcuts for any command, e.g. a key for Left Half
 - Code-signed, auto-updating releases
 
 Ideas and bug reports are welcome in [Issues](https://github.com/alexsilver8/open-palette/issues).
