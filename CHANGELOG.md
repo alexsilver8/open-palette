@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/alexsilver8/open-palette/compare/v1.7.1...v1.8.0) (2026-10-11)
+
+
+### Features
+
+* add window management, media controls, system actions and system info ([#34](https://github.com/alexsilver8/open-palette/issues/34)) ([ca07b3c](https://github.com/alexsilver8/open-palette/commit/ca07b3c38b7549be4086f0ec460358320f38ae75))
+
 ## [1.7.1](https://github.com/alexsilver8/open-palette/compare/v1.7.0...v1.7.1) (2026-10-11)
 
 
