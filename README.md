@@ -40,7 +40,7 @@ Builds aren't code-signed yet, so your system will warn you the first time you o
 | <kbd>⇥</kbd> / <kbd>⇧</kbd> <kbd>⇥</kbd> | Switch between All, Apps, Commands, Extensions, Notes and Clipboard |
 | <kbd>↵</kbd> | Run the primary action |
 | <kbd>⌘</kbd> <kbd>↵</kbd> | Run the secondary action |
-| <kbd>⌘</kbd> <kbd>1</kbd> … <kbd>9</kbd> | Run one of the first nine results (hold <kbd>⌘</kbd> to see the numbers) |
+| <kbd>⌘</kbd> <kbd>1</kbd> … <kbd>9</kbd> | Run one of the first nine results in view (hold <kbd>⌘</kbd> to see the numbers; they follow the scroll) |
 | <kbd>⌘</kbd> <kbd>K</kbd> | Show all actions |
 | <kbd>Esc</kbd> | Go back, clear the search, return to All, then close |
 | <kbd>⌘</kbd> <kbd>,</kbd> | Open settings |

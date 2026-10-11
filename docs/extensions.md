@@ -134,7 +134,7 @@ When any item in a view has a `detail`, the launcher splits in two: the list on 
 | `title` | Optional heading above the body, up to 200 characters. |
 | `metadata` | Optional `{ label, value }` pairs listed at the bottom, up to 12. |
 
-Every result also gets a quick key while you hold <kbd>⌘</kbd> (<kbd>Ctrl</kbd> on Windows and Linux): <kbd>⌘</kbd><kbd>1</kbd> to <kbd>⌘</kbd><kbd>9</kbd> run the first action of the first nine rows.
+Every result also gets a quick key while you hold <kbd>⌘</kbd> (<kbd>Ctrl</kbd> on Windows and Linux): <kbd>⌘</kbd><kbd>1</kbd> to <kbd>⌘</kbd><kbd>9</kbd> run the first action of the first nine rows in view, so after scrolling <kbd>⌘</kbd><kbd>1</kbd> is the top row you can see.
 
 Built-in icons: `alert`, `app`, `calculator`, `clipboard`, `copy`, `extension`, `file`, `folder`, `git-commit`, `globe`, `link`, `lock`, `moon`, `note`, `plug`, `power`, `refresh`, `search`, `server`, `settings`, `sparkles`, `terminal`, `text`, `trash`. Tints: `red`, `orange`, `yellow`, `green`, `teal`, `blue`, `purple`, `pink`, `gray`.
 
