@@ -2,6 +2,7 @@ import { join } from 'node:path';
 import { app, BrowserWindow, screen } from 'electron';
 import { IpcChannel, type ShownInfo, type ToastMessage } from '../shared/ipc';
 import { glassFor, glassWindowOptions, loadPage } from './glass';
+import { showOnEverySpace } from './spaces';
 
 const WIDTH = 800;
 const HEIGHT = 500;
@@ -48,7 +49,7 @@ export class LauncherWindow {
       },
     });
 
-    if (isMac) this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    showOnEverySpace(this.window);
 
     // If the page crashes, bring it back rather than leaving an empty window.
     this.window.webContents.on('render-process-gone', (_event, details) => {

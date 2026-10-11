@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { app, BrowserWindow } from 'electron';
 import { glassFor, glassWindowOptions, loadPage } from './glass';
+import { showOnEverySpace } from './spaces';
 
 const isMac = process.platform === 'darwin';
 
@@ -44,6 +45,7 @@ export class SettingsWindow {
       },
     });
     this.window = window;
+    showOnEverySpace(window);
     window.once('ready-to-show', () => window.show());
     window.on('closed', () => {
       this.window = undefined;
