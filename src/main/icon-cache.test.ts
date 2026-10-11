@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fileIconSize, IconCache } from './icon-cache';
+import { fileIconSize, IconCache, type IconSources, loadFileIcon } from './icon-cache';
 
 const bytes = (n: number) => new Uint8Array([n]);
 
@@ -65,5 +65,52 @@ describe('fileIconSize', () => {
     expect(fileIconSize('darwin')).toBe('normal');
     expect(fileIconSize('win32')).toBe('normal');
     expect(fileIconSize('linux')).toBe('large');
+  });
+});
+
+describe('loadFileIcon', () => {
+  const sources = (overrides: Partial<IconSources> = {}) => {
+    const calls: string[] = [];
+    const all: IconSources = {
+      thumbnail: async (path) => {
+        calls.push(`thumbnail ${path}`);
+        return bytes(1);
+      },
+      fileIcon: async (path) => {
+        calls.push(`fileIcon ${path}`);
+        return bytes(2);
+      },
+      realpath: async (path) => (path === '/Applications/Safari.app' ? '/System/Cryptexes/Safari.app' : path),
+      ...overrides,
+    };
+    return { all, calls };
+  };
+
+  it("draws an app's own icon with Quick Look on macOS, from its real path", async () => {
+    const { all, calls } = sources();
+    expect(await loadFileIcon('/Applications/Safari.app', 'darwin', all)).toEqual(bytes(1));
+    expect(calls).toEqual(['thumbnail /System/Cryptexes/Safari.app']);
+  });
+
+  it("falls back to the file icon when Quick Look can't draw it", async () => {
+    for (const thumbnail of [
+      async () => {
+        throw new Error('unable to retrieve thumbnail preview image');
+      },
+      async () => undefined,
+    ]) {
+      const { all, calls } = sources({ thumbnail });
+      expect(await loadFileIcon('/Applications/Odd.app', 'darwin', all)).toEqual(bytes(2));
+      expect(calls).toEqual(['fileIcon /Applications/Odd.app']);
+    }
+  });
+
+  it('uses the file icon elsewhere, and fails when there is none', async () => {
+    const { all, calls } = sources();
+    expect(await loadFileIcon('C:\\Program Files\\App\\app.exe', 'win32', all)).toEqual(bytes(2));
+    expect(calls).toEqual(['fileIcon C:\\Program Files\\App\\app.exe']);
+    await expect(loadFileIcon('/x', 'linux', sources({ fileIcon: async () => undefined }).all)).rejects.toThrow(
+      'No icon for /x',
+    );
   });
 });
