@@ -73,6 +73,13 @@ describe('sanitizeIcon', () => {
     expect(sanitizeIcon({ path: '/Applications/Safari.app' })).toEqual({ path: '/Applications/Safari.app' });
   });
 
+  it('counts an emoji made of several code points as one', () => {
+    expect(sanitizeIcon('🧑🏻\u200d🤝\u200d🧑🏻')).toEqual({ emoji: '🧑🏻\u200d🤝\u200d🧑🏻' });
+    expect(sanitizeIcon({ emoji: '🏳️\u200d🌈' })).toEqual({ emoji: '🏳️\u200d🌈' });
+    expect(sanitizeIcon('JS')).toEqual({ emoji: 'JS' });
+    expect(sanitizeIcon('ABCD')).toBeUndefined();
+  });
+
   it('rejects unknown shapes', () => {
     expect(sanitizeIcon({ builtin: 'unicorn' })).toBeUndefined();
     expect(sanitizeIcon('relative.png')).toBeUndefined();
@@ -159,5 +166,22 @@ describe('sanitizeActionResult', () => {
   it('passes through known fields only', () => {
     expect(sanitizeActionResult({ hide: true, toast: 'Done', evil: 1 })).toEqual({ hide: true, toast: 'Done' });
     expect(sanitizeActionResult(undefined)).toBeUndefined();
+  });
+
+  it('lets a command copy or paste text', () => {
+    expect(sanitizeActionResult({ paste: '✨', copy: 42 })).toEqual({ paste: '✨' });
+    expect(sanitizeActionResult({ search: 'feat: ' })).toEqual({ search: 'feat: ' });
+    expect(sanitizeActionResult({ copy: 'x'.repeat(2_000_000) })?.copy).toHaveLength(1_000_000);
+  });
+});
+
+describe('paste actions', () => {
+  it('are kept like copy actions', () => {
+    expect(sanitizeAction({ type: 'paste', text: '🎉', title: 'Paste Emoji' })).toEqual({
+      type: 'paste',
+      text: '🎉',
+      title: 'Paste Emoji',
+    });
+    expect(sanitizeAction({ type: 'paste' })).toBeUndefined();
   });
 });

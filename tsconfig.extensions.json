@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "lib": ["ES2023"],
+    "types": ["node"]
+  },
+  "include": ["extensions/**/*.js", "examples/extensions/**/*.js", "src/shared/extension-api.ts"],
+  "exclude": ["extensions/**/*.test.js"]
+}

@@ -19,6 +19,7 @@ export interface LauncherWindowOptions {
 export class LauncherWindow {
   readonly window: BrowserWindow;
   private hiddenAt = 0;
+  private openedFromOwnWindow = false;
 
   constructor(private readonly options: LauncherWindowOptions) {
     const glass = glassFor();
@@ -77,7 +78,12 @@ export class LauncherWindow {
     const info: ShownInfo = {
       reset: !this.visible && this.hiddenAt > 0 && Date.now() - this.hiddenAt > RESET_AFTER_MS,
     };
-    if (!this.visible) this.center();
+    if (!this.visible) {
+      this.center();
+      // Was one of our own windows (Notes, Settings) in front, or another app?
+      const focused = BrowserWindow.getFocusedWindow();
+      this.openedFromOwnWindow = focused !== null && focused !== this.window;
+    }
     this.window.show();
     this.window.focus();
     if (isMac) app.focus({ steal: true });
@@ -92,6 +98,17 @@ export class LauncherWindow {
     // another of our windows (like Notes) is open and should keep it.
     const otherWindowOpen = BrowserWindow.getAllWindows().some((w) => w !== this.window && w.isVisible());
     if (isMac && !otherWindowOpen) app.hide();
+  }
+
+  /**
+   * Hides the launcher and makes sure what you were using before is in front again, so a
+   * paste lands there. On macOS, a visible Notes window would otherwise keep Open Palette the
+   * active app; unless you opened the launcher from Notes, the whole app steps aside.
+   */
+  hideAndReturnFocus(): void {
+    const wasVisible = this.visible;
+    this.hide();
+    if (wasVisible && isMac && !this.openedFromOwnWindow) app.hide();
   }
 
   /**

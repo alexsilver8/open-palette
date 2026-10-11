@@ -1,12 +1,12 @@
 /** Contract between the main process and the Settings window. */
 import type { Settings } from './settings';
-import type { Platform } from './types';
+import type { ExtensionSource, Platform } from './types';
 
 export interface ExtensionSummary {
   name: string;
   title: string;
-  source: 'builtin' | 'user';
-  /** Folder of a user extension. */
+  source: ExtensionSource;
+  /** Folder of an extension that isn't compiled in. */
   dir?: string;
   /** Why it failed to load. */
   error?: string;

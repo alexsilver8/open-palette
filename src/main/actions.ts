@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
-import { clipboard, shell } from 'electron';
+import { shell } from 'electron';
 import type { Action, ActionResult } from '../shared/types';
 import { execToArgv, parseDesktopEntry } from './apps/desktop-entry';
 
@@ -55,7 +55,8 @@ export async function performSystemAction(
       shell.showItemInFolder(action.path);
       return { hide: true };
     case 'copy':
-      await clipboard.writeText(action.text);
-      return { hide: true };
+      return { copy: action.text };
+    case 'paste':
+      return { paste: action.text };
   }
 }

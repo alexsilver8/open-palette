@@ -29,6 +29,8 @@ export function actionTitle(action: Action): string {
       return 'Show in Folder';
     case 'copy':
       return 'Copy to Clipboard';
+    case 'paste':
+      return 'Paste to Active App';
     case 'callback':
       return action.title;
   }

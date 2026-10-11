@@ -20,6 +20,7 @@ Website: [alexsilver8.github.io/open-palette](https://alexsilver8.github.io/open
 - **Remembers your clipboard** — searchable history of copied text, skipping anything password managers mark as private.
 - **Searches the web** — anything that doesn't match falls back to Google, DuckDuckGo or any extension that offers itself.
 - **Learns what you use** — frequently used items rise to the top.
+- **Comes with extensions** — Port Manager, Gitmoji, Emoji and Conventional Commits, described [below](#included-extensions).
 - **Runs extensions** — commands written in JavaScript, each extension in a separate process. See [Writing extensions](docs/extensions.md).
 - **Everything has actions** — <kbd>⌘</kbd> <kbd>K</kbd> lists what you can do with the selected item.
 - **Looks at home on your desktop** — liquid-glass windows that blur what's behind them on macOS and Windows 11, in light or dark, with the search field, preview and action bar floating on brighter panes. Linux gets the same design on a solid background, since it has no system blur.
@@ -71,6 +72,19 @@ The toolbar at the bottom of the window formats the selection or the line you're
 
 Notes are saved as you type, one `.md` file per note, and what you see is what's in the file: the formatting is Markdown, so it reads the same in any editor. A note is only rewritten when you change it, and then in a tidy form (for example `*` bullets become `-`). Notes with Markdown the editor can't show yet, like tables, images or front matter, open as plain Markdown instead, so nothing in them is lost. Set `notesDirectory` to a synced folder (Dropbox, iCloud Drive, a git repo) to have them everywhere; Markdown files already in that folder show up as notes too. Notes you delete go to the system Trash.
 
+## Included extensions
+
+These come with Open Palette and are written with the same [extension API](docs/extensions.md) as any other, in [`extensions/`](extensions).
+
+| Command | |
+| --- | --- |
+| **Open Ports** | Every program listening on a port, with its command line and whether other devices can reach it. <kbd>↵</kbd> stops it, <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>⌫</kbd> forces it, <kbd>⌘</kbd> <kbd>O</kbd> opens it in the browser. |
+| **Search Gitmoji** | The [gitmoji](https://gitmoji.dev) list by name or meaning. <kbd>↵</kbd> pastes the emoji, <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>C</kbd> copies its `:code:`. Recently used come first. |
+| **Search Emoji** | Every emoji by name, keyword or `:shortcode:`, recently used first. <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>T</kbd> picks the skin tone for all of them. |
+| **Write Commit Message** | A [Conventional Commits](https://www.conventionalcommits.org) message, checked as you type, with what it does to the version. Pick a type, or just describe the change: it suggests the type, also from the launcher's **Use “…” with**. |
+
+<kbd>↵</kbd> in Gitmoji, Emoji and Commit Message pastes into the app you were in. The first time on macOS, allow Open Palette under **System Settings → Privacy & Security → Accessibility** (and **Automation** for System Events). On Linux, pasting needs `xdotool` (X11) or `wtype` (Wayland); without them the text is copied instead. Turn off **Paste into the app you were in** in Settings to always copy.
+
 ## Settings
 
 Open **Settings** with <kbd>⌘</kbd> <kbd>,</kbd> in the launcher, the **Open Settings** command, or **Settings…** in the tray menu. There you can record a new shortcut, pick light or dark, choose how much clipboard history to keep, move your notes folder and manage extensions.
@@ -120,6 +134,7 @@ pnpm dist         # installers for your OS in release/
 - `src/extension-host` — loads extensions and runs their commands in a separate process.
 - `src/renderer` — the launcher and Notes windows. Root search and the calculator run here, so typing never waits on IPC.
 - `src/shared` — types, fuzzy matching and the calculator, shared by all three.
+- `extensions` — the extensions that come with Open Palette, in plain JavaScript checked through JSDoc. `pnpm extensions:data` refreshes the gitmoji and emoji lists from their packages.
 - `website` — the landing page: plain HTML, CSS and JavaScript with no build step. Serve the folder to preview it (`npx serve website`); pushes to `main` publish it to GitHub Pages.
 
 Built-in commands implement the same interface as extensions, so anything a built-in can do, an extension can too.

@@ -39,13 +39,13 @@ export function paletteExtension({ openSettings, extensionsDir, registry }: Pale
         icon: info.error
           ? { builtin: 'alert', tint: 'red' }
           : (info.manifest?.icon ?? { builtin: 'extension', tint: 'purple' }),
-        accessory: info.error ? 'Failed to load' : info.source === 'builtin' ? 'Built-in' : name,
+        accessory: info.error ? 'Failed to load' : info.source === 'user' ? name : 'Built-in',
         actions: [],
       };
       if (info.dir) item.actions.push({ type: 'open-path', path: info.dir, title: 'Open Extension Folder' });
       if (info.error) item.actions.push({ type: 'copy', text: info.error, title: 'Copy Error' });
       item.actions.push({ type: 'callback', id: 'reload', title: 'Reload Extensions' });
-      (info.source === 'builtin' ? builtin : user).push(item);
+      (info.source === 'user' ? user : builtin).push(item);
     }
     return {
       type: 'list',

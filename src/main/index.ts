@@ -83,6 +83,8 @@ async function main(): Promise<void> {
       () => noteRootItems(notesStore),
       () => clipboardRootItems(clipboardHistory, () => settings.get().clipboardHistory.enabled),
     ],
+    // Shipped with the app: inside its resources once installed, the repo's folder from source.
+    bundledRoots: () => [join(app.isPackaged ? process.resourcesPath : app.getAppPath(), 'extensions')],
     extensionRoots: () => [
       extensionsDir,
       ...settings.get().extensionDirectories,
@@ -110,7 +112,7 @@ async function main(): Promise<void> {
 
   const launcher = new LauncherWindow({ hideOnBlur: () => settings.get().hideOnBlur });
   const hotkeys = new HotkeyManager(() => launcher.toggle());
-  registerIpc(registry, launcher);
+  registerIpc(registry, launcher, { pasteIntoApps: () => settings.get().pasteIntoApps });
   const settingsIpc = registerSettingsIpc({
     store: settings,
     window: settingsWindow,

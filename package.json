@@ -14,14 +14,15 @@
     "build": "electron-vite build",
     "preview": "electron-vite preview",
     "start": "electron-vite preview",
-    "typecheck": "tsc -p tsconfig.node.json && tsc -p tsconfig.web.json",
+    "typecheck": "tsc -p tsconfig.node.json && tsc -p tsconfig.web.json && tsc -p tsconfig.extensions.json",
     "lint": "biome check .",
     "format": "biome check --write .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "pnpm run build && playwright test",
     "dist": "pnpm run build && electron-builder --publish never",
-    "dist:dir": "pnpm run build && electron-builder --dir"
+    "dist:dir": "pnpm run build && electron-builder --dir",
+    "extensions:data": "node scripts/extension-data.mjs"
   },
   "engines": {
     "node": ">=22.12"
@@ -51,6 +52,8 @@
     "electron": "^44.7.0",
     "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
+    "emojibase-data": "17.0.0",
+    "gitmojis": "3.15.0",
     "lucide-react": "^1.54.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

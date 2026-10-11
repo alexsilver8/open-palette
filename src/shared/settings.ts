@@ -16,6 +16,8 @@ export interface Settings {
   extensionDirectories: string[];
   /** Where notes are kept, one Markdown file each. Empty means the app's data folder. */
   notesDirectory: string;
+  /** Paste actions (emoji, gitmoji, commit messages) type into the app you were in; off, they copy. */
+  pasteIntoApps: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -26,6 +28,7 @@ export const DEFAULT_SETTINGS: Settings = {
   clipboardHistory: { enabled: true, maxItems: 200 },
   extensionDirectories: [],
   notesDirectory: '',
+  pasteIntoApps: true,
 };
 
 export interface NormalizedSettings {
@@ -61,6 +64,9 @@ export function normalizeSettings(raw: unknown): NormalizedSettings {
   });
   take('launchAtLogin', raw.launchAtLogin, isBoolean, (v) => {
     settings.launchAtLogin = v;
+  });
+  take('pasteIntoApps', raw.pasteIntoApps, isBoolean, (v) => {
+    settings.pasteIntoApps = v;
   });
   take(
     'theme',

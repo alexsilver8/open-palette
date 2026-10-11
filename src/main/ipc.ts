@@ -1,7 +1,8 @@
-import { ipcMain } from 'electron';
+import { clipboard, ipcMain } from 'electron';
 import { IpcChannel } from '../shared/ipc';
 import type { ActionContext, CommandRef } from '../shared/types';
 import { sanitizeAction } from './extensions/validate';
+import { pasteIntoFrontApp } from './paste';
 import type { CommandRegistry } from './registry';
 import type { LauncherWindow } from './window';
 
@@ -20,7 +21,11 @@ function toActionContext(value: unknown): ActionContext {
 }
 
 /** Wires the renderer's `window.palette` API to the registry and the window. */
-export function registerIpc(registry: CommandRegistry, launcher: LauncherWindow): void {
+export function registerIpc(
+  registry: CommandRegistry,
+  launcher: LauncherWindow,
+  options: { pasteIntoApps(): boolean },
+): void {
   const fromLauncher = (event: Electron.IpcMainInvokeEvent | Electron.IpcMainEvent) =>
     event.sender === launcher.window.webContents;
 
@@ -33,8 +38,19 @@ export function registerIpc(registry: CommandRegistry, launcher: LauncherWindow)
     if (!fromLauncher(event)) throw new Error('Unexpected sender');
     const action = sanitizeAction(rawAction);
     if (!action) return { toast: 'Invalid action', toastStyle: 'failure' };
-    const result = await registry.runAction(action, toActionContext(rawContext));
-    if (result.hide) launcher.hide();
+    const { copy, paste, ...result } = await registry.runAction(action, toActionContext(rawContext));
+    const text = paste ?? copy;
+    if (text !== undefined) {
+      await clipboard.writeText(text);
+      result.hide = true;
+    }
+    if (paste !== undefined && options.pasteIntoApps()) {
+      // Hand the keyboard back to the app you were in, then paste there.
+      launcher.hideAndReturnFocus();
+      void pasteIntoFrontApp();
+    } else if (result.hide) {
+      launcher.hide();
+    }
     return result;
   });
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { DisplayItem, DisplaySection } from '../model';
 import { Highlight } from './Highlight';
 import { ItemIcon, tintOf } from './ItemIcon';
@@ -6,6 +6,16 @@ import { Keycaps } from './Keycaps';
 
 /** ⌘1 to ⌘9 open the first nine rows. */
 export const QUICK_KEY_COUNT = 9;
+
+/**
+ * Lists longer than this only draw the rows in view (plus a margin), so thousands of emoji or
+ * clipboard entries open as fast as ten. Heights match styles.css.
+ */
+export const VIRTUAL_AFTER = 150;
+const HEADING_HEIGHT = 28;
+const ROW_HEIGHT = 42;
+const CALC_HEIGHT = 62;
+const OVERSCAN = 420;
 
 interface ResultListProps {
   sections: DisplaySection[];
@@ -49,62 +59,164 @@ function Row({ item, quickKey }: { item: DisplayItem; quickKey: string[] | null 
   );
 }
 
+type Entry =
+  | { kind: 'heading'; key: string; title: string; top: number }
+  | { kind: 'row'; item: DisplayItem; index: number; top: number; height: number };
+
+/** Where every heading and row sits, for drawing just the ones in view. */
+function layOut(sections: DisplaySection[]): { entries: Entry[]; height: number; count: number } {
+  const entries: Entry[] = [];
+  let top = 0;
+  let index = 0;
+  sections.forEach((section, sectionIndex) => {
+    if (section.title) {
+      entries.push({ kind: 'heading', key: `heading-${sectionIndex}`, title: section.title, top });
+      top += HEADING_HEIGHT;
+    }
+    for (const item of section.items) {
+      const height = item.calculator ? CALC_HEIGHT : ROW_HEIGHT;
+      entries.push({ kind: 'row', item, index, top, height });
+      top += height;
+      index += 1;
+    }
+  });
+  return { entries, height: top, count: index };
+}
+
 export function ResultList({
-  sections,
+  sections: allSections,
   selectedId,
   emptyText,
   quickKeyModifier,
   onSelect,
   onActivate,
 }: ResultListProps) {
-  const rows = useRef(new Map<string, HTMLLIElement>());
+  // A heading over nothing says nothing.
+  const sections = useMemo(() => allSections.filter((section) => section.items.length > 0), [allSections]);
+  const layout = useMemo(() => layOut(sections), [sections]);
+  const virtual = layout.count > VIRTUAL_AFTER;
 
+  const root = useRef<HTMLDivElement>(null);
+  const rows = useRef(new Map<string, HTMLElement>());
+  /** Where the list starts within its scrolling pane. */
+  const offsetIn = (scroller: HTMLElement) =>
+    (root.current?.getBoundingClientRect().top ?? 0) - scroller.getBoundingClientRect().top + scroller.scrollTop;
+  const [viewport, setViewport] = useState({ top: 0, height: 600 });
+
+  // Long lists follow the scroll position of the pane they're in.
+  useLayoutEffect(() => {
+    const scroller = root.current?.parentElement;
+    if (!virtual || !scroller) return;
+    const update = () => {
+      setViewport({ top: scroller.scrollTop - offsetIn(scroller), height: scroller.clientHeight });
+    };
+    update();
+    scroller.addEventListener('scroll', update, { passive: true });
+    const resize = new ResizeObserver(update);
+    resize.observe(scroller);
+    return () => {
+      scroller.removeEventListener('scroll', update);
+      resize.disconnect();
+    };
+  }, [virtual]);
+
+  // Keep the selected row in view as it moves.
+  useLayoutEffect(() => {
+    if (!selectedId) return;
+    if (!virtual) {
+      rows.current.get(selectedId)?.scrollIntoView({ block: 'nearest' });
+      return;
+    }
+    const scroller = root.current?.parentElement;
+    const entry = layout.entries.find((e) => e.kind === 'row' && e.item.id === selectedId);
+    if (!scroller || entry?.kind !== 'row') return;
+    const top = entry.top + offsetIn(scroller);
+    const bottom = top + entry.height;
+    if (top < scroller.scrollTop) scroller.scrollTop = entry.index === 0 ? 0 : top;
+    else if (bottom > scroller.scrollTop + scroller.clientHeight) scroller.scrollTop = bottom - scroller.clientHeight;
+  }, [selectedId, virtual, layout]);
+
+  // Rows drawn last time are forgotten once they're gone.
   useEffect(() => {
-    if (selectedId) rows.current.get(selectedId)?.scrollIntoView({ block: 'nearest' });
-  }, [selectedId]);
+    for (const [id, node] of rows.current) if (!node.isConnected) rows.current.delete(id);
+  });
 
-  if (sections.every((section) => section.items.length === 0)) {
+  if (sections.length === 0) {
     return <div className="empty">{emptyText}</div>;
+  }
+
+  const option = (item: DisplayItem, index: number, style?: CSSProperties) => {
+    const selected = item.id === selectedId;
+    return (
+      <div
+        key={item.id}
+        id={optionId(index)}
+        ref={(node) => {
+          if (node) rows.current.set(item.id, node);
+        }}
+        role="option"
+        aria-selected={selected}
+        aria-posinset={index + 1}
+        aria-setsize={layout.count}
+        className={item.calculator ? 'row row--calc' : 'row'}
+        data-tint={tintOf(item.icon)}
+        style={style}
+        onMouseMove={() => {
+          if (!selected) onSelect(item);
+        }}
+        onClick={() => onActivate(item)}
+      >
+        <Row
+          item={item}
+          quickKey={quickKeyModifier && index < QUICK_KEY_COUNT ? [quickKeyModifier, String(index + 1)] : null}
+        />
+      </div>
+    );
+  };
+
+  if (virtual) {
+    const from = viewport.top - OVERSCAN;
+    const to = viewport.top + viewport.height + OVERSCAN;
+    const shown = layout.entries.filter(
+      (entry) =>
+        (entry.top + (entry.kind === 'row' ? entry.height : HEADING_HEIGHT) >= from && entry.top <= to) ||
+        // The selected row stays drawn, so the search field can point at it.
+        (entry.kind === 'row' && entry.item.id === selectedId),
+    );
+    return (
+      <div
+        ref={root}
+        className="results results--virtual"
+        id="results"
+        role="listbox"
+        aria-label="Results"
+        style={{ height: layout.height }}
+      >
+        {shown.map((entry) =>
+          entry.kind === 'heading' ? (
+            <h2 key={entry.key} className="results__heading" style={{ top: entry.top }}>
+              {entry.title}
+            </h2>
+          ) : (
+            option(entry.item, entry.index, { top: entry.top })
+          ),
+        )}
+      </div>
+    );
   }
 
   let index = -1;
   return (
-    <div className="results" id="results" role="listbox" aria-label="Results">
+    <div ref={root} className="results" id="results" role="listbox" aria-label="Results">
       {sections.map((section, sectionIndex) => (
-        <section key={sectionIndex} className="results__section" aria-label={section.title}>
+        // biome-ignore lint/a11y/useSemanticElements: groups the options of an ARIA listbox
+        <div key={sectionIndex} className="results__section" role="group" aria-label={section.title}>
           {section.title && <h2 className="results__heading">{section.title}</h2>}
-          <ul>
-            {section.items.map((item) => {
-              index += 1;
-              const selected = item.id === selectedId;
-              return (
-                <li
-                  key={item.id}
-                  id={optionId(index)}
-                  ref={(node) => {
-                    if (node) rows.current.set(item.id, node);
-                    else rows.current.delete(item.id);
-                  }}
-                  role="option"
-                  aria-selected={selected}
-                  className={item.calculator ? 'row row--calc' : 'row'}
-                  data-tint={tintOf(item.icon)}
-                  onMouseMove={() => {
-                    if (!selected) onSelect(item);
-                  }}
-                  onClick={() => onActivate(item)}
-                >
-                  <Row
-                    item={item}
-                    quickKey={
-                      quickKeyModifier && index < QUICK_KEY_COUNT ? [quickKeyModifier, String(index + 1)] : null
-                    }
-                  />
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+          {section.items.map((item) => {
+            index += 1;
+            return option(item, index);
+          })}
+        </div>
       ))}
     </div>
   );

@@ -9,8 +9,13 @@ import { randomUUID } from 'node:crypto';
 /** @typedef {import('../../../src/shared/extension-api').Extension} Extension */
 /** @typedef {import('../../../src/shared/extension-api').ExtensionContext} Context */
 /** @typedef {import('../../../src/shared/extension-api').ListItem} ListItem */
+/** @typedef {import('../../../src/shared/extension-api').ListView} ListView */
+/** @typedef {import('../../../src/shared/extension-api').Action} Action */
 
-/** @param {Context} ctx */
+/**
+ * @param {Context} ctx
+ * @returns {ListView}
+ */
 function uuidView(ctx) {
   const uuids = Array.from({ length: 5 }, () =>
     ctx.query.toLowerCase().includes('upper') ? randomUUID().toUpperCase() : randomUUID(),
@@ -27,7 +32,7 @@ function uuidView(ctx) {
         items: uuids.map((uuid) => ({
           id: uuid,
           title: uuid,
-          icon: '🎲',
+          icon: { emoji: '🎲' },
           actions: [
             { type: 'copy', text: uuid, title: 'Copy UUID' },
             {
@@ -43,7 +48,10 @@ function uuidView(ctx) {
   };
 }
 
-/** @param {Context} ctx */
+/**
+ * @param {Context} ctx
+ * @returns {Promise<ListView>}
+ */
 async function npmView(ctx) {
   const query = (ctx.query || ctx.argument || '').trim();
   if (!query) {
@@ -75,13 +83,13 @@ async function npmView(ctx) {
           title: pkg.name,
           subtitle: pkg.description,
           accessory: `v${pkg.version}`,
-          icon: '📦',
+          icon: { emoji: '📦' },
           actions: [
             { type: 'open-url', url: pkg.links.npm, title: 'Open on npmjs.com' },
             { type: 'copy', text: `npm install ${pkg.name}`, title: 'Copy Install Command' },
-            ...(pkg.links.repository
-              ? [{ type: 'open-url', url: pkg.links.repository, title: 'Open Repository' }]
-              : []),
+            .../** @type {Action[]} */ (
+              pkg.links.repository ? [{ type: 'open-url', url: pkg.links.repository, title: 'Open Repository' }] : []
+            ),
           ],
         })),
       },
@@ -98,7 +106,10 @@ function readTodos(ctx) {
   return /** @type {any} */ (ctx.storage.get('todos')) ?? [];
 }
 
-/** @param {Context} ctx */
+/**
+ * @param {Context} ctx
+ * @returns {ListView}
+ */
 function todosView(ctx) {
   const todos = readTodos(ctx);
   const query = ctx.query.trim();
@@ -107,7 +118,7 @@ function todosView(ctx) {
   const toItem = (todo) => ({
     id: todo.id,
     title: todo.text,
-    icon: todo.done ? '✅' : '⬜️',
+    icon: { emoji: todo.done ? '✅' : '⬜️' },
     actions: [
       { type: 'callback', id: 'toggle', title: todo.done ? 'Mark as Not Done' : 'Mark as Done', payload: todo.id },
       { type: 'copy', text: todo.text, title: 'Copy Text' },
@@ -134,7 +145,7 @@ function todosView(ctx) {
               {
                 id: 'add',
                 title: `Add “${query}”`,
-                icon: '➕',
+                icon: { emoji: '➕' },
                 actions: [{ type: 'callback', id: 'add', title: 'Add To-do', payload: query }],
               },
             ]

@@ -37,14 +37,17 @@ const BUILTIN_ICONS: BuiltinIconName[] = [
   'extension',
   'file',
   'folder',
+  'git-commit',
   'globe',
   'link',
   'lock',
   'moon',
   'note',
+  'plug',
   'power',
   'refresh',
   'search',
+  'server',
   'settings',
   'sparkles',
   'terminal',
@@ -54,6 +57,8 @@ const BUILTIN_ICONS: BuiltinIconName[] = [
 const MAX_ITEMS = 2000;
 const MAX_TEXT = 1000;
 const MAX_DETAIL = 20_000;
+/** Text an action may copy or paste: plenty for any snippet, but not unbounded. */
+const MAX_CLIPBOARD_TEXT = 1_000_000;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -74,13 +79,25 @@ function stringList(value: unknown): string[] | undefined {
  * Accepts `"🎉"`, `"assets/icon.png"` (relative to `baseDir`), or the object forms of
  * `Icon`. Returns `undefined` for anything else.
  */
+const graphemes = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+
+/**
+ * An emoji or a few characters of text. Counted as people see them, so an emoji built from
+ * several code points (a family, a skin tone) still counts as one.
+ */
+function isShortText(value: string): boolean {
+  if (value.length === 0 || value.length > 40) return false;
+  // Three code units can't be more than three characters; only longer text needs counting.
+  return value.length <= 3 || [...graphemes.segment(value)].length <= 3;
+}
+
 export function sanitizeIcon(value: unknown, baseDir?: string): Icon | undefined {
   if (typeof value === 'string') {
     if (IMAGE_PATTERN.test(value)) {
       if (isAbsolute(value)) return { path: value };
       return baseDir ? { path: resolve(baseDir, value) } : undefined;
     }
-    return value.length > 0 && value.length <= 8 && !/[\\/]/.test(value) ? { emoji: value } : undefined;
+    return isShortText(value) && !/[\\/]/.test(value) ? { emoji: value } : undefined;
   }
   if (!isRecord(value)) return undefined;
   if (typeof value.builtin === 'string' && (BUILTIN_ICONS as string[]).includes(value.builtin)) {
@@ -88,8 +105,7 @@ export function sanitizeIcon(value: unknown, baseDir?: string): Icon | undefined
       typeof value.tint === 'string' && (TINTS as string[]).includes(value.tint) ? (value.tint as Tint) : undefined;
     return tint ? { builtin: value.builtin as BuiltinIconName, tint } : { builtin: value.builtin as BuiltinIconName };
   }
-  if (typeof value.emoji === 'string' && value.emoji.length > 0 && value.emoji.length <= 8)
-    return { emoji: value.emoji };
+  if (typeof value.emoji === 'string' && isShortText(value.emoji)) return { emoji: value.emoji };
   if (typeof value.path === 'string') {
     // The object form may point at any file; non-images show their OS icon.
     if (isAbsolute(value.path)) return { path: value.path };
@@ -132,9 +148,10 @@ export function sanitizeAction(value: unknown): Action | undefined {
       const path = text(value.path, 4096);
       return path && isAbsolute(path) ? { ...base, type: value.type, path } : undefined;
     }
-    case 'copy': {
-      const copied = typeof value.text === 'string' ? value.text : undefined;
-      return copied !== undefined ? { ...base, type: 'copy', text: copied } : undefined;
+    case 'copy':
+    case 'paste': {
+      const copied = typeof value.text === 'string' ? value.text.slice(0, MAX_CLIPBOARD_TEXT) : undefined;
+      return copied !== undefined ? { ...base, type: value.type, text: copied } : undefined;
     }
     case 'open-command': {
       const ref = value.ref;
@@ -251,11 +268,14 @@ export function sanitizeActionResult(value: unknown, baseDir?: string): ActionRe
   if (value.hide === true) result.hide = true;
   if (value.pop === true) result.pop = true;
   if (value.clearSearch === true) result.clearSearch = true;
+  if (typeof value.search === 'string') result.search = value.search.slice(0, 500);
   const toast = text(value.toast, 200);
   if (toast) result.toast = toast;
   if (value.toastStyle === 'success' || value.toastStyle === 'failure') result.toastStyle = value.toastStyle;
   if (value.push !== undefined) result.push = sanitizeView(value.push, baseDir);
   if (value.replace !== undefined) result.replace = sanitizeView(value.replace, baseDir);
+  if (typeof value.copy === 'string') result.copy = value.copy.slice(0, MAX_CLIPBOARD_TEXT);
+  if (typeof value.paste === 'string') result.paste = value.paste.slice(0, MAX_CLIPBOARD_TEXT);
   return result;
 }
 
