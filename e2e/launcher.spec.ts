@@ -19,7 +19,7 @@ function savedNotes(): string[] {
 
 test.beforeEach(async () => {
   userData = mkdtempSync(join(tmpdir(), 'open-palette-e2e-'));
-  if (test.info().title.includes('no cap')) {
+  if (test.info().title.includes('no cap') || test.info().title.includes('scrolled')) {
     mkdirSync(join(userData, 'notes'));
     for (let i = 1; i <= 12; i++) writeFileSync(join(userData, 'notes', `note-${i}.md`), `Note number ${i}`);
   }
@@ -287,6 +287,25 @@ test('runs a result by its number', async () => {
   await page.keyboard.press('1');
   await page.keyboard.up(mod);
   await expect(page.locator('.search__crumb')).toHaveText('Generate UUID');
+});
+
+test('numbers the rows in view once the list is scrolled', async () => {
+  await page.keyboard.type('search notes');
+  await page.keyboard.press('Enter');
+  const options = page.getByRole('option');
+  await expect(options).toHaveCount(12);
+  // Scroll the third note to the top of the list.
+  await page.locator('.content__list').evaluate((list) => {
+    const third = list.querySelectorAll('[role="option"]')[2];
+    if (third) list.scrollTop += third.getBoundingClientRect().top - list.getBoundingClientRect().top;
+  });
+  const fourth = (await options.nth(3).locator('.row__title').textContent()) ?? '';
+  await page.keyboard.down(mod);
+  await expect(options.first().locator('.keycap')).toHaveCount(0);
+  await expect(options.nth(2).locator('.keycap')).toHaveText([mod === 'Meta' ? '⌘' : 'Ctrl', '1']);
+  const [notes] = await Promise.all([app.waitForEvent('window'), page.keyboard.press('2')]);
+  await page.keyboard.up(mod);
+  await expect(notes.locator('.notes__item[aria-current]')).toContainText(fourth);
 });
 
 test('changes settings in the Settings window', async () => {

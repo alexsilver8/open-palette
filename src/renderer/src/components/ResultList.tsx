@@ -4,7 +4,7 @@ import { Highlight } from './Highlight';
 import { ItemIcon, tintOf } from './ItemIcon';
 import { Keycaps } from './Keycaps';
 
-/** ⌘1 to ⌘9 open the first nine rows. */
+/** ⌘1 to ⌘9 open the first nine rows in view. */
 export const QUICK_KEY_COUNT = 9;
 
 /**
@@ -21,13 +21,28 @@ interface ResultListProps {
   sections: DisplaySection[];
   selectedId: string | undefined;
   emptyText: string | undefined;
-  /** The modifier to draw beside the first rows while it's held, e.g. "⌘". */
+  /** The modifier to draw beside the rows in view while it's held, e.g. "⌘". */
   quickKeyModifier: string | null;
+  /** The row ⌘1 stands for (the first one in view); ⌘2 is the next, and so on. */
+  quickKeyStart: number;
+  /** Reports the first row in view as the list scrolls or changes. */
+  onFirstInViewChange(index: number): void;
   onSelect(item: DisplayItem): void;
   onActivate(item: DisplayItem): void;
 }
 
 export const optionId = (index: number) => `option-${index}`;
+
+/** The first row at least half in view, counting from 0. */
+function firstRowInView(list: HTMLElement, scroller: HTMLElement): number {
+  const top = scroller.getBoundingClientRect().top;
+  // Rows are in list order, and long lists only draw the ones near the view.
+  for (const node of list.querySelectorAll<HTMLElement>('[role="option"]')) {
+    const box = node.getBoundingClientRect();
+    if (box.top + box.height / 2 >= top) return Number(node.getAttribute('aria-posinset')) - 1;
+  }
+  return 0;
+}
 
 function Row({ item, quickKey }: { item: DisplayItem; quickKey: string[] | null }) {
   if (item.calculator) {
@@ -88,6 +103,8 @@ export function ResultList({
   selectedId,
   emptyText,
   quickKeyModifier,
+  quickKeyStart,
+  onFirstInViewChange,
   onSelect,
   onActivate,
 }: ResultListProps) {
@@ -136,6 +153,24 @@ export function ResultList({
     else if (bottom > scroller.scrollTop + scroller.clientHeight) scroller.scrollTop = bottom - scroller.clientHeight;
   }, [selectedId, virtual, layout]);
 
+  // ⌘1 opens the first row in view, so the numbers follow the scroll. Checked after every draw
+  // (long lists redraw as they scroll, and the rows change as you type) and on scroll (short
+  // lists don't redraw for it).
+  const hasRows = sections.length > 0;
+  useLayoutEffect(() => {
+    const scroller = root.current?.parentElement;
+    if (!hasRows || !scroller) return;
+    const update = () => {
+      if (root.current) onFirstInViewChange(firstRowInView(root.current, scroller));
+    };
+    scroller.addEventListener('scroll', update, { passive: true });
+    return () => scroller.removeEventListener('scroll', update);
+  }, [hasRows, onFirstInViewChange]);
+  useLayoutEffect(() => {
+    const scroller = root.current?.parentElement;
+    onFirstInViewChange(root.current && scroller ? firstRowInView(root.current, scroller) : 0);
+  });
+
   // Rows drawn last time are forgotten once they're gone.
   useEffect(() => {
     for (const [id, node] of rows.current) if (!node.isConnected) rows.current.delete(id);
@@ -168,7 +203,11 @@ export function ResultList({
       >
         <Row
           item={item}
-          quickKey={quickKeyModifier && index < QUICK_KEY_COUNT ? [quickKeyModifier, String(index + 1)] : null}
+          quickKey={
+            quickKeyModifier && index >= quickKeyStart && index < quickKeyStart + QUICK_KEY_COUNT
+              ? [quickKeyModifier, String(index - quickKeyStart + 1)]
+              : null
+          }
         />
       </div>
     );

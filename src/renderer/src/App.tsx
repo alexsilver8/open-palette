@@ -70,8 +70,10 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
-  /** While ⌘ (Ctrl) is held, the first rows show their quick keys. */
+  /** While ⌘ (Ctrl) is held, the rows in view show their quick keys. */
   const [modHeld, setModHeld] = useState(false);
+  /** The first row in view: ⌘1 opens it, ⌘2 the one after, and so on. */
+  const [firstInView, setFirstInView] = useState(0);
   const input = useRef<HTMLInputElement>(null);
   const searchRequest = useRef(0);
   const busy = useRef(false);
@@ -274,7 +276,7 @@ export function App() {
   );
 
   /**
-   * Runs an action of a row: the selected one for ↵ / ⌘↵, or the nth for ⌘1–9. If a
+   * Runs an action of a row: the selected one for ↵ / ⌘↵, or the one at `index` for ⌘1–9. If a
    * self-filtering list hasn't caught up with the typing yet, waits for it first, so the row
    * that runs is the one for what was typed.
    */
@@ -325,14 +327,15 @@ export function App() {
     const shortcutAction = selected && byShortcut(selected);
     // By physical key, so it works on layouts where the digits need Shift (AZERTY).
     const digit = /^(?:Digit|Numpad)([1-9])$/.exec(event.code)?.[1];
-    const quickIndex = mod && !event.shiftKey && !event.altKey && digit ? Number(digit) - 1 : -1;
+    const quickKey = mod && !event.shiftKey && !event.altKey && digit ? Number(digit) : 0;
     if (shortcutAction) {
       event.preventDefault();
       // Like ↵, waits for a list that builds itself from the search to catch up first.
       void activate(byShortcut);
-    } else if (quickIndex >= 0 && quickIndex < QUICK_KEY_COUNT) {
+    } else if (quickKey > 0 && quickKey <= QUICK_KEY_COUNT) {
       event.preventDefault();
-      void activate((item) => item.actions[0], quickIndex);
+      // Counted from the first row in view, like the numbers drawn beside the rows.
+      void activate((item) => item.actions[0], firstInView + quickKey - 1);
     } else if (key === 'Tab' && isRoot && !mod && !event.altKey) {
       event.preventDefault();
       const index = ROOT_FILTERS.findIndex((f) => f.id === filter);
@@ -430,6 +433,8 @@ export function App() {
             selectedId={selected?.id}
             emptyText={emptyText}
             quickKeyModifier={modHeld ? MOD_LABEL : null}
+            quickKeyStart={firstInView}
+            onFirstInViewChange={setFirstInView}
             onSelect={(item) => updateTop({ selectedId: item.id })}
             onActivate={(item) => void run(item, item.actions[0])}
           />
