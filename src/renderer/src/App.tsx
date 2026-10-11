@@ -35,6 +35,7 @@ const PLACEHOLDERS: Record<RootFilter, string> = {
   all: 'Search apps, commands and notes…',
   application: 'Search apps…',
   command: 'Search commands…',
+  extensions: 'Search extensions and their commands…',
   note: 'Search notes…',
   clipboard: 'Search copied text…',
 };
@@ -44,6 +45,7 @@ const EMPTY_TABS: Record<RootFilter, string> = {
   all: 'Loading apps and commands…',
   application: 'No apps found.',
   command: 'No commands.',
+  extensions: 'No extensions yet. Run Open Extensions Folder to add one.',
   note: 'No notes yet. Run Create Note to write one.',
   clipboard: 'Nothing copied yet, or clipboard history is turned off in Settings.',
 };

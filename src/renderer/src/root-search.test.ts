@@ -133,8 +133,68 @@ describe('filter tabs', () => {
   });
 
   it('counts matches per tab', () => {
-    expect(countRootMatches(items, 'safari')).toEqual({ all: 2, application: 1, command: 0, note: 1, clipboard: 0 });
+    expect(countRootMatches(items, 'safari')).toEqual({
+      all: 2,
+      application: 1,
+      command: 0,
+      extensions: 0,
+      note: 1,
+      clipboard: 0,
+    });
     expect(countRootMatches(items, '').all).toBe(items.length);
+  });
+});
+
+describe('Extensions tab', () => {
+  const fromExtension = (
+    title: string,
+    extension: { name: string; title: string; source: 'builtin' | 'bundled' | 'user' },
+    extra: Partial<RootItem> = {},
+  ): RootItem =>
+    command(title, {
+      id: `command:${extension.name}/${title}`,
+      subtitle: extension.title,
+      extension,
+      ...extra,
+    });
+  const docker = { name: 'docker', title: 'Docker', source: 'bundled' as const };
+  const github = { name: 'github', title: 'GitHub', source: 'bundled' as const };
+  const mine = { name: 'standup', title: 'Standup Notes', source: 'user' as const };
+  const system = { name: 'system', title: 'System', source: 'builtin' as const };
+  const all: RootItem[] = [
+    fromExtension('Search Docker Images', docker),
+    fromExtension('Search Docker Containers', docker, { keywords: ['container', 'compose'] }),
+    fromExtension('My Pull Requests', github, { keywords: ['review'] }),
+    fromExtension('Write Standup', mine, { subtitle: 'For the 9:30 call' }),
+    fromExtension('Lock Screen', system),
+    app('Docker'),
+  ];
+
+  it('lists each extension with its commands, A to Z, leaving out built-in ones', () => {
+    const sections = buildRootSections(all, '', 'extensions');
+    expect(titles2(sections)).toEqual([
+      ['Docker', ['Search Docker Containers', 'Search Docker Images']],
+      ['GitHub', ['My Pull Requests']],
+      ['Standup Notes', ['Write Standup']],
+    ]);
+    // The heading names the extension, so rows don't repeat it, but keep their own subtitles.
+    expect(sections[0]?.items[0]?.subtitle).toBeUndefined();
+    expect(sections[2]?.items[0]?.subtitle).toBe('For the 9:30 call');
+    expect(sections[0]?.items[0]?.rootItemId).toBe('command:docker/Search Docker Containers');
+    expect(sections[0]?.items[0]).not.toHaveProperty('extension');
+  });
+
+  it("finds commands by their own words or their extension's name", () => {
+    expect(titles2(buildRootSections(all, 'review', 'extensions'))).toEqual([['GitHub', ['My Pull Requests']]]);
+    expect(titles2(buildRootSections(all, 'docker', 'extensions'))).toEqual([
+      ['Docker', ['Search Docker Containers', 'Search Docker Images']],
+    ]);
+    expect(buildRootSections(all, 'lock', 'extensions')).toEqual([]);
+  });
+
+  it('counts the commands that match', () => {
+    expect(countRootMatches(all, 'docker').extensions).toBe(2);
+    expect(countRootMatches(all, '').extensions).toBe(4);
   });
 });
 
