@@ -45,7 +45,7 @@ export function pasteKeystrokes(platform: NodeJS.Platform, env: NodeJS.ProcessEn
 }
 
 /** How long to give the previous app to come back to the front after the launcher hides. */
-const FOCUS_DELAY_MS = 150;
+export const FOCUS_DELAY_MS = 150;
 
 function run(keystroke: PasteKeystroke): Promise<void> {
   return new Promise((resolve, reject) => {

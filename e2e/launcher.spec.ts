@@ -104,6 +104,25 @@ test('acts on what was typed even when ↵ comes before a self-filtering list ca
   await expect(page.getByRole('combobox')).toHaveValue('');
 });
 
+test('asks before restarting, and Cancel goes back', async () => {
+  await page.keyboard.type('restart');
+  await expect(page.getByRole('option').first()).toContainText('Restart');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.search__crumb')).toHaveText('Restart');
+  await expect(page.getByRole('option')).toHaveText([/Restart Now/, /Cancel/]);
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.search__crumb')).toHaveCount(0);
+  await expect(page.getByRole('combobox')).toHaveValue('restart');
+});
+
+test('lists the window layouts', async () => {
+  await page.keyboard.type('left half');
+  const row = page.getByRole('option').first();
+  await expect(row).toContainText('Left Half');
+  await expect(row).toContainText('Window Management');
+});
+
 test('creates a note and saves it as a Markdown file', async () => {
   await page.keyboard.type('create note');
   const [notes] = await Promise.all([app.waitForEvent('window'), page.keyboard.press('Enter')]);
