@@ -40,8 +40,10 @@ public static class OpenPaletteWindows {
   [DllImport("user32.dll")] static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr clip, MonitorEnumProc callback, IntPtr data);
   [DllImport("user32.dll")] static extern bool GetMonitorInfo(IntPtr monitor, ref MONITORINFO info);
   [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetClassName(IntPtr hwnd, StringBuilder name, int size);
-  [DllImport("user32.dll")] static extern IntPtr SetProcessDpiAwarenessContext(IntPtr context);
+  [DllImport("user32.dll")] static extern bool SetProcessDpiAwarenessContext(IntPtr context);
+  [DllImport("user32.dll")] static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
   [DllImport("user32.dll")] static extern bool SetProcessDPIAware();
+  [DllImport("user32.dll")] static extern bool IsHungAppWindow(IntPtr hwnd);
   [DllImport("dwmapi.dll")] static extern int DwmGetWindowAttribute(IntPtr hwnd, int attribute, out RECT value, int size);
 
   const uint GA_ROOT = 2;
@@ -54,6 +56,12 @@ public static class OpenPaletteWindows {
     // Real pixels on every display, whatever its scaling (-4: per-monitor aware, v2).
     try { SetProcessDpiAwarenessContext(new IntPtr(-4)); }
     catch (EntryPointNotFoundException) { SetProcessDPIAware(); }
+  }
+
+  // The process may already have been given another awareness; the thread's own setting wins.
+  static void Aware() {
+    try { SetThreadDpiAwarenessContext(new IntPtr(-4)); }
+    catch (EntryPointNotFoundException) {}
   }
 
   // The frame you see; GetWindowRect also counts the invisible borders used for resizing.
@@ -69,6 +77,7 @@ public static class OpenPaletteWindows {
   }
 
   public static string Front() {
+    Aware();
     IntPtr hwnd = GetForegroundWindow();
     if (hwnd != IntPtr.Zero) hwnd = GetAncestor(hwnd, GA_ROOT);
     StringBuilder name = new StringBuilder(256);
@@ -101,8 +110,11 @@ public static class OpenPaletteWindows {
   }
 
   public static string Move(long id, int x, int y, int width, int height) {
+    Aware();
     IntPtr hwnd = new IntPtr(id);
     if (!IsWindow(hwnd)) return "{\"error\":\"gone\"}";
+    // Moving a window that isn't responding would wait until it does.
+    if (IsHungAppWindow(hwnd)) return "{\"error\":\"hung\"}";
     if (IsZoomed(hwnd) || IsIconic(hwnd)) ShowWindow(hwnd, SW_RESTORE);
     // Twice: a window moved to a display with different scaling resizes itself once it arrives.
     for (int pass = 0; pass < 2; pass++) {
@@ -174,6 +186,7 @@ export function checkMove(line: string): void {
   const reply = JSON.parse(line) as { ok?: boolean; error?: string };
   if (reply.ok) return;
   if (reply.error === 'gone') throw new WindowError('That window has closed.');
+  if (reply.error === 'hung') throw new WindowError("That app isn't responding, so its window can't be moved.");
   if (reply.error === 'denied') {
     throw new WindowError("Windows doesn't let Open Palette move the windows of apps running as administrator.");
   }
@@ -212,11 +225,14 @@ export class PowerShellWindows implements WindowBackend {
     checkMove(await this.request(`move ${window.id} ${numbers.join(' ')}`));
   }
 
-  /** Stops the helper. */
-  dispose(): void {
+  /** Stops the helper: asks it to finish, or ends it at once if it's stuck. */
+  dispose(force = false): void {
     clearTimeout(this.idle);
-    this.child?.stdin.end();
+    const child = this.child;
     this.child = undefined;
+    if (!child) return;
+    child.stdin.end();
+    if (force) child.kill();
   }
 
   /** One request at a time, so answers can't cross. */
@@ -232,13 +248,16 @@ export class PowerShellWindows implements WindowBackend {
     if (!this.ready) {
       // The helper says it's ready once compiled; until then, a slow start isn't a failure.
       const ready = await this.next(FIRST_TIMEOUT_MS);
-      if (ready === undefined) throw new WindowError("Couldn't start the PowerShell helper that moves windows.");
+      if (ready === undefined) {
+        this.dispose(true);
+        throw new WindowError("Couldn't start the PowerShell helper that moves windows.");
+      }
       this.ready = true;
     }
     child.stdin.write(`${line}\n`);
     const answer = await this.next(TIMEOUT_MS);
     if (answer === undefined) {
-      this.dispose();
+      this.dispose(true);
       throw new WindowError("The PowerShell helper that moves windows didn't answer.");
     }
     this.idle = setTimeout(() => this.dispose(), IDLE_MS);

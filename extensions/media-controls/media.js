@@ -153,9 +153,12 @@ function run(argv) {
 
 // ── Linux ────────────────────────────────────────────────────────────────────
 
-/** What `playerctl metadata --format` prints for each player, tab-separated. */
+/**
+ * What `playerctl metadata --format` prints for each player, tab-separated. The instance tells
+ * apart two players of the same kind (Chrome and an Electron app are both "chromium").
+ */
 export const PLAYERCTL_FORMAT =
-  '{{playerName}}\t{{status}}\t{{title}}\t{{artist}}\t{{album}}\t{{mpris:length}}\t{{position}}';
+  '{{playerInstance}}\t{{playerName}}\t{{status}}\t{{title}}\t{{artist}}\t{{album}}\t{{mpris:length}}\t{{position}}';
 
 /** @param {string} output @returns {Player[]} */
 export function parsePlayerctl(output) {
@@ -163,15 +166,16 @@ export function parsePlayerctl(output) {
     .split('\n')
     .filter((line) => line.includes('\t'))
     .map((line) => {
-      const [name = '', status, title, artist, album, length, position] = line.split('\t');
+      const [instance = '', name = '', status, title, artist, album, length, position] = line.split('\t');
       // MPRIS counts in microseconds.
       const micro = (/** @type {string | undefined} */ v) => {
         const n = seconds(v);
         return n === undefined ? undefined : n / 1e6;
       };
       return {
-        id: name,
-        app: prettyLinuxName(name),
+        // playerctl before 2.1 leaves the instance empty.
+        id: instance || name,
+        app: prettyLinuxName(name || instance),
         state: toState(status),
         title: text(title),
         artist: text(artist),
@@ -259,7 +263,8 @@ const WINDOWS_METHODS = {
  * @param {{ app: string, action: MediaAction }} [control]
  */
 export function windowsSessionsScript(control) {
-  const app = control ? control.app.replace(/'/g, "''") : '';
+  // Base64, so nothing in an app's ID can end the string it's put in.
+  const app = control ? Buffer.from(control.app, 'utf8').toString('base64') : '';
   const method = control ? WINDOWS_METHODS[control.action] : '';
   return `$ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
@@ -272,7 +277,7 @@ function Await($operation, [Type]$type) {
 [Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager, Windows.Media.Control, ContentType = WindowsRuntime] | Out-Null
 $manager = Await ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync()) ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager])
 $sessions = @($manager.GetSessions())
-$app = '${app}'
+$app = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${app}'))
 if ($app) {
   $target = $sessions | Where-Object { $_.SourceAppUserModelId -eq $app } | Select-Object -First 1
   if (-not $target) { throw "That app isn't playing any more." }

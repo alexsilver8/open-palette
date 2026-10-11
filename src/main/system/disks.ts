@@ -142,6 +142,12 @@ if ($image -and $image.ImagePath) {
   $item = (New-Object -ComObject Shell.Application).Namespace(17).ParseName('${letter}:')
   if (-not $item) { throw "There's no drive ${letter}:." }
   $item.InvokeVerb('Eject')
+  # Eject doesn't say whether it worked; the drive going away does.
+  for ($i = 0; $i -lt 20; $i++) {
+    Start-Sleep -Milliseconds 250
+    if (-not (Test-Path '${letter}:\\')) { exit 0 }
+  }
+  throw "${letter}: is still there; it may be in use."
 }`;
 }
 
@@ -161,7 +167,8 @@ interface LsblkDevice {
   children?: LsblkDevice[];
 }
 
-const LINUX_SYSTEM_MOUNTS = new Set(['/', '/boot', '/boot/efi', '/home', '/usr', '/var', '[SWAP]']);
+/** Where desktops mount what you plug in; anything mounted elsewhere is part of the system. */
+const LINUX_REMOVABLE_MOUNTS = /^\/(media|run\/media|mnt)\//;
 
 function truthy(value: unknown): boolean {
   return value === true || value === 1 || value === '1' || value === 'true';
@@ -181,7 +188,7 @@ export function parseLsblk(output: string): Disk[] {
     const mountpoint = device.mountpoint ?? device.mountpoints?.find((m): m is string => !!m);
     const removable = truthy(top.rm) || truthy(top.hotplug) || truthy(device.rm) || truthy(device.hotplug);
     const path = device.path ?? (device.name ? `/dev/${device.name}` : undefined);
-    if (mountpoint && path && !LINUX_SYSTEM_MOUNTS.has(mountpoint) && (removable || device.type === 'rom')) {
+    if (mountpoint && path && LINUX_REMOVABLE_MOUNTS.test(mountpoint) && (removable || device.type === 'rom')) {
       disks.push({
         id: path,
         name: device.label || mountpoint.split('/').pop() || path,

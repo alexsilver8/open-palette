@@ -6,7 +6,7 @@ import type { ListView } from '../../shared/types';
 import { systemExtension } from '../commands/system';
 import type { Exec } from '../exec';
 import { macDiskFromInfo, parseLsblk, parsePlist, parseWindowsDisks, windowsEjectScript } from './disks';
-import { linuxLogOut, powerPrograms } from './power';
+import { asksAppsFirst, powerPrograms } from './power';
 import { emptyTrash, linuxTrash } from './trash';
 import { parseAirportPower, parseRfkill, parseWifiDevice, windowsWifiScript } from './wifi';
 
@@ -36,13 +36,29 @@ describe('power', () => {
     expect(powerPrograms('restart', 'linux')).toEqual([['systemctl', ['reboot']]]);
   });
 
-  it('logs out of each Linux desktop its own way, then by ending the session', () => {
-    expect(linuxLogOut({ XDG_CURRENT_DESKTOP: 'ubuntu:GNOME', XDG_SESSION_ID: '3' })).toEqual([
-      ['gnome-session-quit', ['--logout', '--no-prompt']],
-      ['loginctl', ['terminate-session', '3']],
+  it('goes through the Linux desktop first, so apps can ask to save', () => {
+    expect(powerPrograms('restart', 'linux', { XDG_CURRENT_DESKTOP: 'ubuntu:GNOME' })).toEqual([
+      ['gnome-session-quit', ['--reboot', '--no-prompt']],
+      ['systemctl', ['reboot']],
     ]);
-    expect(linuxLogOut({ XDG_CURRENT_DESKTOP: 'KDE' }).map(([file]) => file)).toEqual(['qdbus6', 'qdbus']);
-    expect(linuxLogOut({})).toEqual([]);
+    expect(
+      powerPrograms('log-out', 'linux', { XDG_CURRENT_DESKTOP: 'KDE' }).map(([file, , options]) => [
+        file,
+        !!options?.next,
+      ]),
+    ).toEqual([
+      ['qdbus6', true],
+      ['qdbus', true],
+      ['qdbus', false],
+    ]);
+    expect(powerPrograms('shut-down', 'linux', { XDG_CURRENT_DESKTOP: 'XFCE' })[0]).toEqual([
+      'xfce4-session-logout',
+      ['--halt'],
+    ]);
+    // An unknown desktop can't log out at all, rather than ending the session from outside.
+    expect(powerPrograms('log-out', 'linux', { XDG_CURRENT_DESKTOP: 'sway', XDG_SESSION_ID: '3' })).toEqual([]);
+    expect(asksAppsFirst('linux', { XDG_CURRENT_DESKTOP: 'sway' })).toBe(false);
+    expect(asksAppsFirst('darwin', {})).toBe(true);
   });
 });
 
@@ -127,6 +143,24 @@ describe('disks', () => {
               type: 'part',
             },
             { name: 'sdb2', path: '/dev/sdb2', mountpoint: null, rm: true, type: 'part' },
+          ],
+        },
+        // An SD card the system boots from counts as hotplug, but isn't something to eject.
+        {
+          name: 'mmcblk0',
+          path: '/dev/mmcblk0',
+          rm: false,
+          hotplug: true,
+          type: 'disk',
+          children: [
+            {
+              name: 'mmcblk0p1',
+              path: '/dev/mmcblk0p1',
+              mountpoint: '/boot/firmware',
+              rm: false,
+              hotplug: true,
+              type: 'part',
+            },
           ],
         },
         // util-linux before 2.33: no path, "0"/"1" flags, mountpoints.

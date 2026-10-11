@@ -40,7 +40,19 @@ export function encodePowerShell(script: string): string {
   return Buffer.from(script, 'utf16le').toString('base64');
 }
 
-/** Arguments to run a PowerShell script, with nothing from the user's profile. */
+/**
+ * Arguments to run a PowerShell script, with nothing from the user's profile. Output comes as
+ * UTF-8, which Node expects, rather than the console's code page, so names like "Beyoncé" or a
+ * volume label in Japanese arrive intact.
+ */
 export function powershellArgs(script: string): string[] {
-  return ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', encodePowerShell(script)];
+  const utf8 = '[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n';
+  return [
+    '-NoProfile',
+    '-NonInteractive',
+    '-ExecutionPolicy',
+    'Bypass',
+    '-EncodedCommand',
+    encodePowerShell(utf8 + script),
+  ];
 }

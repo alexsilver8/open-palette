@@ -1,36 +1,51 @@
 import type { Platform } from '../../shared/types';
 
-/** A program to run, with its arguments. */
-export type Program = [file: string, args: string[]];
+/** A program to run, with its arguments. `next: true` tries the next one if this one fails. */
+export type Program = [file: string, args: string[], options?: { next?: boolean }];
 
 export type PowerAction = 'restart' | 'shut-down' | 'log-out';
 
 const osascript = (script: string): Program => ['osascript', ['-e', script]];
 
 /**
- * How to log out on Linux, by desktop, before falling back to ending the session outright
- * (which doesn't let apps ask to save). Each is tried in turn until one is installed.
+ * Restarting, shutting down and logging out through the Linux desktop, which asks open apps to
+ * quit (and lets them ask to save). Only desktops whose way is known are listed.
  */
-export function linuxLogOut(env: NodeJS.ProcessEnv = process.env): Program[] {
+export function linuxDesktopPrograms(action: PowerAction, env: NodeJS.ProcessEnv = process.env): Program[] {
   const desktop = (env.XDG_CURRENT_DESKTOP ?? env.DESKTOP_SESSION ?? '').toLowerCase();
   const programs: Program[] = [];
   if (desktop.includes('kde')) {
-    programs.push(['qdbus6', ['org.kde.Shutdown', '/Shutdown', 'logout']]);
-    programs.push(['qdbus', ['org.kde.ksmserver', '/KSMServer', 'logout', '0', '0', '0']]);
+    // Plasma 6 and late 5 answer on org.kde.Shutdown; older Plasma on ksmserver.
+    const method = { restart: 'logoutAndReboot', 'shut-down': 'logoutAndShutdown', 'log-out': 'logout' }[action];
+    const type = { restart: '1', 'shut-down': '2', 'log-out': '0' }[action];
+    programs.push(['qdbus6', ['org.kde.Shutdown', '/Shutdown', method], { next: true }]);
+    programs.push(['qdbus', ['org.kde.Shutdown', '/Shutdown', method], { next: true }]);
+    programs.push(['qdbus', ['org.kde.ksmserver', '/KSMServer', 'logout', '0', type, '0']]);
   }
-  if (desktop.includes('xfce')) programs.push(['xfce4-session-logout', ['--logout']]);
-  if (desktop.includes('mate')) programs.push(['mate-session-save', ['--logout']]);
-  if (desktop.includes('cinnamon')) programs.push(['cinnamon-session-quit', ['--logout', '--no-prompt']]);
+  if (desktop.includes('xfce')) {
+    programs.push([
+      'xfce4-session-logout',
+      [{ restart: '--reboot', 'shut-down': '--halt', 'log-out': '--logout' }[action]],
+    ]);
+  }
+  if (desktop.includes('cinnamon')) {
+    const flag = { restart: '--reboot', 'shut-down': '--power-off', 'log-out': '--logout' }[action];
+    programs.push(['cinnamon-session-quit', [flag, '--no-prompt']]);
+  }
+  if (desktop.includes('mate') && action === 'log-out') programs.push(['mate-session-save', ['--logout']]);
   if (desktop.includes('gnome') || desktop.includes('unity') || desktop.includes('budgie')) {
-    programs.push(['gnome-session-quit', ['--logout', '--no-prompt']]);
+    const flag = { restart: '--reboot', 'shut-down': '--power-off', 'log-out': '--logout' }[action];
+    programs.push(['gnome-session-quit', [flag, '--no-prompt']]);
   }
-  if (env.XDG_SESSION_ID) programs.push(['loginctl', ['terminate-session', env.XDG_SESSION_ID]]);
   return programs;
 }
 
 /**
  * Programs that restart, shut down or log out, in the order to try them. On macOS, System
  * Events asks open apps to quit first, as the Apple menu does, so unsaved work isn't lost.
+ * On Linux, the desktop's own way comes first; restarting and shutting down fall back to
+ * systemd, which closes apps without asking. Logging out has no such fallback: ending a
+ * session from outside would close everything in it unasked.
  */
 export function powerPrograms(action: PowerAction, platform: Platform, env = process.env): Program[] {
   switch (platform) {
@@ -44,8 +59,15 @@ export function powerPrograms(action: PowerAction, platform: Platform, env = pro
       const flag = action === 'restart' ? '/r' : action === 'shut-down' ? '/s' : '/l';
       return [['shutdown.exe', action === 'log-out' ? [flag] : [flag, '/t', '0']]];
     }
-    case 'linux':
-      if (action === 'log-out') return linuxLogOut(env);
-      return [['systemctl', [action === 'restart' ? 'reboot' : 'poweroff']]];
+    case 'linux': {
+      const desktop = linuxDesktopPrograms(action, env);
+      if (action === 'log-out') return desktop;
+      return [...desktop, ['systemctl', [action === 'restart' ? 'reboot' : 'poweroff']]];
+    }
   }
+}
+
+/** Whether apps get to ask to save first; on Linux only when the desktop's way is known. */
+export function asksAppsFirst(platform: Platform, env = process.env): boolean {
+  return platform !== 'linux' || linuxDesktopPrograms('restart', env).length > 0;
 }

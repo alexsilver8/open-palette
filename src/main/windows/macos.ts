@@ -10,22 +10,23 @@ import type { Rect } from './layout';
 /** The focused window of the app in front: pid, app, x, y, width, height and title, tab-separated. */
 export const FRONT_WINDOW_SCRIPT = `tell application "System Events"
   set frontApp to first application process whose frontmost is true
-  set target to missing value
+  set theWindow to missing value
   try
-    set target to value of attribute "AXFocusedWindow" of frontApp
+    set theWindow to value of attribute "AXFocusedWindow" of frontApp
   end try
-  if target is missing value then
+  if theWindow is missing value then
     if (count of windows of frontApp) is 0 then return ""
-    set target to window 1 of frontApp
+    set theWindow to window 1 of frontApp
   end if
-  set {x, y} to position of target
-  set {w, h} to size of target
-  set title to ""
+  set {windowX, windowY} to position of theWindow
+  set {windowWidth, windowHeight} to size of theWindow
+  -- Not "title" or "name": inside this tell block those are System Events' own properties.
+  set windowTitle to ""
   try
-    set title to name of target
+    set windowTitle to name of theWindow
   end try
-  if title is missing value then set title to ""
-  return ((unix id of frontApp) as text) & tab & (name of frontApp) & tab & x & tab & y & tab & w & tab & h & tab & title
+  if windowTitle is missing value then set windowTitle to ""
+  return ((unix id of frontApp) as text) & tab & (name of frontApp) & tab & windowX & tab & windowY & tab & windowWidth & tab & windowHeight & tab & windowTitle
 end tell`;
 
 /**
@@ -36,18 +37,18 @@ export const MOVE_WINDOW_SCRIPT = `on run argv
   set targetPid to (item 1 of argv) as integer
   set newX to (item 2 of argv) as integer
   set newY to (item 3 of argv) as integer
-  set newW to (item 4 of argv) as integer
-  set newH to (item 5 of argv) as integer
+  set newWidth to (item 4 of argv) as integer
+  set newHeight to (item 5 of argv) as integer
   tell application "System Events"
     set targetApp to first application process whose unix id is targetPid
-    set target to missing value
+    set theWindow to missing value
     try
-      set target to value of attribute "AXFocusedWindow" of targetApp
+      set theWindow to value of attribute "AXFocusedWindow" of targetApp
     end try
-    if target is missing value then set target to window 1 of targetApp
-    set position of target to {newX, newY}
-    set size of target to {newW, newH}
-    set position of target to {newX, newY}
+    if theWindow is missing value then set theWindow to window 1 of targetApp
+    set position of theWindow to {newX, newY}
+    set size of theWindow to {newWidth, newHeight}
+    set position of theWindow to {newX, newY}
   end tell
 end run`;
 
@@ -90,10 +91,15 @@ export function explainMacError(error: unknown): WindowError {
   if (/-25211|-1719|assistive access|accessibility/i.test(message)) {
     return new WindowError('Allow Open Palette in System Settings → Privacy & Security → Accessibility.');
   }
-  if (/-10006|-10000|can.t set/i.test(message)) {
-    return new WindowError("This window can't be moved or resized, perhaps because it's full screen.");
+  const reason =
+    message
+      .split('\n')
+      .filter((line) => line.trim())
+      .pop() ?? message;
+  if (/-10006/.test(message)) {
+    return new WindowError(`This window can't be moved or resized, perhaps because it's full screen. (${reason})`);
   }
-  return new WindowError(`Couldn't move the window: ${message.split('\n').pop()}`);
+  return new WindowError(`Couldn't move the window: ${reason}`);
 }
 
 export function macBackend(displays: () => Rect[], exec: Exec = defaultExec): WindowBackend {

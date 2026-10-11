@@ -3,7 +3,7 @@ import { promisify } from 'node:util';
 import type { ActionResult, CommandImplementation, Icon, Json, ListItem, Platform, View } from '../../shared/types';
 import { exec as defaultExec, type Exec, isMissing, reasonOf } from '../exec';
 import { type Disk, ejectDisk, listDisks } from '../system/disks';
-import { type PowerAction, type Program, powerPrograms } from '../system/power';
+import { asksAppsFirst, type PowerAction, type Program, powerPrograms } from '../system/power';
 import { emptyTrash } from '../system/trash';
 import { setWifiPower, WifiError, wifiPower } from '../system/wifi';
 import type { BuiltinExtension } from './types';
@@ -36,19 +36,22 @@ export function explainFailure(error: unknown, app = 'System Events'): string {
 
 const failure = (toast: string): ActionResult => ({ toast, toastStyle: 'failure' });
 
-/** Runs the first of the programs that's installed. */
+/**
+ * Runs the first of the programs that's installed. A program that runs and fails stops there,
+ * unless it's marked to try the next one.
+ */
 async function runFirst(programs: Program[], exec: Exec): Promise<void> {
-  let lastMissing: unknown;
-  for (const [file, args] of programs) {
+  let last: unknown;
+  for (const [file, args, options] of programs) {
     try {
       await exec(file, args, 30_000);
       return;
     } catch (error) {
-      if (!isMissing(error)) throw error;
-      lastMissing = error;
+      if (!isMissing(error) && !options?.next) throw error;
+      last = error;
     }
   }
-  throw lastMissing ?? new Error('Not available on this system.');
+  throw last ?? Object.assign(new Error('Not available on this system.'), { code: 'ENOENT' });
 }
 
 interface Confirmation {
@@ -150,10 +153,16 @@ export function systemExtension({
       await runFirst(powerPrograms(action, platform), exec);
       return { hide: true };
     } catch (error) {
-      if (isMissing(error)) return failure("Couldn't find a way to log out of this desktop.");
+      if (isMissing(error)) {
+        const doing = { restart: 'restart', 'shut-down': 'shut down', 'log-out': 'log out' }[action];
+        return failure(`Open Palette doesn't know how to ${doing} on this desktop yet.`);
+      }
       return failure(explainFailure(error));
     }
   };
+  // On a Linux desktop whose own way isn't known, systemd closes apps without asking.
+  const askApps = asksAppsFirst(platform);
+  const quitting = askApps ? 'Open apps are asked to quit first.' : 'Save your work first: open apps are closed.';
 
   const disksView = async (): Promise<View> => {
     let disks: Disk[];
@@ -257,7 +266,7 @@ export function systemExtension({
           title: 'Log Out',
           mode: 'view',
           icon: { builtin: 'log-out', tint: 'orange' },
-          keywords: ['sign out', 'logout', 'log off'],
+          keywords: ['sign out', 'log off'],
         },
         {
           name: 'empty-trash',
@@ -278,7 +287,7 @@ export function systemExtension({
           title: 'Toggle Wi-Fi',
           mode: 'no-view',
           icon: { builtin: 'wifi', tint: 'blue' },
-          keywords: ['wifi', 'wireless', 'network', 'turn wi-fi on', 'turn wi-fi off'],
+          keywords: ['wifi', 'wireless', 'turn wi-fi on', 'turn wi-fi off'],
         },
         {
           name: 'toggle-appearance',
@@ -305,7 +314,7 @@ export function systemExtension({
         {
           title: 'Restart',
           confirm: 'Restart Now',
-          detail: `Restarts your ${words.computer}. Open apps are asked to quit first.`,
+          detail: `Restarts your ${words.computer}. ${quitting}`,
           icon: { builtin: 'restart', tint: 'orange' },
         },
         power('restart'),
@@ -314,7 +323,7 @@ export function systemExtension({
         {
           title: 'Shut Down',
           confirm: 'Shut Down Now',
-          detail: `Turns off your ${words.computer}. Open apps are asked to quit first.`,
+          detail: `Turns off your ${words.computer}. ${quitting}`,
           icon: { builtin: 'power', tint: 'red' },
         },
         power('shut-down'),
@@ -337,9 +346,13 @@ export function systemExtension({
         },
         async () => {
           try {
-            await emptyTrash(platform, exec);
-            return { pop: true, toast: `Emptied the ${words.trash}` };
+            const result = await emptyTrash(platform, exec);
+            return {
+              pop: true,
+              toast: result === 'empty' ? `The ${words.trash} is already empty` : `Emptied the ${words.trash}`,
+            };
           } catch (error) {
+            if (/\(-128\)/.test(String(error))) return failure(`Emptying the ${words.trash} was cancelled.`);
             return failure(explainFailure(error, 'Finder'));
           }
         },

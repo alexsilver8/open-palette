@@ -47,8 +47,13 @@ function run(file, args, timeout = 5000) {
   });
 }
 
-/** @param {string} script */
+/**
+ * Runs a PowerShell script, with its output in UTF-8 (rather than the console's code page) so
+ * track names in any language arrive intact.
+ * @param {string} script
+ */
 function powershell(script, timeout = 8000) {
+  const utf8 = '[Console]::OutputEncoding = [System.Text.Encoding]::UTF8\n';
   return run(
     'powershell.exe',
     [
@@ -57,7 +62,7 @@ function powershell(script, timeout = 8000) {
       '-ExecutionPolicy',
       'Bypass',
       '-EncodedCommand',
-      Buffer.from(script, 'utf16le').toString('base64'),
+      Buffer.from(utf8 + script, 'utf16le').toString('base64'),
     ],
     timeout,
   );

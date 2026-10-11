@@ -65,7 +65,7 @@ describe('macOS', () => {
 describe('Linux', () => {
   it('reads playerctl', () => {
     const output =
-      'spotify\tPlaying\tDreams\tFleetwood Mac\tRumours\t257000000\t12000000\nfirefox.instance_1_23\tPaused\tA video\t\t\t\t\n';
+      'spotify\tspotify\tPlaying\tDreams\tFleetwood Mac\tRumours\t257000000\t12000000\nfirefox.instance_1_23\tfirefox\tPaused\tA video\t\t\t\t\n';
     expect(parsePlayerctl(output)).toEqual([
       {
         id: 'spotify',
@@ -137,8 +137,10 @@ describe('Windows', () => {
   });
 
   it('keeps an app ID from breaking out of its quotes', () => {
-    const script = windowsSessionsScript({ app: "x'; Remove-Item C:\\ ; '", action: 'next' });
-    expect(script).toContain("$app = 'x''; Remove-Item C:\\ ; '''");
+    const app = 'x’; Remove-Item C:\\ ; ’';
+    const script = windowsSessionsScript({ app, action: 'next' });
+    expect(script).not.toContain('Remove-Item');
+    expect(script).toContain(Buffer.from(app, 'utf8').toString('base64'));
     expect(script).toContain('TrySkipNextAsync');
     expect(windowsMediaKeyScript('play-pause')).toContain('[char]179');
   });

@@ -18,11 +18,7 @@
         "keywords": [
           "play",
           "pause",
-          "resume",
-          "music",
-          "media",
-          "song",
-          "spotify"
+          "resume"
         ]
       },
       {
@@ -32,10 +28,7 @@
         "icon": "⏭️",
         "keywords": [
           "skip",
-          "next song",
-          "music",
-          "media",
-          "spotify"
+          "next song"
         ]
       },
       {
@@ -44,11 +37,7 @@
         "mode": "no-view",
         "icon": "⏮️",
         "keywords": [
-          "back",
-          "previous song",
-          "music",
-          "media",
-          "spotify"
+          "previous song"
         ]
       },
       {

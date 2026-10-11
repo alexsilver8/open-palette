@@ -100,7 +100,7 @@ Windows fill the screen without the menu bar, Dock or taskbar. They're moved wit
 | **Toggle Wi-Fi** | Turns Wi-Fi off if it's on, and on if it's off |
 | **Toggle System Appearance** | Switches macOS between light and dark |
 
-On macOS, Empty Trash asks once to control Finder, and Restart, Shut Down and Log Out to control System Events. On Linux, Wi-Fi uses NetworkManager (`nmcli`) or `rfkill`, ejecting uses `udisksctl`, and Log Out uses your desktop's own way of logging out.
+On macOS, Empty Trash asks once to control Finder, and Restart, Shut Down and Log Out to control System Events. On Linux, Restart, Shut Down and Log Out go through GNOME, KDE, Xfce or Cinnamon, so apps can ask to save; on other desktops Restart and Shut Down use systemd, which closes apps without asking (the confirmation says so), and Log Out isn't available. Wi-Fi uses NetworkManager (`nmcli`) or `rfkill`, and ejecting uses `udisksctl`.
 
 ## Included extensions
 

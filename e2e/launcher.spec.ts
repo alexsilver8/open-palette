@@ -116,6 +116,21 @@ test('asks before restarting, and Cancel goes back', async () => {
   await expect(page.getByRole('combobox')).toHaveValue('restart');
 });
 
+test('a held ↵ opens a command once, without running what it shows', async () => {
+  await app.evaluate(({ clipboard }) => clipboard.writeText('untouched'));
+  await page.keyboard.type('generate uuid');
+  await expect(page.getByRole('option').first()).toContainText('Generate UUID');
+  await page.keyboard.down('Enter');
+  await expect(page.locator('.search__crumb')).toHaveText('Generate UUID');
+  // Pressing a key that's already down is a repeat.
+  await page.keyboard.down('Enter');
+  await page.keyboard.down('Enter');
+  await page.keyboard.up('Enter');
+  await expect(page.locator('.search__crumb')).toHaveText('Generate UUID');
+  await expect(page.getByRole('option')).toHaveCount(5);
+  expect(await app.evaluate(({ clipboard }) => clipboard.readText())).toBe('untouched');
+});
+
 test('lists the window layouts', async () => {
   await page.keyboard.type('left half');
   const row = page.getByRole('option').first();

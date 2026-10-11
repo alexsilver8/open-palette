@@ -126,7 +126,9 @@ describe('Linux', () => {
       frame: { left: 1, right: 1, top: 20, bottom: 5 },
       shadow: { left: 0, right: 0, top: 0, bottom: 0 },
       states: ['MAXIMIZED_VERT', 'MAXIMIZED_HORZ'],
+      types: [],
     });
+    expect(parseProperties('_NET_WM_WINDOW_TYPE(ATOM) = _NET_WM_WINDOW_TYPE_DESKTOP\n').types).toEqual(['DESKTOP']);
     expect(parseProperties('_NET_WM_STATE(ATOM) = \n').states).toEqual([]);
   });
 

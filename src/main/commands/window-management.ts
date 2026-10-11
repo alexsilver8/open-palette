@@ -31,15 +31,16 @@ const COMMANDS: WindowCommandInfo[] = [
   { command: 'last-third', title: 'Last Third' },
   { command: 'first-two-thirds', title: 'First Two Thirds' },
   { command: 'last-two-thirds', title: 'Last Two Thirds' },
-  { command: 'maximize', title: 'Maximize', keywords: ['maximise', 'full', 'fill'] },
+  { command: 'maximize', title: 'Maximize', keywords: ['maximise'] },
   { command: 'almost-maximize', title: 'Almost Maximize', keywords: ['almost maximise'] },
   { command: 'center', title: 'Center', keywords: ['centre', 'middle'] },
-  { command: 'next-display', title: 'Next Display', keywords: ['monitor', 'screen'] },
-  { command: 'previous-display', title: 'Previous Display', keywords: ['monitor', 'screen'] },
-  { command: 'restore', title: 'Restore', keywords: ['undo', 'back'] },
+  { command: 'next-display', title: 'Next Display', keywords: ['monitor'] },
+  { command: 'previous-display', title: 'Previous Display', keywords: ['monitor'] },
+  { command: 'restore', title: 'Restore' },
 ];
 
-const SHARED_KEYWORDS = ['window', 'snap', 'layout'];
+/** Typing "window" lists them all. Kept short: these act at once, so a common word shouldn't pick one. */
+const SHARED_KEYWORDS = ['window', 'snap'];
 
 /** Electron's work areas in real pixels, which is what X11 uses. */
 function pixelWorkAreas(): Rect[] {
