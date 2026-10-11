@@ -204,6 +204,7 @@ export class CommandRegistry extends EventEmitter<{ change: [] }> {
         if (icon) item.icon = icon;
         if (command.keywords) item.keywords = command.keywords;
         if (command.fallback) item.fallback = ref;
+        item.extension = { name: extension.manifest.name, title: extension.manifest.title, source: extension.source };
         items.push(item);
       }
     }

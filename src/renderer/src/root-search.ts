@@ -10,12 +10,14 @@ const MAX_NOTES_IN_ALL = 4;
 const MAX_CLIPBOARD_IN_ALL = 3;
 const MAX_IN_TAB = 300;
 
-export type RootFilter = 'all' | RootKind;
+/** A kind of thing, or the commands of extensions grouped by extension. */
+export type RootFilter = 'all' | RootKind | 'extensions';
 
 export const ROOT_FILTERS: ReadonlyArray<{ id: RootFilter; label: string }> = [
   { id: 'all', label: 'All' },
   { id: 'application', label: 'Apps' },
   { id: 'command', label: 'Commands' },
+  { id: 'extensions', label: 'Extensions' },
   { id: 'note', label: 'Notes' },
   { id: 'clipboard', label: 'Clipboard' },
 ];
@@ -61,13 +63,34 @@ function ranked(items: readonly RootItem[], query: string): DisplayItem[] {
 /** How many items of each kind match the query, for the filter tabs. */
 export function countRootMatches(items: readonly RootItem[], rawQuery: string): Record<RootFilter, number> {
   const query = rawQuery.trim();
-  const counts: Record<RootFilter, number> = { all: 0, application: 0, command: 0, note: 0, clipboard: 0 };
+  const counts: Record<RootFilter, number> = {
+    all: 0,
+    application: 0,
+    command: 0,
+    extensions: 0,
+    note: 0,
+    clipboard: 0,
+  };
   const matching = query ? rankItems(items, query).map((r) => r.item) : items;
   for (const item of matching) {
     counts[item.kind] += 1;
     counts.all += 1;
   }
+  const extensionCommands = withExtensionTitles(fromExtensions(items));
+  counts.extensions = query ? rankItems(extensionCommands, query).length : extensionCommands.length;
   return counts;
+}
+
+/** Commands from extensions you can add or remove: bundled ones and your own, not the app's built-ins. */
+function fromExtensions(items: readonly RootItem[]): RootItem[] {
+  return items.filter((item) => item.kind === 'command' && item.extension && item.extension.source !== 'builtin');
+}
+
+/** Lets a command be found by its extension's name too: "docker" finds all of Docker's commands. */
+function withExtensionTitles(items: readonly RootItem[]): RootItem[] {
+  return items.map((item) =>
+    item.extension ? { ...item, keywords: [...(item.keywords ?? []), item.extension.title] } : item,
+  );
 }
 
 /**
@@ -80,6 +103,7 @@ export function buildRootSections(
   filter: RootFilter = 'all',
 ): DisplaySection[] {
   const query = rawQuery.trim();
+  if (filter === 'extensions') return buildExtensionsTab(items, query);
   if (filter !== 'all') return buildTab(items, query, filter);
 
   const sections: DisplaySection[] = [];
@@ -179,8 +203,40 @@ function buildTab(items: readonly RootItem[], query: string, kind: RootKind): Di
   return rows.length > 0 ? [{ title: titles.matches, items: rows }] : [];
 }
 
+/**
+ * Every extension's commands under the extension's name, extensions A to Z. When searching,
+ * the extension with the best match comes first, and its matching commands in order.
+ */
+function buildExtensionsTab(items: readonly RootItem[], query: string): DisplaySection[] {
+  const pool = withExtensionTitles(fromExtensions(items));
+  const ordered = query
+    ? rankItems(pool, query, usageBoost).map(({ item, titlePositions }) => ({ item, titlePositions }))
+    : [...pool]
+        .sort(
+          (a, b) =>
+            (a.extension?.title ?? '').localeCompare(b.extension?.title ?? '') || a.title.localeCompare(b.title),
+        )
+        .map((item) => ({ item, titlePositions: undefined }));
+
+  const sections = new Map<string, DisplaySection>();
+  for (const { item, titlePositions } of ordered) {
+    const extension = item.extension;
+    if (!extension) continue;
+    let section = sections.get(extension.name);
+    if (!section) {
+      section = { title: extension.title, items: [] };
+      sections.set(extension.name, section);
+    }
+    const row = asRootRow(item);
+    // The heading already names the extension.
+    if (row.subtitle === extension.title) delete row.subtitle;
+    section.items.push(titlePositions ? { ...row, titlePositions } : row);
+  }
+  return [...sections.values()];
+}
+
 function asRootRow(item: RootItem): DisplayItem {
-  const { kind, frecency: _frecency, fallback: _fallback, ...row } = item;
+  const { kind, frecency: _frecency, fallback: _fallback, extension: _extension, ...row } = item;
   // Only launching apps and commands teaches the ranking what you use.
   return kind === 'command' || kind === 'application' ? { ...row, rootItemId: item.id } : row;
 }

@@ -230,6 +230,30 @@ test('switches what the root lists with the filter tabs', async () => {
   await expect(page.getByRole('option', { name: /Clipboard History/ })).toBeVisible();
 });
 
+test('lists each extension with its commands in the Extensions tab', async () => {
+  const tab = (name: string) => page.getByRole('tab', { name, exact: true });
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(tab('Extensions')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('combobox')).toHaveAttribute('placeholder', 'Search extensions and their commands…');
+  await expect(page.locator('.results__heading').first()).toHaveText('Colors');
+
+  // An extension's name finds all of its commands; built-in commands aren't listed here.
+  await page.keyboard.type('docker');
+  await expect(page.locator('.results__heading')).toHaveText(['Docker']);
+  await expect(page.getByRole('option')).toHaveText([/Search Docker Containers/, /Search Docker Images/]);
+  await page.keyboard.press(`${mod}+a`);
+  await page.keyboard.type('quit open palette');
+  await expect(page.getByRole('option')).toHaveCount(0);
+
+  await page.keyboard.press(`${mod}+a`);
+  await page.keyboard.type('uuid');
+  await expect(page.locator('.results__heading')).toHaveText(['Developer Utilities']);
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.search__crumb')).toHaveText('Generate UUID');
+});
+
 test('finds notes from the root and shows a preview', async () => {
   await page.keyboard.type('glass look');
   const note = page.getByRole('option', { name: /Launch plan/ });
@@ -237,6 +261,7 @@ test('finds notes from the root and shows a preview', async () => {
   await expect(page.getByRole('tab', { name: /^Notes/ })).toHaveText('Notes1');
 
   // In the Notes tab the note is first, and the preview shows its body.
+  await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');

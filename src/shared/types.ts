@@ -220,6 +220,8 @@ export interface RootItem extends ListItem {
   frecency: number;
   /** Offered under "Use “…” with" and opened with the search text as argument. */
   fallback?: CommandRef;
+  /** For commands: the extension they come from, to group them in the Extensions tab. */
+  extension?: { name: string; title: string; source: ExtensionSource };
 }
 
 /** Where an action was triggered from, so the main process can route and record it. */

@@ -13,7 +13,7 @@ Website: [openpalette.alexsilver.dev](https://openpalette.alexsilver.dev/)
 
 ## What it does
 
-- **Finds everything from one box** — apps, commands, notes and copied text all show up as you type. <kbd>⇥</kbd> narrows the list to Apps, Commands, Notes or Clipboard, and a preview beside the results shows the note or copied text you've selected.
+- **Finds everything from one box** — apps, commands, notes and copied text all show up as you type. <kbd>⇥</kbd> narrows the list to Apps, Commands, Notes or Clipboard, or to **Extensions**, which lists every extension with its commands so you can pick one without remembering its name. A preview beside the results shows the note or copied text you've selected.
 - **Opens apps** — finds installed applications on every platform.
 - **Keeps notes, as many as you want** — a floating Notes window with headings, checklists, links and code, plus search, autosave and a pin to keep it on top. Every note is a plain Markdown file, so you can sync, back up or edit them with anything. There's no limit on how many you keep.
 - **Calculates as you type** — `1200 * 1.077 + 2^5` shows `1,324.4`; <kbd>↵</kbd> copies it.
@@ -37,7 +37,7 @@ Builds aren't code-signed yet, so your system will warn you the first time you o
 | --- | --- |
 | <kbd>⌥</kbd> <kbd>Space</kbd> (<kbd>Alt</kbd> <kbd>Space</kbd>) | Open or close the launcher |
 | <kbd>↑</kbd> <kbd>↓</kbd> | Move through results (also <kbd>Ctrl</kbd> <kbd>N</kbd> / <kbd>Ctrl</kbd> <kbd>P</kbd>) |
-| <kbd>⇥</kbd> / <kbd>⇧</kbd> <kbd>⇥</kbd> | Switch between All, Apps, Commands, Notes and Clipboard |
+| <kbd>⇥</kbd> / <kbd>⇧</kbd> <kbd>⇥</kbd> | Switch between All, Apps, Commands, Extensions, Notes and Clipboard |
 | <kbd>↵</kbd> | Run the primary action |
 | <kbd>⌘</kbd> <kbd>↵</kbd> | Run the secondary action |
 | <kbd>⌘</kbd> <kbd>1</kbd> … <kbd>9</kbd> | Run one of the first nine results (hold <kbd>⌘</kbd> to see the numbers) |
