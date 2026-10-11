@@ -37,6 +37,8 @@ export class NotesStore extends EventEmitter<{ change: [] }> {
    */
   private cache: { notes: Promise<Note[]>; generation: number; readAt: number } | undefined;
   private generation = 0;
+  /** Ids of notes being created, not written yet. */
+  private readonly reserved = new Set<string>();
   private readonly announce = debounce(() => this.emit('change'), 250);
 
   constructor(
@@ -104,13 +106,32 @@ export class NotesStore extends EventEmitter<{ change: [] }> {
 
   async create(text = ''): Promise<Note> {
     await mkdir(this.dir, { recursive: true });
-    const id = `${Date.now().toString(36)}-${randomBytes(2).toString('hex')}`;
+    const id = await this.newId();
     try {
       await this.write(id, text);
     } finally {
+      this.reserved.delete(id);
       this.invalidate();
     }
     return this.read(id);
+  }
+
+  /**
+   * An id no other note has: notes created in the same millisecond only differ by a few random
+   * characters, and writing one would replace the other. Ids being created count as taken.
+   */
+  private async newId(): Promise<string> {
+    for (;;) {
+      const id = `${Date.now().toString(36)}-${randomBytes(2).toString('hex')}`;
+      if (this.reserved.has(id)) continue;
+      this.reserved.add(id);
+      const taken = await stat(this.pathOf(id)).then(
+        () => true,
+        () => false,
+      );
+      if (!taken) return id;
+      this.reserved.delete(id);
+    }
   }
 
   async update(id: string, text: string): Promise<Note> {
