@@ -212,8 +212,13 @@ export function ago(iso, now) {
  * @param {string} body
  */
 export function preview(body) {
-  const text = body
-    .replace(/<!--[\s\S]*?-->/g, '')
+  let uncommented = body;
+  // Again until none are left, so a comment split around another can't survive.
+  for (let previous = ''; previous !== uncommented; ) {
+    previous = uncommented;
+    uncommented = uncommented.replace(/<!--[\s\S]*?-->/g, '');
+  }
+  const text = uncommented
     .replace(/\r\n/g, '\n')
     .replace(/^#{1,6}\s+/gm, '# ')
     .replace(/^(\s*)[*+]\s+/gm, '$1- ')

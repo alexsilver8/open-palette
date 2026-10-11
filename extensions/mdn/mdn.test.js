@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { areaOf, parseResults, searchUrl } from './mdn.js';
+import { areaOf, parseResults, plain, searchUrl } from './mdn.js';
 
 describe('searchUrl', () => {
   it('asks the search API for the query', () => {
@@ -47,5 +47,13 @@ describe('parseResults', () => {
   it('copes with an unexpected response', () => {
     expect(parseResults(null)).toEqual([]);
     expect(parseResults({ error: 'nope' })).toEqual([]);
+  });
+});
+
+describe('plain', () => {
+  it('removes tags, even nested ones, and decodes entities once', () => {
+    expect(plain('The <mark>flex</mark>  box &amp; grid')).toBe('The flex box & grid');
+    expect(plain('a <<b>script>b')).toBe('a b');
+    expect(plain('&amp;lt;div&amp;gt; is &lt;div&gt;')).toBe('&lt;div&gt; is <div>');
   });
 });

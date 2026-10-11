@@ -122,8 +122,9 @@ export function parsePorts(ports) {
  * @param {string} name
  */
 function label(labels, name) {
-  const match = new RegExp(`(?:^|,)${name.replace(/\./g, '\\.')}=([^,]*)`).exec(labels);
-  return match?.[1] || undefined;
+  const prefix = `${name}=`;
+  const entry = labels.split(',').find((part) => part.startsWith(prefix));
+  return entry?.slice(prefix.length) || undefined;
 }
 
 /**

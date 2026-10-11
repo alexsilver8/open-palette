@@ -103,6 +103,7 @@ describe('helpers', () => {
   it('tidies descriptions for the preview', () => {
     expect(preview(ISSUE.body)).toBe('# What & why\n\n- Moves the site');
     expect(preview('x'.repeat(2500))).toHaveLength(2001);
+    expect(preview('a<!-<!-- x -->- y -->b')).toBe('ab');
   });
 
   it('says how long ago', () => {

@@ -57,15 +57,23 @@ export function areaOf(path) {
     .join(' › ');
 }
 
-/** @param {string} text */
-function plain(text) {
-  return text
-    .replace(/<[^>]+>/g, '')
-    .replace(/&#x27;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
+/** @type {Record<string, string>} */
+const ENTITIES = { '#x27': "'", '#39': "'", quot: '"', lt: '<', gt: '>', amp: '&', nbsp: ' ' };
+
+/**
+ * MDN's summaries as text: tags (its search highlights) removed, entities decoded.
+ * @param {string} text
+ */
+export function plain(text) {
+  let stripped = text;
+  // Again until none are left, so a tag split around another (`<<b>b>`) can't survive.
+  for (let previous = ''; previous !== stripped; ) {
+    previous = stripped;
+    stripped = stripped.replace(/<[^<>]*>/g, '');
+  }
+  // In one pass, so `&amp;lt;` becomes `&lt;` and not `<`.
+  return stripped
+    .replace(/&(#x27|#39|quot|lt|gt|amp|nbsp);/g, (_, name) => ENTITIES[name] ?? '')
     .replace(/\s+/g, ' ')
     .trim();
 }
