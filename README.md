@@ -154,6 +154,7 @@ pnpm dev          # run with hot reload; also loads examples/extensions
 pnpm test         # unit tests
 pnpm test:e2e     # build, then drive the app with Playwright
 pnpm lint         # Biome
+pnpm cleaner      # conventions Biome and TypeScript don't check, from alexsilver8/cleaner
 pnpm typecheck
 pnpm dist         # installers for your OS in release/
 ```

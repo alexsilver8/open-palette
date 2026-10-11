@@ -16,6 +16,7 @@
     "start": "electron-vite preview",
     "typecheck": "tsc -p tsconfig.node.json && tsc -p tsconfig.web.json && tsc -p tsconfig.extensions.json",
     "lint": "biome check .",
+    "cleaner": "pnpm dlx github:alexsilver8/cleaner#v1 src",
     "format": "biome check --write .",
     "test": "vitest run",
     "test:watch": "vitest",
