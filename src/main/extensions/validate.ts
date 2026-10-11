@@ -12,6 +12,7 @@ import type {
   CommandManifest,
   ExtensionManifest,
   Icon,
+  ItemDetail,
   Json,
   ListItem,
   ListSection,
@@ -52,6 +53,7 @@ const BUILTIN_ICONS: BuiltinIconName[] = [
 ];
 const MAX_ITEMS = 2000;
 const MAX_TEXT = 1000;
+const MAX_DETAIL = 20_000;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -163,6 +165,24 @@ export function sanitizeAction(value: unknown): Action | undefined {
   }
 }
 
+export function sanitizeDetail(value: unknown): ItemDetail | undefined {
+  if (!isRecord(value)) return undefined;
+  const body = typeof value.body === 'string' ? value.body.slice(0, MAX_DETAIL) : undefined;
+  if (body === undefined) return undefined;
+  const detail: ItemDetail = { body };
+  const title = text(value.title, 200);
+  if (title) detail.title = title;
+  if (Array.isArray(value.metadata)) {
+    const metadata = value.metadata
+      .filter(isRecord)
+      .map((entry) => ({ label: text(entry.label, 60), value: text(entry.value, 200) }))
+      .filter((entry): entry is { label: string; value: string } => Boolean(entry.label && entry.value))
+      .slice(0, 12);
+    if (metadata.length > 0) detail.metadata = metadata;
+  }
+  return detail;
+}
+
 function sanitizeItem(value: unknown, baseDir: string | undefined, seen: Set<string>): ListItem | undefined {
   if (!isRecord(value)) return undefined;
   const title = text(value.title);
@@ -183,6 +203,8 @@ function sanitizeItem(value: unknown, baseDir: string | undefined, seen: Set<str
   if (accessory) item.accessory = accessory;
   if (keywords) item.keywords = keywords;
   if (icon) item.icon = icon;
+  const detail = sanitizeDetail(value.detail);
+  if (detail) item.detail = detail;
   return item;
 }
 

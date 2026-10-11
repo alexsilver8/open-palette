@@ -2,18 +2,24 @@ import { useEffect, useRef } from 'react';
 import type { DisplayItem, DisplaySection } from '../model';
 import { Highlight } from './Highlight';
 import { ItemIcon, tintOf } from './ItemIcon';
+import { Keycaps } from './Keycaps';
+
+/** ⌘1 to ⌘9 open the first nine rows. */
+export const QUICK_KEY_COUNT = 9;
 
 interface ResultListProps {
   sections: DisplaySection[];
   selectedId: string | undefined;
   emptyText: string | undefined;
+  /** The modifier to draw beside the first rows while it's held, e.g. "⌘". */
+  quickKeyModifier: string | null;
   onSelect(item: DisplayItem): void;
   onActivate(item: DisplayItem): void;
 }
 
 export const optionId = (index: number) => `option-${index}`;
 
-function Row({ item }: { item: DisplayItem }) {
+function Row({ item, quickKey }: { item: DisplayItem; quickKey: string[] | null }) {
   if (item.calculator) {
     return (
       <span className="calc">
@@ -34,12 +40,23 @@ function Row({ item }: { item: DisplayItem }) {
         </span>
         {item.subtitle && <span className="row__subtitle">{item.subtitle}</span>}
       </span>
-      {item.accessory && <span className="row__accessory">{item.accessory}</span>}
+      {quickKey ? (
+        <Keycaps keys={quickKey} />
+      ) : (
+        item.accessory && <span className="row__accessory">{item.accessory}</span>
+      )}
     </>
   );
 }
 
-export function ResultList({ sections, selectedId, emptyText, onSelect, onActivate }: ResultListProps) {
+export function ResultList({
+  sections,
+  selectedId,
+  emptyText,
+  quickKeyModifier,
+  onSelect,
+  onActivate,
+}: ResultListProps) {
   const rows = useRef(new Map<string, HTMLLIElement>());
 
   useEffect(() => {
@@ -77,7 +94,12 @@ export function ResultList({ sections, selectedId, emptyText, onSelect, onActiva
                   }}
                   onClick={() => onActivate(item)}
                 >
-                  <Row item={item} />
+                  <Row
+                    item={item}
+                    quickKey={
+                      quickKeyModifier && index < QUICK_KEY_COUNT ? [quickKeyModifier, String(index + 1)] : null
+                    }
+                  />
                 </li>
               );
             })}

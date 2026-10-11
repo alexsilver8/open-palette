@@ -1,6 +1,6 @@
 /*
- * Notes window: the same frosted glass as the launcher, with the note list on a slightly
- * lighter strip of it.
+ * Notes window: the launcher's liquid glass, with the note list on a floating pane of
+ * brighter glass.
  */
 
 @import "../base.css";
@@ -45,7 +45,7 @@ button {
 }
 
 .notes[data-sidebar] {
-  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-columns: calc(var(--sidebar-width) + 8px) 1fr;
 }
 
 /* ── Header ─────────────────────────────────────────────── */
@@ -56,7 +56,6 @@ button {
   align-items: center;
   gap: 2px;
   padding: 0 8px;
-  border-bottom: 1px solid var(--hairline);
   user-select: none;
   -webkit-app-region: drag;
 }
@@ -72,7 +71,7 @@ button {
   width: 30px;
   height: 28px;
   border: none;
-  border-radius: 7px;
+  border-radius: 9px;
   background: none;
   color: var(--ink-muted);
   -webkit-app-region: no-drag;
@@ -89,7 +88,7 @@ button {
 
 .notes__tool:focus-visible,
 .notes__item:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid color-mix(in oklab, var(--accent) 75%, transparent);
   outline-offset: -2px;
 }
 
@@ -108,25 +107,30 @@ button {
 
 /* ── Sidebar ────────────────────────────────────────────── */
 
+/* A pane of brighter glass floating in the window, like the launcher's preview. */
 .notes__sidebar {
   grid-area: sidebar;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  margin: 0 0 8px 8px;
   overflow: hidden;
-  border-right: 1px solid var(--hairline);
-  background: var(--glass-bar);
+  border: 1px solid var(--glass-raised-border);
+  border-radius: 16px;
+  background: var(--glass-raised);
+  box-shadow: inset 0 1px 0 var(--glass-sheen);
 }
 
 .notes__search {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin: 10px 10px 6px;
-  padding: 0 9px;
-  height: 30px;
-  border-radius: 8px;
-  background: var(--keycap);
+  margin: 8px 8px 6px;
+  padding: 0 10px;
+  height: 32px;
+  border: 1px solid var(--control-border);
+  border-radius: 10px;
+  background: var(--control);
   color: var(--ink-faint);
 }
 
@@ -151,7 +155,6 @@ button {
   min-height: 0;
   overflow-y: auto;
   padding: 2px 6px 6px;
-  scrollbar-width: thin;
 }
 
 .notes__list ul {
@@ -166,8 +169,8 @@ button {
   gap: 2px;
   width: 100%;
   padding: 7px 10px;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
   background: none;
   text-align: left;
 }
@@ -177,7 +180,9 @@ button {
 }
 
 .notes__item[aria-current="true"] {
-  background: var(--selected);
+  border-color: var(--selected-border);
+  background: var(--selected-pane);
+  box-shadow: var(--selected-shadow);
 }
 
 .notes__item-title {
@@ -210,7 +215,7 @@ button {
 }
 
 .notes__count {
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-top: 1px solid var(--hairline);
   color: var(--ink-faint);
   font-size: 12px;
@@ -249,7 +254,6 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px 0 28px;
-  border-top: 1px solid var(--hairline);
   color: var(--ink-faint);
   font-size: 12px;
   user-select: none;

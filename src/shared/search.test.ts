@@ -41,6 +41,16 @@ describe('rankItems', () => {
     expect(boosted[0]?.item.title).toBe('Calculator');
   });
 
+  it('matches long content by words, not scattered letters', () => {
+    const notes = [
+      { title: 'Groceries', keywords: ['Groceries\n- oat milk\n- sourdough bread from the bakery on the corner'] },
+      { title: 'Trip', keywords: ['Pack a hat, sunscreen and the travel adapter for the long weekend away'] },
+    ];
+    expect(rankItems(notes, 'cal').map((r) => r.item.title)).toEqual([]);
+    expect(rankItems(notes, 'oat milk').map((r) => r.item.title)).toEqual(['Groceries']);
+    expect(rankItems(notes, 'adapter hat').map((r) => r.item.title)).toEqual(['Trip']);
+  });
+
   it('drops items that do not match', () => {
     expect(titles('zzz')).toEqual([]);
   });

@@ -36,6 +36,16 @@ function Row({ label, description, children }: { label: string; description?: Re
   );
 }
 
+/** A rounded card of settings rows, with an optional title above it. */
+function Group({ title, children }: { title?: string; children: ReactNode }) {
+  return (
+    <section className="group" aria-label={title}>
+      {title && <h2 className="group__title">{title}</h2>}
+      <div className="group__card">{children}</div>
+    </section>
+  );
+}
+
 function Toggle({
   label,
   checked,
@@ -62,30 +72,33 @@ function Toggle({
   );
 }
 
-function Segmented<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: T;
-  options: Array<{ value: T; label: string }>;
-  onChange(value: T): void;
-}) {
+const THEMES: Array<{ value: Settings['theme']; label: string }> = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
+
+/** System, Light and Dark as little launcher windows, picked like radio buttons. */
+function ThemePicker({ value, onChange }: { value: Settings['theme']; onChange(value: Settings['theme']): void }) {
   return (
-    <fieldset className="segmented">
-      <legend className="visually-hidden">{label}</legend>
-      {options.map((option) => (
-        <label key={option.value} className="segmented__option" data-checked={option.value === value || undefined}>
+    <fieldset className="themes">
+      <legend className="visually-hidden">Appearance</legend>
+      {THEMES.map((theme) => (
+        <label key={theme.value} className="theme" data-checked={theme.value === value || undefined}>
           <input
             type="radio"
-            name={label}
-            value={option.value}
-            checked={option.value === value}
-            onChange={() => onChange(option.value)}
+            name="theme"
+            value={theme.value}
+            checked={theme.value === value}
+            onChange={() => onChange(theme.value)}
           />
-          {option.label}
+          <span className="theme__preview" data-theme={theme.value} aria-hidden="true">
+            <span className="theme__search" />
+            <span className="theme__line" />
+            <span className="theme__line" />
+            <span className="theme__line" />
+          </span>
+          <span className="theme__label">{theme.label}</span>
         </label>
       ))}
     </fieldset>
@@ -239,45 +252,38 @@ function General({ state, update }: SectionProps) {
   const { settings, info } = state;
   return (
     <>
-      <Row label="Open Palette shortcut" description="Press it anywhere to open the launcher.">
-        <HotkeyRecorder value={settings.hotkey} active={state.activeHotkey} />
-      </Row>
-      <Row label="Close when you click elsewhere" description="Hide the launcher as soon as it loses focus.">
-        <Toggle
-          label="Close when you click elsewhere"
-          checked={settings.hideOnBlur}
-          onChange={(hideOnBlur) => update({ hideOnBlur })}
-        />
-      </Row>
-      <Row
-        label="Open at login"
-        description={
-          info.canLaunchAtLogin
-            ? 'Start Open Palette when you log in.'
-            : info.platform === 'linux'
-              ? 'Not available on Linux yet.'
-              : 'Works in the installed app, not when running from source.'
-        }
-      >
-        <Toggle
+      <Group>
+        <Row label="Launcher shortcut" description="Press it anywhere to open Open Palette.">
+          <HotkeyRecorder value={settings.hotkey} active={state.activeHotkey} />
+        </Row>
+        <Row label="Close when you click elsewhere" description="Hide the launcher as soon as it loses focus.">
+          <Toggle
+            label="Close when you click elsewhere"
+            checked={settings.hideOnBlur}
+            onChange={(hideOnBlur) => update({ hideOnBlur })}
+          />
+        </Row>
+        <Row
           label="Open at login"
-          checked={settings.launchAtLogin}
-          disabled={!info.canLaunchAtLogin}
-          onChange={(launchAtLogin) => update({ launchAtLogin })}
-        />
-      </Row>
-      <Row label="Appearance">
-        <Segmented
-          label="Appearance"
-          value={settings.theme}
-          options={[
-            { value: 'system', label: 'System' },
-            { value: 'light', label: 'Light' },
-            { value: 'dark', label: 'Dark' },
-          ]}
-          onChange={(theme) => update({ theme })}
-        />
-      </Row>
+          description={
+            info.canLaunchAtLogin
+              ? 'Start Open Palette when you log in.'
+              : info.platform === 'linux'
+                ? 'Not available on Linux yet.'
+                : 'Works in the installed app, not when running from source.'
+          }
+        >
+          <Toggle
+            label="Open at login"
+            checked={settings.launchAtLogin}
+            disabled={!info.canLaunchAtLogin}
+            onChange={(launchAtLogin) => update({ launchAtLogin })}
+          />
+        </Row>
+      </Group>
+      <Group title="Appearance">
+        <ThemePicker value={settings.theme} onChange={(theme) => update({ theme })} />
+      </Group>
     </>
   );
 }
@@ -289,7 +295,7 @@ function Clipboard({ state, update, setState }: SectionProps) {
     : [...HISTORY_SIZES, clipboardHistory.maxItems].sort((a, b) => a - b);
   const entries = state.info.clipboardEntries;
   return (
-    <>
+    <Group>
       <Row
         label="Save clipboard history"
         description="Keep text you copy so you can find it again. Anything a password manager marks as private is skipped."
@@ -328,7 +334,7 @@ function Clipboard({ state, update, setState }: SectionProps) {
           Clear History
         </ConfirmButton>
       </Row>
-    </>
+    </Group>
   );
 }
 
@@ -345,17 +351,19 @@ function Notes({ state, update }: SectionProps) {
         (iCloud Drive, Dropbox, a git repo) to have them everywhere. Markdown files already in the folder show up as
         notes too.
       </p>
-      <Row label="Notes folder" description={<PathRow path={state.info.notesDirectory} />}>
-        <div className="button-row">
-          <Button onClick={() => api.open('notesDirectory')}>{REVEAL}</Button>
-          <Button onClick={() => void choose()}>Change…</Button>
-        </div>
-      </Row>
-      {custom && (
-        <Row label="Use the default folder" description="Notes already in your folder stay where they are.">
-          <Button onClick={() => update({ notesDirectory: '' })}>Use Default</Button>
+      <Group>
+        <Row label="Notes folder" description={<PathRow path={state.info.notesDirectory} />}>
+          <div className="button-row">
+            <Button onClick={() => api.open('notesDirectory')}>{REVEAL}</Button>
+            <Button onClick={() => void choose()}>Change…</Button>
+          </div>
         </Row>
-      )}
+        {custom && (
+          <Row label="Use the default folder" description="Notes already in your folder stay where they are.">
+            <Button onClick={() => update({ notesDirectory: '' })}>Use Default</Button>
+          </Row>
+        )}
+      </Group>
     </>
   );
 }
@@ -395,61 +403,63 @@ function Extensions({ state, update, setState }: SectionProps) {
         </Button>
       </div>
 
-      <h2 className="section__subheading">Installed</h2>
-      {user.length === 0 ? (
-        <p className="section__empty">
-          No extensions yet. Put an extension’s folder in the extensions folder, then reload.
-        </p>
-      ) : (
+      <Group title="Installed">
+        {user.length === 0 ? (
+          <p className="group__empty">
+            No extensions yet. Put an extension’s folder in the extensions folder, then reload.
+          </p>
+        ) : (
+          <ul className="extension-list">
+            {user.map((extension) => (
+              <li
+                key={`${extension.name}:${extension.dir}`}
+                className="extension"
+                data-failed={extension.error ? '' : undefined}
+              >
+                <span className="extension__title">{extension.title}</span>
+                <span className="extension__meta">
+                  {extension.error ??
+                    `${extension.commands} command${extension.commands === 1 ? '' : 's'}, from ${extension.dir}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Group>
+
+      <Group title="Also load extensions from">
+        {folders.length > 0 && (
+          <ul className="folder-list">
+            {folders.map((folder) => (
+              <li key={folder} className="folder">
+                <PathRow path={folder} />
+                <Button onClick={() => update({ extensionDirectories: folders.filter((f) => f !== folder) })}>
+                  Remove
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <Row
+          label={folders.length === 0 ? 'Only the extensions folder' : 'Another folder'}
+          description="Add a folder to work on an extension in its own repo."
+        >
+          <Button onClick={() => void addFolder()}>Add Folder…</Button>
+        </Row>
+      </Group>
+
+      <Group title="Built in">
         <ul className="extension-list">
-          {user.map((extension) => (
-            <li
-              key={`${extension.name}:${extension.dir}`}
-              className="extension"
-              data-failed={extension.error ? '' : undefined}
-            >
+          {builtin.map((extension) => (
+            <li key={extension.name} className="extension">
               <span className="extension__title">{extension.title}</span>
               <span className="extension__meta">
-                {extension.error ??
-                  `${extension.commands} command${extension.commands === 1 ? '' : 's'}, from ${extension.dir}`}
+                {extension.commands} command{extension.commands === 1 ? '' : 's'}
               </span>
             </li>
           ))}
         </ul>
-      )}
-
-      <h2 className="section__subheading">Also load extensions from</h2>
-      {folders.length === 0 ? (
-        <p className="section__empty">
-          Only the extensions folder. Add a folder to work on an extension in its own repo.
-        </p>
-      ) : (
-        <ul className="folder-list">
-          {folders.map((folder) => (
-            <li key={folder} className="folder">
-              <PathRow path={folder} />
-              <Button onClick={() => update({ extensionDirectories: folders.filter((f) => f !== folder) })}>
-                Remove
-              </Button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="button-row button-row--start">
-        <Button onClick={() => void addFolder()}>Add Folder…</Button>
-      </div>
-
-      <h2 className="section__subheading">Built in</h2>
-      <ul className="extension-list">
-        {builtin.map((extension) => (
-          <li key={extension.name} className="extension">
-            <span className="extension__title">{extension.title}</span>
-            <span className="extension__meta">
-              {extension.commands} command{extension.commands === 1 ? '' : 's'}
-            </span>
-          </li>
-        ))}
-      </ul>
+      </Group>
     </>
   );
 }
@@ -471,16 +481,17 @@ function About({ state }: SectionProps) {
         <Button onClick={() => api.openLink('repository')}>View on GitHub</Button>
         <Button onClick={() => api.openLink('issues')}>Report an Issue</Button>
       </div>
-      <h2 className="section__subheading">Your data</h2>
-      <Row label="Data folder" description={<PathRow path={info.dataDirectory} />}>
-        <Button onClick={() => api.open('dataDirectory')}>{REVEAL}</Button>
-      </Row>
-      <Row
-        label="Settings file"
-        description="Everything on these pages, as JSON. Changes you save there apply right away."
-      >
-        <Button onClick={() => api.open('settingsFile')}>Edit settings.json</Button>
-      </Row>
+      <Group title="Your data">
+        <Row label="Data folder" description={<PathRow path={info.dataDirectory} />}>
+          <Button onClick={() => api.open('dataDirectory')}>{REVEAL}</Button>
+        </Row>
+        <Row
+          label="Settings file"
+          description="Everything on these pages, as JSON. Changes you save there apply right away."
+        >
+          <Button onClick={() => api.open('settingsFile')}>Edit settings.json</Button>
+        </Row>
+      </Group>
     </>
   );
 }
@@ -533,13 +544,21 @@ export function SettingsApp() {
     }
   };
 
+  // Start with focus in the page rather than on the first section button, so nothing shows a
+  // focus ring until you press Tab.
+  const content = useRef<HTMLElement>(null);
+  useEffect(() => {
+    content.current?.focus({ preventScroll: true });
+  }, []);
+
   const current = SECTIONS.find((s) => s.id === section) ?? SECTIONS[0];
   const View = SECTION_VIEWS[section];
 
   return (
     <div className="settings">
-      <header className="settings__titlebar">Settings</header>
       <nav className="settings__nav" aria-label="Settings sections" onKeyDown={onNavKeyDown}>
+        {/* Room for the window buttons on macOS, and somewhere to drag the window by. */}
+        <div className="settings__nav-top" />
         {SECTIONS.map((item) => (
           <button
             key={item.id}
@@ -548,6 +567,7 @@ export function SettingsApp() {
             className="settings__nav-item"
             data-tint={item.tint}
             aria-current={item.id === section ? 'page' : undefined}
+            tabIndex={item.id === section ? 0 : -1}
             onClick={() => setSection(item.id)}
           >
             <ItemIcon icon={{ builtin: item.icon, tint: item.tint }} />
@@ -555,8 +575,12 @@ export function SettingsApp() {
           </button>
         ))}
       </nav>
-      <main className="settings__content">
-        <h1 className="settings__heading">{current?.label}</h1>
+      <main ref={content} className="settings__content" tabIndex={-1} aria-labelledby="settings-heading">
+        <header className="settings__header">
+          <h1 id="settings-heading" className="settings__heading">
+            {current?.label}
+          </h1>
+        </header>
         {state ? <View state={state} update={update} setState={setState} /> : null}
       </main>
     </div>

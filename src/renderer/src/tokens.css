@@ -40,8 +40,17 @@
   --control-border: rgb(0 0 0 / 0.1);
   --control-strong: rgb(255 255 255 / 0.95);
   --track: rgb(0 0 0 / 0.12);
-  /* The tint over the blurred backdrop. */
-  --glass: rgb(248 248 250 / 0.58);
+  /* The tint over the blurred backdrop: thin, so the desktop shows through. */
+  --glass: rgb(250 250 252 / 0.42);
+  /* Panes of glass inside the window: the search field, preview, action bar. */
+  --glass-raised: rgb(255 255 255 / 0.5);
+  --glass-raised-border: rgb(255 255 255 / 0.75);
+  /* The lit top edge of each pane. */
+  --glass-sheen: rgb(255 255 255 / 0.9);
+  /* The selected row: a brighter pane lifted off the glass. */
+  --selected-pane: rgb(255 255 255 / 0.78);
+  --selected-border: rgb(0 0 0 / 0.05);
+  --selected-shadow: inset 0 1px 0 rgb(255 255 255 / 1), 0 4px 14px rgb(30 40 70 / 0.1);
   /* Bars and sidebars sit a shade apart from the main glass. */
   --glass-bar: rgb(255 255 255 / 0.32);
   /* Popovers blur the window content under them. */
@@ -50,7 +59,7 @@
   --glass-edge: rgb(255 255 255 / 0.6);
   --shadow-popover: 0 16px 40px rgb(0 0 0 / 0.16), 0 2px 8px rgb(0 0 0 / 0.08);
 
-  --radius-window: 12px;
+  --radius-window: 24px;
   --radius-row: 8px;
 
   /* Older names, kept so every window shares one vocabulary. */
@@ -75,7 +84,13 @@
     --control-border: rgb(255 255 255 / 0.1);
     --control-strong: rgb(255 255 255 / 0.16);
     --track: rgb(255 255 255 / 0.16);
-    --glass: rgb(26 26 30 / 0.55);
+    --glass: rgb(22 22 28 / 0.36);
+    --glass-raised: rgb(255 255 255 / 0.07);
+    --glass-raised-border: rgb(255 255 255 / 0.1);
+    --glass-sheen: rgb(255 255 255 / 0.1);
+    --selected-pane: rgb(255 255 255 / 0.13);
+    --selected-border: rgb(255 255 255 / 0.13);
+    --selected-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16), 0 6px 18px rgb(0 0 0 / 0.2);
     --glass-bar: rgb(255 255 255 / 0.035);
     --glass-panel: rgb(40 40 46 / 0.78);
     --glass-edge: rgb(255 255 255 / 0.13);
@@ -87,11 +102,15 @@
 :root[data-glass="none"] {
   --glass: rgb(244 244 246);
   --glass-bar: rgb(0 0 0 / 0.025);
+  --glass-raised: rgb(255 255 255 / 0.7);
+  --glass-raised-border: rgb(0 0 0 / 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
   :root[data-glass="none"] {
     --glass: rgb(30 30 34);
     --glass-bar: rgb(255 255 255 / 0.03);
+    --glass-raised: rgb(255 255 255 / 0.05);
+    --glass-raised-border: rgb(255 255 255 / 0.08);
   }
 }

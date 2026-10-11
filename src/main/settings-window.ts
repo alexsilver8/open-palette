@@ -23,17 +23,17 @@ export class SettingsWindow {
   private create(): BrowserWindow {
     const glass = glassFor();
     const window = new BrowserWindow({
-      width: 760,
-      height: 560,
-      minWidth: 620,
-      minHeight: 420,
+      width: 800,
+      height: 580,
+      minWidth: 660,
+      minHeight: 440,
       show: false,
       title: 'Open Palette Settings',
       fullscreenable: false,
       maximizable: false,
       ...glassWindowOptions(glass, false),
       ...(isMac
-        ? ({ titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 14, y: 15 } } as const)
+        ? ({ titleBarStyle: 'hiddenInset', trafficLightPosition: { x: 22, y: 22 } } as const)
         : ({ autoHideMenuBar: true } as const)),
       webPreferences: {
         preload: join(import.meta.dirname, '../preload/settings.cjs'),

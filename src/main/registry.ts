@@ -49,6 +49,8 @@ export interface RegistryOptions {
   extensionRoots: () => string[];
   /** Where extensions get their own writable folder. */
   supportRoot: string;
+  /** More things the root search finds, like notes and clipboard entries. */
+  rootSources?: Array<() => RootItem[] | Promise<RootItem[]>>;
 }
 
 const REVEAL_LABEL: Record<Platform, string> = {
@@ -152,7 +154,22 @@ export class CommandRegistry extends EventEmitter<{ change: [] }> {
     return [...loaded, ...this.failures];
   }
 
-  getRootItems(): RootItem[] {
+  /** Commands, apps and whatever the root sources add. A failing source is left out, not fatal. */
+  async getRootItems(): Promise<RootItem[]> {
+    const extra = await Promise.all(
+      (this.options.rootSources ?? []).map(async (source) => {
+        try {
+          return await source();
+        } catch (error) {
+          console.error('[root search] A source failed:', error);
+          return [];
+        }
+      }),
+    );
+    return [...this.commandAndAppItems(), ...extra.flat()];
+  }
+
+  private commandAndAppItems(): RootItem[] {
     const { platform, usage, apps } = this.options;
     const items: RootItem[] = [];
 

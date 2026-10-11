@@ -1,7 +1,7 @@
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { NotesStore } from './store';
 
 function setup() {
@@ -65,5 +65,55 @@ describe('NotesStore', () => {
     await expect(store.update('../evil', 'x')).rejects.toThrow('Invalid note id');
     await expect(store.update('a/b', 'x')).rejects.toThrow('Invalid note id');
     await expect(store.update('.hidden', 'x')).rejects.toThrow('Invalid note id');
+  });
+
+  it('keeps its listing while watching, and reads again after a change', async () => {
+    const { dir, store } = setup();
+    await store.watch();
+    try {
+      const first = await store.create('# First');
+      expect((await store.list()).map((n) => n.id)).toEqual([first.id]);
+      writeFileSync(join(dir, 'from-elsewhere.md'), '# From elsewhere');
+      await vi.waitFor(async () => expect(await store.list()).toHaveLength(2));
+    } finally {
+      store.unwatch();
+    }
+  });
+
+  it('announces nothing once it stops watching', async () => {
+    const { dir, store } = setup();
+    await store.watch();
+    const onChange = vi.fn();
+    store.on('change', onChange);
+    writeFileSync(join(dir, 'late.md'), '# Late');
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    store.unwatch();
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('never keeps a listing read while a note was being changed', async () => {
+    const dir = join(mkdtempSync(join(tmpdir(), 'notes-')), 'notes');
+    let finishTrash: (() => void) | undefined;
+    const store = new NotesStore(dir, async (path) => {
+      await new Promise<void>((resolve) => {
+        finishTrash = () => {
+          rmSync(path);
+          resolve();
+        };
+      });
+    });
+    const note = await store.create('# Going');
+    await store.watch();
+    try {
+      const trashing = store.trash(note.id);
+      // Listed mid-trash, the note is still on disk.
+      expect(await store.list()).toHaveLength(1);
+      finishTrash?.();
+      await trashing;
+      expect(await store.list()).toHaveLength(0);
+    } finally {
+      store.unwatch();
+    }
   });
 });

@@ -3,8 +3,8 @@ import { app, BrowserWindow, screen } from 'electron';
 import { IpcChannel, type ShownInfo, type ToastMessage } from '../shared/ipc';
 import { glassFor, glassWindowOptions, loadPage } from './glass';
 
-const WIDTH = 750;
-const HEIGHT = 474;
+const WIDTH = 800;
+const HEIGHT = 500;
 /** After this long hidden, the launcher opens at the root again instead of where you left it. */
 const RESET_AFTER_MS = 90_000;
 
@@ -93,8 +93,20 @@ export class LauncherWindow {
     if (isMac && !otherWindowOpen) app.hide();
   }
 
+  /**
+   * Tells the page the root items changed. A hidden launcher reloads them when it opens, so
+   * it isn't told (a note being typed changes them every few keystrokes). Changes can also
+   * arrive while the app quits, after the window is gone, when sending would throw.
+   */
+  rootItemsChanged(): void {
+    if (!this.window.isDestroyed() && this.window.isVisible()) {
+      this.window.webContents.send(IpcChannel.rootItemsChanged);
+    }
+  }
+
   /** Shows a message in the launcher's footer, once the page has loaded. */
   toast(message: ToastMessage): void {
+    if (this.window.isDestroyed()) return;
     const { webContents } = this.window;
     if (webContents.isLoading()) webContents.once('did-finish-load', () => webContents.send(IpcChannel.toast, message));
     else webContents.send(IpcChannel.toast, message);

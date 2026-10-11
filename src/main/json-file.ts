@@ -25,7 +25,7 @@ export function writeJsonFile(path: string, data: unknown): void {
 export function debounce<A extends unknown[]>(
   fn: (...args: A) => void,
   ms: number,
-): ((...args: A) => void) & { flush(): void } {
+): ((...args: A) => void) & { flush(): void; cancel(): void } {
   let timer: NodeJS.Timeout | undefined;
   let pending: A | undefined;
   const debounced = (...args: A) => {
@@ -45,6 +45,11 @@ export function debounce<A extends unknown[]>(
     const callArgs = pending;
     pending = undefined;
     fn(...callArgs);
+  };
+  debounced.cancel = () => {
+    clearTimeout(timer);
+    timer = undefined;
+    pending = undefined;
   };
   return debounced;
 }
