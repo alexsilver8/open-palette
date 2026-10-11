@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/alexsilver8/open-palette/compare/v1.4.0...v1.5.0) (2026-10-11)
+
+
+### Features
+
+* add Port Manager, Gitmoji, Emoji and Conventional Commits extensions ([#19](https://github.com/alexsilver8/open-palette/issues/19)) ([9689e3c](https://github.com/alexsilver8/open-palette/commit/9689e3c224920f9a1a53b86fcb8823d3482fcca4))
+
+
+### Documentation
+
+* show the new Notes editor on the landing page ([#17](https://github.com/alexsilver8/open-palette/issues/17)) ([7abccaa](https://github.com/alexsilver8/open-palette/commit/7abccaa5070fc7c342d2c6ad630d8e21b98d26b5))
+
 ## [1.4.0](https://github.com/alexsilver8/open-palette/compare/v1.3.0...v1.4.0) (2026-10-11)
 
 
