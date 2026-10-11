@@ -1,7 +1,7 @@
 {
   "name": "open-palette",
   "productName": "Open Palette",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "An open-source, keyboard-first command palette and launcher for macOS, Windows and Linux.",
   "private": true,
   "type": "module",
