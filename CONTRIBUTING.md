@@ -56,7 +56,7 @@ Examples: `feat: add --json output`, `fix(parser): handle empty input`, `docs: c
 
 ## Releases
 
-Releases are automated with [release-please](https://github.com/googleapis/release-please). Every merge to `main` updates an open release PR with the next version and changelog. Merging that PR tags the release and publishes it on GitHub.
+Releases are automated with [release-please](https://github.com/googleapis/release-please). Every merge to `main` updates an open release PR with the next version and changelog. Merging that PR tags the release and publishes it on GitHub, with installers for each OS. When the repository has a `RELEASE_PLEASE_TOKEN` secret (a fine-grained token with read and write access to Contents, Pull requests and Issues), CI runs on the release PR and it merges itself once its checks pass, so every `feat` or `fix` is released on its own.
 
 ## Reporting issues
 

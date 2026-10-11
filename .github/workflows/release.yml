@@ -2,6 +2,7 @@ name: release
 
 # release-please keeps a "release PR" open that bumps the version and updates
 # CHANGELOG.md from Conventional Commits. Merging it tags and publishes a GitHub Release.
+# With a RELEASE_PLEASE_TOKEN secret, the release PR also merges itself once its checks pass.
 on:
   push:
     branches: [main]
@@ -30,6 +31,20 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+      # Auto-merge waits for the required checks, which only run on a release PR opened with
+      # the PAT. The merge is then made with the PAT too, so it starts this workflow again,
+      # which tags the release and builds the installers.
+      - name: Merge the release PR once its checks pass
+        if: ${{ steps.release.outputs.prs_created == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          PR: ${{ fromJSON(steps.release.outputs.pr).number }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "No RELEASE_PLEASE_TOKEN secret, so the release PR is left for you to merge."
+            exit 0
+          fi
+          gh pr merge "$PR" --auto --squash --repo "$GITHUB_REPOSITORY"
 
   # Build installers on each OS whenever a release is cut, and attach them to it.
   build:
