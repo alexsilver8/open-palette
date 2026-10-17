@@ -2,6 +2,16 @@
 
 Every release of Waypoint. `pnpm release` writes it from the commits, and each GitHub release shows its section.
 
+## 1.10.0 (2026-10-17)
+
+3 features.
+
+### Features
+
+- redesign the launcher as Halo ([#45](https://github.com/alexsilver8/waypoint/pull/45), [1927c0a](https://github.com/alexsilver8/waypoint/commit/1927c0a55d4e8747f8adcd2c5bfefad6625bf9d5))
+- open Settings from Waypoint in the launcher's footer ([#44](https://github.com/alexsilver8/waypoint/pull/44), [14dc197](https://github.com/alexsilver8/waypoint/commit/14dc197c363e8242588b059ecf3a7ab8b6295803))
+- **notes:** slide the sidebar in and out ([#43](https://github.com/alexsilver8/waypoint/pull/43), [c2eb3d0](https://github.com/alexsilver8/waypoint/commit/c2eb3d05721db3a179406c1feac9a448d56ab7ef))
+
 ## 1.9.1 (2026-10-17)
 
 1 fix.
