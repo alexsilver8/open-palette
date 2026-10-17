@@ -1,11 +1,12 @@
 import { join } from 'node:path';
 import { app, BrowserWindow, screen } from 'electron';
 import { IpcChannel, type ShownInfo, type ToastMessage } from '../shared/ipc';
-import { glassFor, glassWindowOptions, loadPage } from './glass';
+import { type Glass, glassWindowOptions, loadPage } from './glass';
 import { showOnEverySpace } from './spaces';
 
-const WIDTH = 800;
-const HEIGHT = 500;
+// The panes take 776 × 476; the clear margin around them leaves room for their shadows.
+const WIDTH = 816;
+const HEIGHT = 516;
 /** After this long hidden, the launcher opens at the root again instead of where you left it. */
 const RESET_AFTER_MS = 90_000;
 
@@ -22,7 +23,9 @@ export class LauncherWindow {
   private openedFromOwnWindow = false;
 
   constructor(private readonly options: LauncherWindowOptions) {
-    const glass = glassFor();
+    // The launcher draws its own floating panes, so the window itself is clear: system blur
+    // would frost the whole rectangle around them, and the panes cast their own shadows.
+    const glass: Glass = 'none';
     this.window = new BrowserWindow({
       width: WIDTH,
       height: HEIGHT,
@@ -34,8 +37,8 @@ export class LauncherWindow {
       fullscreenable: false,
       skipTaskbar: true,
       alwaysOnTop: true,
-      hasShadow: true,
-      // Frosted glass: the system blurs what's behind the window where it can.
+      hasShadow: false,
+      // Transparent, so only the panes show.
       ...glassWindowOptions(glass, true),
       // On macOS a panel can float above full-screen apps.
       ...(isMac ? ({ type: 'panel' } as const) : {}),
