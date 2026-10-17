@@ -51,13 +51,21 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org)
 | `fix:` | a bug fix | patch |
 | `perf:` | a performance improvement | patch |
 | `docs:` `refactor:` `test:` `build:` `ci:` `chore:` | everything else | — |
-| `feat!:` `fix!:` … | a breaking change | major (minor while < 1.0) |
+| `feat!:` `fix!:` … | a breaking change | major |
 
-Examples: `feat: add --json output`, `fix(parser): handle empty input`, `docs: clarify install steps`.
+The description after the colon starts with a lowercase letter. Examples: `feat: add --json output`, `fix(parser): handle empty input`, `docs: clarify install steps`. Check a title with `node scripts/check-commits.mjs --title "…"`, or your branch's commits with `pnpm commits:check`.
 
 ## Releases
 
-Releases are automated with [release-please](https://github.com/googleapis/release-please). Every merge to `main` updates an open release PR with the next version and changelog. Merging that PR tags the release and publishes it on GitHub, with installers for each OS. When the repository has a `RELEASE_PLEASE_TOKEN` secret (a fine-grained token with read and write access to Contents, Pull requests and Issues), CI runs on the release PR and it merges itself once its checks pass, so every `feat` or `fix` is released on its own.
+```sh
+pnpm release             # works out the version, checks, tags and pushes
+pnpm release --dry-run   # shows the version and the notes, changes nothing
+pnpm release minor       # forces patch, minor, major or an exact version
+```
+
+The version comes from the commit subjects since the last release: `feat:` makes a minor release, `fix:` and `perf:` a patch, and `feat!:` or a `BREAKING CHANGE:` line a major one. `chore:`, `docs:`, `refactor:`, `test:`, `ci:`, `build:` and `style:` don't release on their own. The command checks that `main` is clean and up to date (pulling it first), runs lint, the type checks, the unit tests and the build, bumps `package.json` and the website's version badge, writes `CHANGELOG.md`, commits, tags `vX.Y.Z` and pushes `main` and the tag together.
+
+The tag starts `.github/workflows/release.yml`, which runs the checks again, makes the GitHub release with that version's notes from the changelog, builds the installers on macOS, Windows and Linux, attaches them, and then publishes the release. Pushing the release commit straight to `main` needs a repository admin, whom `main`'s ruleset lets through.
 
 ## Reporting issues
 
