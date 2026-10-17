@@ -3,9 +3,10 @@ import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState }
 import type { Action, ActionContext, ActionResult, CommandRef, RootItem, View } from '../../shared/types';
 import { ActionPanel } from './components/ActionPanel';
 import { DetailPane } from './components/DetailPane';
-import { FilterTabs } from './components/FilterTabs';
 import { Footer, type Toast } from './components/Footer';
+import { Keycaps } from './components/Keycaps';
 import { optionId, QUICK_KEY_COUNT, ResultList } from './components/ResultList';
+import { ScopeDock } from './components/ScopeDock';
 import { isModKey, matchesShortcut } from './keys';
 import { type DisplayItem, type DisplaySection, filterView } from './model';
 import { buildRootSections, countRootMatches, ROOT_FILTERS, type RootFilter } from './root-search';
@@ -309,6 +310,19 @@ export function App() {
     focusInput();
   }, [focusInput]);
 
+  /** Picks what the root search shows; from a command's view, goes back to the search first. */
+  const pickScope = (next: RootFilter) => {
+    if (isRoot) {
+      updateTop({ filter: next, selectedId: undefined });
+    } else {
+      searchRequest.current++;
+      setLoading(false);
+      setPanelOpen(false);
+      setStack([{ ...ROOT, filter: next }]);
+    }
+    focusInput();
+  };
+
   const move = (delta: number) => {
     const next = items[Math.min(items.length - 1, Math.max(0, selectedIndex + delta))];
     if (next) updateTop({ selectedId: next.id });
@@ -381,6 +395,8 @@ export function App() {
     }
   };
 
+  const scopeLabel = ROOT_FILTERS.find((f) => f.id === filter)?.label;
+  const scopeMatches = counts?.[filter] ?? 0;
   const placeholder = isRoot ? PLACEHOLDERS[filter] : (frame.view?.searchPlaceholder ?? 'Search…');
   const emptyText = isRoot
     ? frame.query
@@ -392,75 +408,89 @@ export function App() {
 
   return (
     <div className="launcher">
-      <header className="search" data-loading={loading || undefined}>
-        {isRoot && (
-          <svg className="search__icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14z M20 20l-4.2-4.2" />
-          </svg>
-        )}
-        {!isRoot && (
-          <button type="button" className="search__back" onClick={pop} aria-label="Back">
-            <ChevronLeft size={16} strokeWidth={2.25} />
-          </button>
-        )}
-        <input
-          ref={input}
-          className="search__input"
-          value={frame.query}
-          placeholder={placeholder}
-          onChange={(event) => updateTop({ query: event.target.value, selectedId: undefined })}
-          onKeyDown={onKeyDown}
-          role="combobox"
-          aria-label={placeholder}
-          aria-expanded="true"
-          aria-controls="results"
-          aria-activedescendant={selected ? optionId(selectedIndex) : undefined}
-          aria-autocomplete="list"
-          spellCheck={false}
-          autoComplete="off"
-          autoFocus
-        />
-        {!isRoot && frame.view?.title && <span className="search__crumb">{frame.view.title}</span>}
-      </header>
-
-      {isRoot && (
-        <FilterTabs
-          value={filter}
-          counts={counts}
-          platform={platform}
-          onChange={(next) => {
-            updateTop({ filter: next, selectedId: undefined });
-            focusInput();
-          }}
-        />
-      )}
-
-      <main className="content" data-detail={showDetail || undefined}>
-        <div className="content__list">
-          <ResultList
-            sections={sections}
-            selectedId={selected?.id}
-            emptyText={emptyText}
-            quickKeyModifier={modHeld ? MOD_LABEL : null}
-            quickKeyStart={firstInView}
-            onFirstInViewChange={setFirstInView}
-            onSelect={(item) => updateTop({ selectedId: item.id })}
-            onActivate={(item) => void run(item, item.actions[0])}
-          />
-        </div>
-        {showDetail && <DetailPane item={selected} />}
-      </main>
-
-      <Footer
+      <ScopeDock
+        value={filter}
+        counts={counts}
+        inactive={!isRoot}
         platform={platform}
-        context={isRoot ? 'Waypoint' : (frame.view?.title ?? 'Waypoint')}
-        onOpenSettings={isRoot ? openSettings : undefined}
-        toast={toast}
-        primary={selected?.actions[0]}
-        hasActions={Boolean(selected && selected.actions.length > 0)}
-        onPrimary={() => void run(selected, selected?.actions[0])}
-        onToggleActions={() => setPanelOpen((open) => !open)}
+        onChange={pickScope}
+        onSettings={openSettings}
       />
+
+      <div className="launcher__main">
+        <header className="search" data-loading={loading || undefined}>
+          {isRoot && (
+            <svg className="search__icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14z M20 20l-4.2-4.2" />
+            </svg>
+          )}
+          {!isRoot && (
+            <button type="button" className="search__back" onClick={pop} aria-label="Back">
+              <ChevronLeft size={16} strokeWidth={2.25} />
+            </button>
+          )}
+          {isRoot && filter !== 'all' && <span className="search__scope">{scopeLabel}</span>}
+          <input
+            ref={input}
+            className="search__input"
+            value={frame.query}
+            placeholder={placeholder}
+            onChange={(event) => updateTop({ query: event.target.value, selectedId: undefined })}
+            onKeyDown={onKeyDown}
+            role="combobox"
+            aria-label={placeholder}
+            aria-expanded="true"
+            aria-controls="results"
+            aria-activedescendant={selected ? optionId(selectedIndex) : undefined}
+            aria-autocomplete="list"
+            spellCheck={false}
+            autoComplete="off"
+            autoFocus
+          />
+          {!isRoot && frame.view?.title && <span className="search__crumb">{frame.view.title}</span>}
+          {isRoot && !frame.query && (
+            <span className="search__hint">
+              <Keycaps keys={[platform === 'darwin' ? '⇥' : 'Tab']} />
+              Scope
+            </span>
+          )}
+          {isRoot && scopeMatches > 0 && (
+            <span className="search__hint">
+              {scopeMatches} {scopeMatches === 1 ? 'result' : 'results'}
+            </span>
+          )}
+        </header>
+
+        <section className="sheet">
+          <main className="content" data-detail={showDetail || undefined}>
+            <div className="content__list">
+              <ResultList
+                sections={sections}
+                selectedId={selected?.id}
+                enterKey={platform === 'darwin' ? '↵' : 'Enter'}
+                emptyText={emptyText}
+                quickKeyModifier={modHeld ? MOD_LABEL : null}
+                quickKeyStart={firstInView}
+                onFirstInViewChange={setFirstInView}
+                onSelect={(item) => updateTop({ selectedId: item.id })}
+                onActivate={(item) => void run(item, item.actions[0])}
+              />
+            </div>
+            {showDetail && <DetailPane item={selected} />}
+          </main>
+
+          <Footer
+            platform={platform}
+            context={isRoot ? 'Waypoint' : (frame.view?.title ?? 'Waypoint')}
+            onOpenSettings={isRoot ? openSettings : undefined}
+            toast={toast}
+            primary={selected?.actions[0]}
+            hasActions={Boolean(selected && selected.actions.length > 0)}
+            onPrimary={() => void run(selected, selected?.actions[0])}
+            onToggleActions={() => setPanelOpen((open) => !open)}
+          />
+        </section>
+      </div>
 
       {panelOpen && selected && (
         <ActionPanel

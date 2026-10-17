@@ -1,9 +1,10 @@
 /*
  * Waypoint — launcher styles.
  *
- * Liquid glass: the desktop blurs through a thin tint, and the search field, preview and
- * action bar are panes of brighter glass floating inside it. The selected row lifts off as
- * its own pane. Colour comes only from the icons.
+ * Halo: the desktop blurs through a thin tint, and three panes of brighter glass float on it —
+ * the scope dock down the left, the search capsule along the top, and the results sheet below
+ * with the action bar along its foot. The selected row lifts off as its own pane. Colour
+ * comes only from the icons.
  */
 
 @import "./base.css";
@@ -41,10 +42,9 @@ button {
 .launcher {
   position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   height: 100%;
-  padding: 10px;
+  padding: 12px;
   background: var(--glass);
   overflow: hidden;
 }
@@ -55,19 +55,37 @@ button {
   border-radius: var(--radius-window);
 }
 
+.launcher__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Keycaps here are a touch larger and rounder, to sit with the capsule shapes. */
+.launcher .keycap {
+  min-width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  font-weight: 600;
+}
+
 /* ── Search field ───────────────────────────────────────── */
 
 .search {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  height: 52px;
-  padding: 0 12px 0 16px;
-  border-radius: 16px;
-  border: 1px solid var(--glass-raised-border);
-  background: var(--glass-raised);
-  box-shadow: inset 0 1px 0 var(--glass-sheen);
+  gap: 12px;
+  height: 56px;
+  padding: 0 18px 0 20px;
+  border: 1px solid var(--pane-border);
+  border-radius: 28px;
+  background: var(--pane);
+  box-shadow:
+    inset 0 1px 0 var(--pane-sheen),
+    var(--pane-shadow);
   flex: none;
 }
 
@@ -90,7 +108,7 @@ button {
   background: transparent;
   color: var(--ink);
   font: inherit;
-  font-size: 18px;
+  font-size: 19px;
   letter-spacing: -0.01em;
   caret-color: var(--accent);
 }
@@ -102,11 +120,11 @@ button {
 .search__back {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  margin-left: -6px;
+  width: 32px;
+  height: 32px;
+  margin-left: -8px;
   border: none;
-  border-radius: 9px;
+  border-radius: 16px;
   background: var(--keycap);
   color: var(--ink-muted);
 }
@@ -117,7 +135,7 @@ button {
 
 .search__back:focus-visible,
 .footer__button:focus-visible,
-.filters__tab:focus-visible {
+.dock__button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
@@ -128,20 +146,46 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding: 4px 10px;
-  border-radius: 9px;
+  padding: 5px 12px;
+  border-radius: 14px;
   background: var(--keycap);
   color: var(--ink-muted);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 500;
+}
+
+/* The scope being searched, as a chip before the text. */
+.search__scope {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 14px;
+  background: var(--keycap);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* "⇥ Scope" while empty, the match count while searching. */
+.search__hint {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-faint);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* A sliver of light sweeps along the bottom of the field while something loads. */
 .search[data-loading]::after {
   content: "";
   position: absolute;
-  left: 16px;
-  right: 16px;
+  left: 28px;
+  right: 28px;
   bottom: 0;
   height: 2px;
   border-radius: 1px;
@@ -159,94 +203,134 @@ button {
   }
 }
 
-/* ── Filter tabs ────────────────────────────────────────── */
+/* ── Scope dock ─────────────────────────────────────────── */
 
-.filters {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 4px 0 2px;
+.dock {
   flex: none;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--pane-border);
+  border-radius: 26px;
+  background: var(--pane);
+  box-shadow:
+    inset 0 1px 0 var(--pane-sheen),
+    var(--pane-shadow);
 }
 
-.filters__tabs {
+.dock__tabs {
   display: flex;
+  flex-direction: column;
   gap: 4px;
 }
 
-.filters__tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 28px;
-  padding: 0 11px;
-  border: 1px solid transparent;
-  border-radius: 9px;
+.dock__button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 20px;
   background: transparent;
   color: var(--ink-muted);
-  font-size: 12.5px;
-  font-weight: 500;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
 }
 
-.filters__tab:hover {
+.dock__button:hover {
   background: var(--hover);
   color: var(--ink);
 }
 
-.filters__tab[aria-selected="true"] {
-  border-color: var(--selected-border);
-  background: var(--selected-pane);
-  box-shadow: var(--selected-shadow);
+.dock__button[aria-selected="true"] {
+  background: var(--dock-active);
+  color: var(--dock-active-ink);
+}
+
+/* A scope with nothing for what's typed steps back. */
+.dock__button[data-empty] {
+  color: var(--ink-faint);
+}
+
+.dock__badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  display: grid;
+  place-items: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--badge-quiet);
   color: var(--ink);
-}
-
-.filters__count {
-  color: var(--ink-faint);
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
-.filters__hint {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: auto;
-  color: var(--ink-faint);
-  font-size: 12px;
+.dock__button[aria-selected="true"] .dock__badge {
+  background: var(--badge);
+  color: var(--badge-ink);
+}
+
+.dock__divider {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--hairline);
 }
 
 /* ── Results and preview ────────────────────────────────── */
+
+/* The list, the preview beside it and the action bar share one sheet of glass. */
+.sheet {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--pane-border);
+  border-radius: var(--radius-pane);
+  background: var(--pane);
+  box-shadow:
+    inset 0 1px 0 var(--pane-sheen),
+    var(--pane-shadow);
+  overflow: hidden;
+}
 
 .content {
   flex: 1;
   min-height: 0;
   display: flex;
-  gap: 6px;
 }
 
 .content__list {
   flex: 1;
   min-width: 0;
   overflow-y: auto;
-  padding: 2px 0;
+  padding: 4px 8px;
 }
 
 .content[data-detail] .content__list {
-  flex: 0 0 52%;
+  flex: 0 0 50%;
 }
 
 /* Fixed heights: long lists only draw what's in view, and work out where rows are from these. */
 .results__heading {
   height: 28px;
   margin: 0;
-  padding: 8px 12px 4px;
+  padding: 8px 10px 4px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   font-size: 12px;
   line-height: 16px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--ink-muted);
 }
 
@@ -263,11 +347,11 @@ button {
 .row {
   display: flex;
   align-items: center;
-  gap: 11px;
-  height: 42px;
+  gap: 12px;
+  height: 44px;
   padding: 0 10px;
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: 14px;
 }
 
 .row[aria-selected="true"] {
@@ -277,12 +361,21 @@ button {
 }
 
 .row .icon {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
 }
 
 .row .icon--tile {
-  border-radius: 7px;
+  border-radius: 8px;
+}
+
+.row .icon--tile svg {
+  width: 16px;
+  height: 16px;
+}
+
+.row .icon--emoji {
+  font-size: 20px;
 }
 
 .row__text {
@@ -300,12 +393,13 @@ button {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 14.5px;
+  font-weight: 500;
 }
 
 .row__title mark {
   background: none;
-  color: inherit;
-  font-weight: 650;
+  color: var(--match);
+  font-weight: 700;
 }
 
 .row__subtitle {
@@ -334,41 +428,65 @@ button {
   max-width: none;
 }
 
-/* The calculator answers inline: the sum on the left, the answer large on the right. */
+/* The calculator answers in a card: the sum on the left, the answer large on the right. */
 .row--calc {
-  height: 62px;
+  height: 92px;
+  padding: 0 22px;
+  border-radius: 18px;
+  background: var(--hover);
+}
+
+.row--calc[aria-selected="true"] {
+  border-color: color-mix(in oklab, var(--accent) 55%, transparent);
 }
 
 .calc {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 16px;
   width: 100%;
   font-variant-numeric: tabular-nums;
 }
 
-.calc__expression {
+.calc__side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.calc__side--result {
+  align-items: flex-end;
+}
+
+.calc__expression,
+.calc__result {
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--ink-muted);
-  font-size: 16px;
 }
 
-.calc__equals {
+.calc__expression {
+  color: var(--ink-muted);
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.calc__arrow {
   color: var(--ink-faint);
-  font-size: 18px;
 }
 
 .calc__result {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: right;
-  font-size: 26px;
-  font-weight: 600;
+  font-size: 34px;
+  font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.calc__label {
+  color: var(--ink-faint);
+  font-size: 12px;
 }
 
 .empty {
@@ -386,11 +504,8 @@ button {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px 18px;
-  border: 1px solid var(--glass-raised-border);
-  border-radius: 16px;
-  background: var(--glass-raised);
-  box-shadow: inset 0 1px 0 var(--glass-sheen);
+  padding: 18px 20px;
+  border-left: 1px solid var(--hairline);
   overflow-y: auto;
 }
 
@@ -545,14 +660,12 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  height: 44px;
-  padding: 0 6px 0 14px;
-  border: 1px solid var(--glass-raised-border);
-  border-radius: 14px;
-  background: var(--glass-raised);
-  box-shadow: inset 0 1px 0 var(--glass-sheen);
+  height: 46px;
+  padding: 0 8px 0 16px;
+  border-top: 1px solid var(--hairline);
+  background: var(--glass-bar);
   color: var(--ink-muted);
-  font-size: 12.5px;
+  font-size: 13px;
   flex: none;
 }
 
@@ -584,7 +697,7 @@ button {
   height: 28px;
   padding: 0 8px;
   border: none;
-  border-radius: 8px;
+  border-radius: 14px;
   background: none;
   color: inherit;
   font: inherit;
@@ -639,9 +752,9 @@ button {
   align-items: center;
   gap: 8px;
   height: 32px;
-  padding: 0 8px 0 12px;
+  padding: 0 6px 0 14px;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 16px;
   background: none;
   color: var(--ink-muted);
 }
@@ -656,7 +769,11 @@ button {
   background: var(--selected-pane);
   box-shadow: var(--selected-shadow);
   color: var(--ink);
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.footer__button--primary .keycap {
+  border-radius: 11px;
 }
 
 .footer__button--primary:hover {
@@ -676,20 +793,20 @@ button {
 
 .action-panel {
   position: absolute;
-  right: 16px;
-  bottom: 62px;
+  right: 20px;
+  bottom: 64px;
   display: flex;
   flex-direction: column;
   width: 320px;
   max-height: 340px;
   /* Its own sheet of glass, blurring the list underneath. */
   background: var(--glass-panel);
-  -webkit-backdrop-filter: blur(28px) saturate(1.8);
-  backdrop-filter: blur(28px) saturate(1.8);
-  border: 1px solid var(--glass-raised-border);
-  border-radius: 16px;
+  -webkit-backdrop-filter: blur(40px) saturate(1.8);
+  backdrop-filter: blur(40px) saturate(1.8);
+  border: 1px solid var(--pane-border);
+  border-radius: 18px;
   box-shadow:
-    inset 0 1px 0 var(--glass-sheen),
+    inset 0 1px 0 var(--pane-sheen),
     var(--shadow-popover);
   overflow: hidden;
   transform-origin: bottom right;
@@ -730,7 +847,7 @@ button {
   height: 34px;
   padding: 0 8px;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: 10px;
 }
 
 .action-panel__item[aria-selected="true"] {
