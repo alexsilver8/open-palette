@@ -21,6 +21,8 @@ export function NotesApp() {
   const [draft, setDraft] = useState('');
   const [filter, setFilter] = useState('');
   const [sidebar, setSidebar] = useState(true);
+  // The sidebar slides only when you open or close it, not when the window opens with it closed.
+  const [animateSidebar, setAnimateSidebar] = useState(false);
   const [alwaysOnTop, setAlwaysOnTop] = useState(false);
   const [, setTick] = useState(0);
 
@@ -179,6 +181,7 @@ export function NotesApp() {
   }, []);
 
   const toggleSidebar = useCallback(() => {
+    setAnimateSidebar(true);
     setSidebar((open) => {
       api.setState({ sidebar: !open });
       return !open;
@@ -186,6 +189,7 @@ export function NotesApp() {
   }, []);
 
   const findNote = useCallback(() => {
+    setAnimateSidebar(true);
     setSidebar(true);
     api.setState({ sidebar: true });
     requestAnimationFrame(() => {
@@ -250,7 +254,7 @@ export function NotesApp() {
   const words = countWords(draft);
 
   return (
-    <div className="notes" data-sidebar={sidebar || undefined}>
+    <div className="notes" data-sidebar={sidebar || undefined} data-animate-sidebar={animateSidebar || undefined}>
       <header className="notes__header">
         <button
           type="button"
@@ -290,50 +294,49 @@ export function NotesApp() {
         </button>
       </header>
 
-      {sidebar && (
-        <aside className="notes__sidebar">
-          <label className="notes__search">
-            <Search size={14} aria-hidden="true" />
-            <input
-              ref={search}
-              value={filter}
-              onChange={(event) => setFilter(event.target.value)}
-              onKeyDown={onSearchKeyDown}
-              placeholder="Find a note"
-              aria-label="Find a note"
-              spellCheck={false}
-            />
-          </label>
-          <nav className="notes__list" aria-label="Notes">
-            <ul>
-              {visible.map((note) => {
-                const text = note.id === currentId ? draft : note.text;
-                const preview = notePreview(text);
-                return (
-                  <li key={note.id}>
-                    <button
-                      type="button"
-                      className="notes__item"
-                      aria-current={note.id === currentId || undefined}
-                      onClick={() => void select(note.id)}
-                    >
-                      <span className="notes__item-title">{noteTitle(text)}</span>
-                      <span className="notes__item-meta">
-                        <span>{timeAgo(note.updatedAt)}</span>
-                        {preview && <span className="notes__item-preview">{preview}</span>}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-            {visible.length === 0 && <p className="notes__none">No notes match “{filter}”.</p>}
-          </nav>
-          <div className="notes__count">
-            {notes.length} {notes.length === 1 ? 'note' : 'notes'}
-          </div>
-        </aside>
-      )}
+      {/* Always there, so it can slide in and out; closed, it's inert and hidden. */}
+      <aside className="notes__sidebar" inert={!sidebar}>
+        <label className="notes__search">
+          <Search size={14} aria-hidden="true" />
+          <input
+            ref={search}
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+            onKeyDown={onSearchKeyDown}
+            placeholder="Find a note"
+            aria-label="Find a note"
+            spellCheck={false}
+          />
+        </label>
+        <nav className="notes__list" aria-label="Notes">
+          <ul>
+            {visible.map((note) => {
+              const text = note.id === currentId ? draft : note.text;
+              const preview = notePreview(text);
+              return (
+                <li key={note.id}>
+                  <button
+                    type="button"
+                    className="notes__item"
+                    aria-current={note.id === currentId || undefined}
+                    onClick={() => void select(note.id)}
+                  >
+                    <span className="notes__item-title">{noteTitle(text)}</span>
+                    <span className="notes__item-meta">
+                      <span>{timeAgo(note.updatedAt)}</span>
+                      {preview && <span className="notes__item-preview">{preview}</span>}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          {visible.length === 0 && <p className="notes__none">No notes match “{filter}”.</p>}
+        </nav>
+        <div className="notes__count">
+          {notes.length} {notes.length === 1 ? 'note' : 'notes'}
+        </div>
+      </aside>
 
       <NoteEditor
         noteId={currentId}

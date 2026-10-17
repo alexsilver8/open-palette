@@ -33,6 +33,8 @@ button {
 .notes {
   --pigment: var(--pigment-yellow);
   --sidebar-width: 216px;
+  --sidebar-duration: 280ms;
+  --sidebar-ease: cubic-bezier(0.32, 0.72, 0, 1);
   display: grid;
   grid-template-columns: 0 minmax(0, 1fr);
   grid-template-rows: 46px 1fr 58px;
@@ -46,6 +48,12 @@ button {
 
 .notes[data-sidebar] {
   grid-template-columns: calc(var(--sidebar-width) + 8px) minmax(0, 1fr);
+}
+
+/* Opening or closing the sidebar: its column folds away while the pane slides out past the window's left edge, its
+   right edge staying on the editor's, so the editor widens into the space it leaves. */
+.notes[data-animate-sidebar] {
+  transition: grid-template-columns var(--sidebar-duration) var(--sidebar-ease);
 }
 
 /* ── Header ─────────────────────────────────────────────── */
@@ -130,6 +138,8 @@ button {
   grid-area: sidebar;
   display: flex;
   flex-direction: column;
+  /* Its own width, not the column's, so the list doesn't squeeze while the column folds. */
+  width: var(--sidebar-width);
   min-height: 0;
   margin: 0 0 8px 8px;
   overflow: hidden;
@@ -137,6 +147,27 @@ button {
   border-radius: 16px;
   background: var(--glass-raised);
   box-shadow: inset 0 1px 0 var(--glass-sheen);
+}
+
+.notes:not([data-sidebar]) .notes__sidebar {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(calc(-100% - 8px));
+}
+
+.notes[data-animate-sidebar] .notes__sidebar {
+  transition:
+    transform var(--sidebar-duration) var(--sidebar-ease),
+    opacity var(--sidebar-duration) var(--sidebar-ease),
+    visibility 0s;
+}
+
+/* Closing, it stays visible until it's out of sight. */
+.notes[data-animate-sidebar]:not([data-sidebar]) .notes__sidebar {
+  transition:
+    transform var(--sidebar-duration) var(--sidebar-ease),
+    opacity var(--sidebar-duration) var(--sidebar-ease),
+    visibility 0s linear var(--sidebar-duration);
 }
 
 .notes__search {
@@ -679,5 +710,10 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .toolbar__popover {
     animation: none;
+  }
+
+  .notes[data-animate-sidebar],
+  .notes[data-animate-sidebar] .notes__sidebar {
+    transition: none;
   }
 }
