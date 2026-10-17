@@ -17,6 +17,8 @@ const HEADING_HEIGHT = 28;
 const ROW_HEIGHT = 44;
 const CALC_HEIGHT = 92;
 const OVERSCAN = 420;
+/** Room kept between the selected row and the list's edge, like `scroll-padding` in styles.css. */
+const SCROLL_GAP = 8;
 
 interface ResultListProps {
   sections: DisplaySection[];
@@ -162,17 +164,23 @@ export function ResultList({
   // Keep the selected row in view as it moves.
   useLayoutEffect(() => {
     if (!selectedId) return;
+    const scroller = root.current?.parentElement;
     if (!virtual) {
-      rows.current.get(selectedId)?.scrollIntoView({ block: 'nearest' });
+      const first = layout.entries.find((e) => e.kind === 'row');
+      // Back at the first row, the list goes to the very top so its heading shows again.
+      if (scroller && first?.kind === 'row' && first.item.id === selectedId) scroller.scrollTop = 0;
+      else rows.current.get(selectedId)?.scrollIntoView({ block: 'nearest' });
       return;
     }
-    const scroller = root.current?.parentElement;
     const entry = layout.entries.find((e) => e.kind === 'row' && e.item.id === selectedId);
     if (!scroller || entry?.kind !== 'row') return;
     const top = entry.top + offsetIn(scroller);
     const bottom = top + entry.height;
-    if (top < scroller.scrollTop) scroller.scrollTop = entry.index === 0 ? 0 : top;
-    else if (bottom > scroller.scrollTop + scroller.clientHeight) scroller.scrollTop = bottom - scroller.clientHeight;
+    if (top < scroller.scrollTop + SCROLL_GAP) {
+      scroller.scrollTop = entry.index === 0 ? 0 : top - SCROLL_GAP;
+    } else if (bottom > scroller.scrollTop + scroller.clientHeight - SCROLL_GAP) {
+      scroller.scrollTop = bottom - scroller.clientHeight + SCROLL_GAP;
+    }
   }, [selectedId, virtual, layout]);
 
   // ⌘1 opens the first row in view, so the numbers follow the scroll. Checked after every draw

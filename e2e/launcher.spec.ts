@@ -342,6 +342,23 @@ test('numbers the rows in view once the list is scrolled', async () => {
   await expect(notes.locator('.notes__item[aria-current]')).toContainText(fourth);
 });
 
+test('opens again where it was dragged', async () => {
+  const launcher = () =>
+    app.evaluate(({ BrowserWindow }) => {
+      const window = BrowserWindow.getAllWindows()[0];
+      return { visible: window?.isVisible(), position: window?.getPosition() };
+    });
+  const centered = (await launcher()).position;
+  // A drag goes through the system's window manager; moving the window stands in for it.
+  await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.setPosition(60, 80));
+  await page.keyboard.press('Escape');
+  await expect.poll(async () => (await launcher()).visible).toBe(false);
+  await app.evaluate(({ app: electronApp }) => electronApp.emit('second-instance'));
+  await expect.poll(async () => (await launcher()).visible).toBe(true);
+  expect((await launcher()).position).toEqual([60, 80]);
+  expect(centered).not.toEqual([60, 80]);
+});
+
 test('opens Settings from Waypoint in the footer', async () => {
   const [settings] = await Promise.all([
     app.waitForEvent('window'),
