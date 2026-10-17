@@ -24,7 +24,7 @@ export class AppTray {
 
   constructor(private readonly options: TrayOptions) {
     this.tray = new Tray(trayIcon());
-    this.tray.setToolTip('Open Palette');
+    this.tray.setToolTip('Waypoint');
     // On Windows and Linux a click usually means "open"; macOS shows the menu instead.
     if (process.platform !== 'darwin') this.tray.on('click', () => options.onOpen());
     this.refresh();
@@ -36,7 +36,7 @@ export class AppTray {
     this.tray.setContextMenu(
       Menu.buildFromTemplate([
         {
-          label: 'Open Palette',
+          label: 'Waypoint',
           accelerator: options.hotkey(),
           registerAccelerator: false,
           click: () => options.onOpen(),
@@ -47,7 +47,7 @@ export class AppTray {
         { label: 'Open Extensions Folder', click: () => options.onOpenExtensionsFolder() },
         { label: 'Reload Extensions', click: () => options.onReloadExtensions() },
         { type: 'separator' },
-        { label: `Open Palette ${app.getVersion()}`, enabled: false },
+        { label: `Waypoint ${app.getVersion()}`, enabled: false },
         { label: 'Quit', role: 'quit' },
       ]),
     );

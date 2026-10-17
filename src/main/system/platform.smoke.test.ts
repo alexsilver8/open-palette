@@ -1,6 +1,6 @@
 /**
  * Runs the System commands' scripts on the real system. Off by default; the platform
- * workflow runs it on macOS, Windows and Linux with OPEN_PALETTE_SMOKE=1. Nothing here
+ * workflow runs it on macOS, Windows and Linux with WAYPOINT_SMOKE=1. Nothing here
  * restarts, shuts down or turns anything off, and the Trash is only emptied on CI machines.
  */
 import { mkdtempSync, writeFileSync } from 'node:fs';
@@ -13,7 +13,7 @@ import { listDisks } from './disks';
 import { emptyTrash } from './trash';
 import { WifiError, wifiPower } from './wifi';
 
-const enabled = process.env.OPEN_PALETTE_SMOKE === '1';
+const enabled = process.env.WAYPOINT_SMOKE === '1';
 const platform = process.platform as Platform;
 
 describe.runIf(enabled)(`System commands on ${platform}`, () => {
@@ -38,7 +38,7 @@ describe.runIf(enabled)(`System commands on ${platform}`, () => {
 
   // Only on CI machines: anywhere else this would empty your own Trash.
   it.runIf(process.env.CI === 'true')('empties the Trash', { timeout: 120_000 }, async () => {
-    const file = join(mkdtempSync(join(tmpdir(), 'open-palette-')), 'thrown away.txt');
+    const file = join(mkdtempSync(join(tmpdir(), 'waypoint-')), 'thrown away.txt');
     writeFileSync(file, 'bye');
     const binned = await toTrash(file).then(
       () => true,

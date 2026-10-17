@@ -29,7 +29,7 @@ export class SettingsWindow {
       minWidth: 660,
       minHeight: 440,
       show: false,
-      title: 'Open Palette Settings',
+      title: 'Waypoint Settings',
       fullscreenable: false,
       maximizable: false,
       ...glassWindowOptions(glass, false),

@@ -4,7 +4,7 @@ export interface Settings {
   hotkey: string;
   /** Hide the launcher when it loses focus. */
   hideOnBlur: boolean;
-  /** Start Open Palette when you log in (macOS and Windows). */
+  /** Start Waypoint when you log in (macOS and Windows). */
   launchAtLogin: boolean;
   theme: 'system' | 'light' | 'dark';
   clipboardHistory: {

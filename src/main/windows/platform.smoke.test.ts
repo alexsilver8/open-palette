@@ -1,6 +1,6 @@
 /**
  * Moves a real window on the system it runs on. Off by default; the platform workflow runs it
- * on macOS, Windows and Linux (under Xvfb with a window manager) with OPEN_PALETTE_SMOKE=1,
+ * on macOS, Windows and Linux (under Xvfb with a window manager) with WAYPOINT_SMOKE=1,
  * after opening a window and bringing it to the front.
  */
 import { describe, expect, it } from 'vitest';
@@ -11,7 +11,7 @@ import { WindowManager } from './manager';
 import { PowerShellWindows } from './win32';
 import { x11Backend } from './x11';
 
-const enabled = process.env.OPEN_PALETTE_SMOKE === '1';
+const enabled = process.env.WAYPOINT_SMOKE === '1';
 
 /**
  * Whether a window landed where it should. Apps round sizes to what they support, and won't go

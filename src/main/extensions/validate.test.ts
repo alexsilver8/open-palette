@@ -4,7 +4,7 @@ import { parseExtensionPackage, sanitizeAction, sanitizeActionResult, sanitizeIc
 const validPackage = {
   name: 'hello-world',
   main: 'index.js',
-  openPalette: {
+  waypoint: {
     title: 'Hello World',
     icon: '👋',
     commands: [
@@ -35,21 +35,27 @@ describe('parseExtensionPackage', () => {
   });
 
   it('resolves image icons relative to the extension folder', () => {
-    const pkg = { ...validPackage, openPalette: { ...validPackage.openPalette, icon: 'assets/icon.png' } };
+    const pkg = { ...validPackage, waypoint: { ...validPackage.waypoint, icon: 'assets/icon.png' } };
     expect(parseExtensionPackage(pkg, '/ext/hello').manifest.icon).toEqual({ path: '/ext/hello/assets/icon.png' });
+  });
+
+  it('still reads the openPalette section from before the rename', () => {
+    const { waypoint, ...rest } = validPackage;
+    const { manifest } = parseExtensionPackage({ ...rest, openPalette: waypoint }, '/ext/hello-world');
+    expect(manifest.title).toBe('Hello World');
   });
 
   it.each([
     ['a non-object', 'nope'],
     ['an invalid name', { ...validPackage, name: 'Hello World' }],
-    ['a missing openPalette section', { name: 'x' }],
-    ['no commands', { ...validPackage, openPalette: { title: 'X', commands: [] } }],
-    ['a command without mode', { ...validPackage, openPalette: { title: 'X', commands: [{ name: 'a', title: 'A' }] } }],
+    ['a missing waypoint section', { name: 'x' }],
+    ['no commands', { ...validPackage, waypoint: { title: 'X', commands: [] } }],
+    ['a command without mode', { ...validPackage, waypoint: { title: 'X', commands: [{ name: 'a', title: 'A' }] } }],
     [
       'duplicate command names',
       {
         ...validPackage,
-        openPalette: {
+        waypoint: {
           title: 'X',
           commands: [
             { name: 'a', title: 'A', mode: 'view' },

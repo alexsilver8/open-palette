@@ -1,7 +1,7 @@
-// Open Palette landing page: the hero replay, scroll reveals, the section rail and
+// Waypoint landing page: the hero replay, scroll reveals, the section rail and
 // download links that point at the right installer from the latest release.
 
-const REPO = 'alexsilver8/open-palette';
+const REPO = 'alexsilver8/waypoint';
 const LATEST = `https://github.com/${REPO}/releases/latest`;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -46,7 +46,7 @@ if (os === 'windows' || os === 'linux') {
 // ── Download links ───────────────────────────────────────
 
 async function latestRelease() {
-  const cacheKey = 'open-palette:latest-release';
+  const cacheKey = 'waypoint:latest-release';
   try {
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) return JSON.parse(cached);

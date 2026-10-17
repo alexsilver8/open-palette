@@ -10,7 +10,7 @@ interface PaletteCommandOptions {
   registry: () => CommandRegistry;
 }
 
-/** Commands for managing Open Palette itself. */
+/** Commands for managing Waypoint itself. */
 export function paletteExtension({ openSettings, extensionsDir, registry }: PaletteCommandOptions): BuiltinExtension {
   const openExtensionsFolder = async () => {
     mkdirSync(extensionsDir, { recursive: true });
@@ -60,8 +60,8 @@ export function paletteExtension({ openSettings, extensionsDir, registry }: Pale
 
   return {
     manifest: {
-      name: 'open-palette',
-      title: 'Open Palette',
+      name: 'waypoint',
+      title: 'Waypoint',
       icon: { builtin: 'sparkles', tint: 'pink' },
       commands: [
         {
@@ -91,7 +91,7 @@ export function paletteExtension({ openSettings, extensionsDir, registry }: Pale
         },
         {
           name: 'quit',
-          title: 'Quit Open Palette',
+          title: 'Quit Waypoint',
           mode: 'no-view',
           icon: { builtin: 'power', tint: 'red' },
           keywords: ['exit'],

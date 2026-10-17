@@ -58,7 +58,7 @@
   ],
   "packages": {
     ".": {
-      "package-name": "open-palette"
+      "package-name": "waypoint"
     }
   }
 }

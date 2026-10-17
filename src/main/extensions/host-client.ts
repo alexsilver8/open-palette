@@ -76,7 +76,7 @@ export class ExtensionHostClient {
     const generation = this.generation;
     return new Promise<void>((resolve, reject) => {
       const child = utilityProcess.fork(this.scriptPath, [], {
-        serviceName: 'Open Palette Extension Host',
+        serviceName: 'Waypoint Extension Host',
         stdio: 'inherit',
       });
       child.on('message', (message: HostResponse) => this.onMessage(message));

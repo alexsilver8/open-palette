@@ -198,7 +198,7 @@ function signInView(ctx, title, problem) {
               '',
               'Or, if you use GitHub CLI, run gh auth login in a terminal and open this again.',
               '',
-              "The token is saved on this computer in Open Palette's data folder (extension-data/github/storage.json), and only sent to api.github.com.",
+              "The token is saved on this computer in Waypoint's data folder (extension-data/github/storage.json), and only sent to api.github.com.",
             ].join('\n'),
           },
         })),

@@ -253,7 +253,7 @@ function General({ state, update }: SectionProps) {
   return (
     <>
       <Group>
-        <Row label="Launcher shortcut" description="Press it anywhere to open Open Palette.">
+        <Row label="Launcher shortcut" description="Press it anywhere to open Waypoint.">
           <HotkeyRecorder value={settings.hotkey} active={state.activeHotkey} />
         </Row>
         <Row label="Close when you click elsewhere" description="Hide the launcher as soon as it loses focus.">
@@ -281,7 +281,7 @@ function General({ state, update }: SectionProps) {
           label="Open at login"
           description={
             info.canLaunchAtLogin
-              ? 'Start Open Palette when you log in.'
+              ? 'Start Waypoint when you log in.'
               : info.platform === 'linux'
                 ? 'Not available on Linux yet.'
                 : 'Works in the installed app, not when running from source.'
@@ -489,7 +489,7 @@ function About({ state }: SectionProps) {
       <div className="about">
         <PaletteMark size={56} />
         <div>
-          <p className="about__name">Open Palette</p>
+          <p className="about__name">Waypoint</p>
           <p className="about__version">
             Version {info.version}, on Electron {info.electron} and Node.js {info.node}
           </p>

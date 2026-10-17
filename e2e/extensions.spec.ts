@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { type ElectronApplication, _electron as electron, expect, type Page, test } from '@playwright/test';
 
-// The extensions that ship with Open Palette, driven through the launcher.
+// The extensions that ship with Waypoint, driven through the launcher.
 
 const mod = process.platform === 'darwin' ? 'Meta' : 'Control';
 
@@ -12,12 +12,12 @@ let app: ElectronApplication;
 let page: Page;
 
 test.beforeEach(async () => {
-  const userData = mkdtempSync(join(tmpdir(), 'open-palette-ext-'));
+  const userData = mkdtempSync(join(tmpdir(), 'waypoint-ext-'));
   // Copy rather than paste, so the tests never type into whatever app is in front.
   writeFileSync(join(userData, 'settings.json'), JSON.stringify({ hideOnBlur: false, pasteIntoApps: false }));
   app = await electron.launch({
     args: [join(import.meta.dirname, '..'), '--show', ...(process.platform === 'linux' ? ['--no-sandbox'] : [])],
-    env: { ...process.env, OPEN_PALETTE_USER_DATA: userData },
+    env: { ...process.env, WAYPOINT_USER_DATA: userData },
   });
   page = await app.firstWindow();
   await expect(page.getByRole('combobox')).toBeFocused();

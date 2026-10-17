@@ -55,9 +55,9 @@ export const SettingsChannel = {
 
 /** Links the Settings window may open. */
 export const SETTINGS_LINKS = {
-  repository: 'https://github.com/alexsilver8/open-palette',
-  issues: 'https://github.com/alexsilver8/open-palette/issues/new/choose',
-  extensionDocs: 'https://github.com/alexsilver8/open-palette/blob/main/docs/extensions.md',
+  repository: 'https://github.com/alexsilver8/waypoint',
+  issues: 'https://github.com/alexsilver8/waypoint/issues/new/choose',
+  extensionDocs: 'https://github.com/alexsilver8/waypoint/blob/main/docs/extensions.md',
 } as const;
 
 export type SettingsLink = keyof typeof SETTINGS_LINKS;

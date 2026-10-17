@@ -130,7 +130,7 @@ function problemView(error, ctx, title) {
     title,
     emptyText:
       kind === 'missing'
-        ? "Docker isn't installed, or isn't where Open Palette looks for it."
+        ? "Docker isn't installed, or isn't where Waypoint looks for it."
         : kind === 'not-running'
           ? "Docker isn't running. Start it and try again."
           : `Couldn't ask Docker: ${error instanceof Error ? error.message : String(error)}`,

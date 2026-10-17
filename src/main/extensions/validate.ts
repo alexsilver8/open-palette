@@ -351,7 +351,7 @@ export interface ParsedExtension {
 
 /**
  * Reads an extension's package.json. The launcher-specific fields live under
- * `openPalette`; see docs/extensions.md.
+ * `waypoint`; see docs/extensions.md.
  */
 export function parseExtensionPackage(pkg: unknown, dir: string): ParsedExtension {
   if (!isRecord(pkg)) throw new ValidationError('package.json must be an object.');
@@ -359,12 +359,13 @@ export function parseExtensionPackage(pkg: unknown, dir: string): ParsedExtensio
   if (!NAME_PATTERN.test(rawName)) {
     throw new ValidationError('package.json "name" must use lowercase letters, digits and dashes.');
   }
-  const config = pkg.openPalette;
-  if (!isRecord(config)) throw new ValidationError('package.json needs an "openPalette" section.');
+  // "openPalette" is the key from before the rename.
+  const config = pkg.waypoint ?? pkg.openPalette;
+  if (!isRecord(config)) throw new ValidationError('package.json needs a "waypoint" section.');
   const title = text(config.title, 100);
-  if (!title) throw new ValidationError('"openPalette.title" is required.');
+  if (!title) throw new ValidationError('"waypoint.title" is required.');
   if (!Array.isArray(config.commands) || config.commands.length === 0) {
-    throw new ValidationError('"openPalette.commands" must list at least one command.');
+    throw new ValidationError('"waypoint.commands" must list at least one command.');
   }
   const commands = config.commands.map((command, index) => parseCommand(command, index, dir));
   const names = new Set<string>();

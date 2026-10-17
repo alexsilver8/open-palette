@@ -1,15 +1,15 @@
-# Open Palette
+# Waypoint
 
-[![CI](https://github.com/alexsilver8/open-palette/actions/workflows/ci.yml/badge.svg)](https://github.com/alexsilver8/open-palette/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/alexsilver8/open-palette?sort=semver)](https://github.com/alexsilver8/open-palette/releases)
-[![License](https://img.shields.io/github/license/alexsilver8/open-palette)](./LICENSE)
+[![CI](https://github.com/alexsilver8/waypoint/actions/workflows/ci.yml/badge.svg)](https://github.com/alexsilver8/waypoint/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/alexsilver8/waypoint?sort=semver)](https://github.com/alexsilver8/waypoint/releases)
+[![License](https://img.shields.io/github/license/alexsilver8/waypoint)](./LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196.svg)](https://www.conventionalcommits.org)
 
 An open-source, keyboard-first launcher for macOS, Windows and Linux, in the spirit of Raycast. Press <kbd>⌥</kbd> <kbd>Space</kbd>, type a few letters, press <kbd>↵</kbd>.
 
-Website: [openpalette.alexsilver.dev](https://openpalette.alexsilver.dev/)
+Website: [waypoint.alexsilver.dev](https://waypoint.alexsilver.dev/)
 
-![Open Palette finding a note, with its preview beside the results](docs/images/launcher.png)
+![Waypoint finding a note, with its preview beside the results](docs/images/launcher.png)
 
 ## What it does
 
@@ -29,7 +29,7 @@ Website: [openpalette.alexsilver.dev](https://openpalette.alexsilver.dev/)
 
 ## Install
 
-Download the latest build for your system from [Releases](https://github.com/alexsilver8/open-palette/releases).
+Download the latest build for your system from [Releases](https://github.com/alexsilver8/waypoint/releases).
 
 Builds aren't code-signed yet, so your system will warn you the first time you open one. On macOS, allow it under **System Settings → Privacy & Security → Open Anyway**. On Windows, choose **More info → Run anyway**.
 
@@ -51,7 +51,7 @@ In the Notes window: <kbd>⌘</kbd> <kbd>N</kbd> new note, <kbd>⌘</kbd> <kbd>P
 
 On Windows and Linux, use <kbd>Ctrl</kbd> wherever you see <kbd>⌘</kbd>.
 
-On Linux under Wayland, global shortcuts may not reach the app. Bind a shortcut in your desktop settings to run `open-palette` instead: launching it again opens the running instance.
+On Linux under Wayland, global shortcuts may not reach the app. Bind a shortcut in your desktop settings to run `waypoint` instead: launching it again opens the running instance.
 
 ## Notes
 
@@ -85,9 +85,9 @@ Type a layout and press <kbd>↵</kbd>: the launcher steps aside and the window 
 | **First Third**, **Center Third**, **Last Third**, **First Two Thirds**, **Last Two Thirds** | Thirds, side by side on a wide screen and stacked on a tall one |
 | **Maximize**, **Almost Maximize**, **Center** | Fill the screen, nine-tenths of it, or keep the size and centre it |
 | **Next Display**, **Previous Display** | The same place on another screen, scaled to fit |
-| **Restore** | Back where the window was before Open Palette first moved it |
+| **Restore** | Back where the window was before Waypoint first moved it |
 
-Windows fill the screen without the menu bar, Dock or taskbar. They're moved with System Events on macOS, which needs Open Palette allowed under **System Settings → Privacy & Security → Accessibility** (as pasting does), with Windows' own window calls on Windows, and with `xdotool` on Linux. Linux needs an X11 session: Wayland doesn't let one app move another's windows.
+Windows fill the screen without the menu bar, Dock or taskbar. They're moved with System Events on macOS, which needs Waypoint allowed under **System Settings → Privacy & Security → Accessibility** (as pasting does), with Windows' own window calls on Windows, and with `xdotool` on Linux. Linux needs an X11 session: Wayland doesn't let one app move another's windows.
 
 ## System
 
@@ -104,7 +104,7 @@ On macOS, Empty Trash asks once to control Finder, and Restart, Shut Down and Lo
 
 ## Included extensions
 
-These come with Open Palette and are written with the same [extension API](docs/extensions.md) as any other, in [`extensions/`](extensions).
+These come with Waypoint and are written with the same [extension API](docs/extensions.md) as any other, in [`extensions/`](extensions).
 
 | Command | |
 | --- | --- |
@@ -113,18 +113,18 @@ These come with Open Palette and are written with the same [extension API](docs/
 | **Search Emoji** | Every emoji by name, keyword or `:shortcode:`, recently used first. <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>T</kbd> picks the skin tone for all of them. |
 | **Write Commit Message** | A [Conventional Commits](https://www.conventionalcommits.org) message, checked as you type, with what it does to the version. Pick a type, or just describe the change: it suggests the type, also from the launcher's **Use “…” with**. |
 | **Search Git Repositories** | The repositories in your code folders (`~/Developer`, `~/Projects`, `~/code`…), most recently changed first. <kbd>↵</kbd> opens one in your editor (VS Code, Cursor, Zed, Sublime Text, JetBrains IDEs…), <kbd>⌘</kbd> <kbd>T</kbd> in a terminal. Type a folder like `~/work` to search it too. |
-| **My Pull Requests**, **My Issues**, **Search GitHub Repositories** | Pull requests waiting for your review and your own, your issues, and your repositories. Uses your [GitHub CLI](https://cli.github.com) sign-in, or a token you paste in once, which is kept in Open Palette's data folder (`extension-data/github`). |
+| **My Pull Requests**, **My Issues**, **Search GitHub Repositories** | Pull requests waiting for your review and your own, your issues, and your repositories. Uses your [GitHub CLI](https://cli.github.com) sign-in, or a token you paste in once, which is kept in Waypoint's data folder (`extension-data/github`). |
 | **Search Processes** | Every running program with its CPU and memory, busiest first. <kbd>↵</kbd> quits it, <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>⌫</kbd> forces it. Programs the system needs can't be quit. |
 | **Search Docker Containers**, **Search Docker Images** | Start, stop and restart containers, open the ports they publish, copy their logs, and remove what you no longer need. Works with Docker Desktop, OrbStack, Colima and Rancher Desktop. |
 | **Encode or Decode Text** | Base64, URL and HTML encoding both ways, a JWT's header and claims, and SHA-256, SHA-1, SHA-512 and MD5 hashes. Also from **Use “…” with**. |
 | **Convert Timestamp** | A Unix timestamp (seconds to nanoseconds), an ISO 8601 or RFC 2822 date, or nothing for now, in every common format. |
 | **Convert Color** | Hex, `rgb()`, `hsl()`, `oklch()` or a CSS name, in all of those forms, with its contrast against white and black text. |
 | **Search MDN** | [MDN Web Docs](https://developer.mozilla.org) as you type. Also from **Use “…” with**. |
-| **Play or Pause**, **Next Track**, **Previous Track**, **Now Playing** | Controls whatever is playing, and shows the track with buttons for it. On macOS, Spotify and Music are asked directly and other apps (a browser tab, Podcasts) get the media keys, once Open Palette is allowed under Accessibility; on Windows it uses the media controls in the volume flyout, and on Linux MPRIS, which most players and browsers support (through `playerctl` when it's installed). |
+| **Play or Pause**, **Next Track**, **Previous Track**, **Now Playing** | Controls whatever is playing, and shows the track with buttons for it. On macOS, Spotify and Music are asked directly and other apps (a browser tab, Podcasts) get the media keys, once Waypoint is allowed under Accessibility; on Windows it uses the media controls in the volume flyout, and on Linux MPRIS, which most players and browsers support (through `playerctl` when it's installed). |
 | **System Info** | Battery, CPU, memory, disk space, your local and public IP addresses, the system version and uptime. <kbd>↵</kbd> copies a value, <kbd>⌘</kbd> <kbd>↵</kbd> opens Activity Monitor, Task Manager or the matching settings. The public IP comes from [api.ipify.org](https://www.ipify.org), asked when the list opens. |
 | **Search Homebrew**, **Manage Homebrew Packages** | Every formula and cask, and what you've installed, out-of-date first. Installing, upgrading and uninstalling run in a Terminal window, so you can see brew work. macOS and Linux. |
 
-<kbd>↵</kbd> in Gitmoji, Emoji and Commit Message pastes into the app you were in. The first time on macOS, allow Open Palette under **System Settings → Privacy & Security → Accessibility** (and **Automation** for System Events). On Linux, pasting needs `xdotool` (X11) or `wtype` (Wayland); without them the text is copied instead. Turn off **Paste into the app you were in** in Settings to always copy.
+<kbd>↵</kbd> in Gitmoji, Emoji and Commit Message pastes into the app you were in. The first time on macOS, allow Waypoint under **System Settings → Privacy & Security → Accessibility** (and **Automation** for System Events). On Linux, pasting needs `xdotool` (X11) or `wtype` (Wayland); without them the text is copied instead. Turn off **Paste into the app you were in** in Settings to always copy.
 
 ## Settings
 
@@ -176,7 +176,7 @@ pnpm dist         # installers for your OS in release/
 - `src/extension-host` — loads extensions and runs their commands in a separate process.
 - `src/renderer` — the launcher and Notes windows. Root search and the calculator run here, so typing never waits on IPC.
 - `src/shared` — types, fuzzy matching and the calculator, shared by all three.
-- `extensions` — the extensions that come with Open Palette, in plain JavaScript checked through JSDoc. `pnpm extensions:data` refreshes the gitmoji and emoji lists from their packages.
+- `extensions` — the extensions that come with Waypoint, in plain JavaScript checked through JSDoc. `pnpm extensions:data` refreshes the gitmoji and emoji lists from their packages.
 - `website` — the landing page: plain HTML, CSS and JavaScript with no build step. Serve the folder to preview it (`npx serve website`); pushes to `main` publish it to GitHub Pages.
 
 Built-in commands implement the same interface as extensions, so anything a built-in can do, an extension can too.
@@ -184,12 +184,12 @@ Built-in commands implement the same interface as extensions, so anything a buil
 ## Roadmap
 
 - Form views and full Markdown detail views for extensions
-- An `@open-palette/api` package with types and helpers
+- An `@waypoint/api` package with types and helpers
 - Quicklinks and snippets
 - Keyboard shortcuts for any command, e.g. a key for Left Half
 - Code-signed, auto-updating releases
 
-Ideas and bug reports are welcome in [Issues](https://github.com/alexsilver8/open-palette/issues).
+Ideas and bug reports are welcome in [Issues](https://github.com/alexsilver8/waypoint/issues).
 
 ## Contributing
 

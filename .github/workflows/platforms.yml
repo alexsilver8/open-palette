@@ -74,5 +74,5 @@ jobs:
 
       - name: Run the commands for real
         env:
-          OPEN_PALETTE_SMOKE: '1'
+          WAYPOINT_SMOKE: '1'
         run: pnpm exec vitest run --reporter=verbose platform.smoke
