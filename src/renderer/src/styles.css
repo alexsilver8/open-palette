@@ -570,6 +570,40 @@ button {
   color: var(--ink-faint);
 }
 
+/* At the root, the mark and "Waypoint" open Settings. The context moves left by the button's padding, so the text
+   stays where it was and the hover background isn't clipped. */
+.footer__context:has(.footer__settings) {
+  margin-left: -8px;
+}
+
+.footer__settings {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.footer__settings:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.footer__settings:hover .palette-mark {
+  color: var(--ink-muted);
+}
+
+.footer__settings:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .toast {
   display: inline-flex;
   align-items: center;

@@ -342,6 +342,14 @@ test('numbers the rows in view once the list is scrolled', async () => {
   await expect(notes.locator('.notes__item[aria-current]')).toContainText(fourth);
 });
 
+test('opens Settings from Waypoint in the footer', async () => {
+  const [settings] = await Promise.all([
+    app.waitForEvent('window'),
+    page.getByRole('button', { name: 'Waypoint', exact: true }).click(),
+  ]);
+  await expect(settings.getByRole('heading', { name: 'General' })).toBeVisible();
+});
+
 test('changes settings in the Settings window', async () => {
   const settingsFile = () => JSON.parse(readFileSync(join(userData, 'settings.json'), 'utf8'));
   await page.keyboard.type('open settings');
