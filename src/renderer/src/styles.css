@@ -39,7 +39,13 @@ button {
 
 /* ── Window ─────────────────────────────────────────────── */
 
-/* The window is clear: only the panes show. The margin around them holds their shadows. */
+/*
+ * The window is clear: only the panes show. The margin around them holds their shadows.
+ *
+ * Like Raycast, the launcher moves when you drag it by anything that isn't a control: the margin
+ * and gaps around the panes, the search capsule around the text, the dock between its icons and
+ * the action bar. Whatever you type in, click or scroll stays clear of it.
+ */
 .launcher {
   position: relative;
   display: flex;
@@ -48,6 +54,15 @@ button {
   padding: 20px;
   background: transparent;
   overflow: hidden;
+  -webkit-app-region: drag;
+}
+
+.launcher input,
+.launcher button,
+.content,
+.action-panel,
+.action-panel__scrim {
+  -webkit-app-region: no-drag;
 }
 
 .launcher__main {

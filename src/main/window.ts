@@ -3,6 +3,7 @@ import { app, BrowserWindow, screen } from 'electron';
 import { IpcChannel, type ShownInfo, type ToastMessage } from '../shared/ipc';
 import { type Glass, glassWindowOptions, loadPage } from './glass';
 import { showOnEverySpace } from './spaces';
+import { launcherPosition, type Point } from './window-position';
 
 // The panes take 776 × 476; the clear margin around them leaves room for their shadows.
 const WIDTH = 816;
@@ -21,6 +22,10 @@ export class LauncherWindow {
   readonly window: BrowserWindow;
   private hiddenAt = 0;
   private openedFromOwnWindow = false;
+  /** Where you last dragged the launcher on each display, by display id, so it opens there again. */
+  private readonly dragged = new Map<number, Point>();
+  /** Where the launcher was put when it last opened, to tell whether it has been dragged since. */
+  private placedAt: Point | null = null;
 
   constructor(private readonly options: LauncherWindowOptions) {
     // The launcher draws its own floating panes, so the window itself is clear: system blur
@@ -82,7 +87,7 @@ export class LauncherWindow {
       reset: !this.visible && this.hiddenAt > 0 && Date.now() - this.hiddenAt > RESET_AFTER_MS,
     };
     if (!this.visible) {
-      this.center();
+      this.place();
       // Was one of our own windows (Notes, Settings) in front, or another app?
       const focused = BrowserWindow.getFocusedWindow();
       this.openedFromOwnWindow = focused !== null && focused !== this.window;
@@ -96,6 +101,7 @@ export class LauncherWindow {
   hide(): void {
     if (!this.visible) return;
     this.hiddenAt = Date.now();
+    this.rememberDrag();
     this.window.hide();
     // Hand focus back to the app that was active before the launcher opened — unless
     // another of our windows (like Notes) is open and should keep it.
@@ -133,15 +139,23 @@ export class LauncherWindow {
     else webContents.send(IpcChannel.toast, message);
   }
 
-  /** Centers the window horizontally on the display under the cursor, a bit above the middle. */
-  private center(): void {
+  /**
+   * Puts the window on the display under the cursor: where you last dragged it on that display,
+   * or else centered across and a bit above the middle.
+   */
+  private place(): void {
     const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
-    const { x, y, width, height } = display.workArea;
-    this.window.setBounds({
-      x: Math.round(x + (width - WIDTH) / 2),
-      y: Math.round(y + height * 0.2),
-      width: WIDTH,
-      height: HEIGHT,
-    });
+    const size = { width: WIDTH, height: HEIGHT };
+    this.window.setBounds({ ...launcherPosition(display.workArea, size, this.dragged.get(display.id)), ...size });
+    // Where the system actually put it, which can differ by a pixel from what was asked.
+    const [x = 0, y = 0] = this.window.getPosition();
+    this.placedAt = { x, y };
+  }
+
+  /** If the launcher was dragged since it opened, remembers where, for the display it's on. */
+  private rememberDrag(): void {
+    const [x = 0, y = 0] = this.window.getPosition();
+    if (!this.placedAt || (x === this.placedAt.x && y === this.placedAt.y)) return;
+    this.dragged.set(screen.getDisplayMatching(this.window.getBounds()).id, { x, y });
   }
 }
