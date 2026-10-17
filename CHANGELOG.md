@@ -2,6 +2,14 @@
 
 Every release of Waypoint. `pnpm release` writes it from the commits, and each GitHub release shows its section.
 
+## 1.9.1 (2026-10-17)
+
+1 fix.
+
+### Fixes
+
+- **website:** show the newest version in the badge after a release ([#42](https://github.com/alexsilver8/waypoint/pull/42), [3ea780d](https://github.com/alexsilver8/waypoint/commit/3ea780dc234948154555fb50973017cb20fc253b))
+
 ## 1.9.0 (2026-10-17)
 
 1 feature.
