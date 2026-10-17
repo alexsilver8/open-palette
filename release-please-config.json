@@ -58,7 +58,13 @@
   ],
   "packages": {
     ".": {
-      "package-name": "waypoint"
+      "package-name": "waypoint",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "website/index.html"
+        }
+      ]
     }
   }
 }
