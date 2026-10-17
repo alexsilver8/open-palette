@@ -1,63 +1,76 @@
 name: release
 
-# release-please keeps a "release PR" open that bumps the version and updates
-# CHANGELOG.md from Conventional Commits. Merging it tags and publishes a GitHub Release.
-# With a RELEASE_PLEASE_TOKEN secret, the release PR also merges itself once its checks pass.
+# Publishes a release when `pnpm release` pushes its tag (v1.2.3): checks everything again, makes a draft GitHub
+# release with the notes from CHANGELOG.md, builds the installers on each OS and attaches them, then publishes the
+# release. Safe to re-run: an existing release gets its notes updated and its installers replaced.
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
+    tags: ['v*.*.*']
 
 permissions:
   contents: read
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
-  release-please:
-    name: release-please
+  release:
+    name: release
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
+      contents: write # the GitHub release
     steps:
-      - uses: googleapis/release-please-action@v5
-        id: release
+      - uses: actions/checkout@v7
         with:
-          # A PAT in RELEASE_PLEASE_TOKEN lets CI run on the release PR.
-          # GITHUB_TOKEN works too, but PRs it opens don't trigger workflows.
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
-      # Auto-merge waits for the required checks, which only run on pushes made with the PAT,
-      # and main's ruleset wants the PR up to date. So the release PR is first brought up to
-      # date with main using the PAT, then set to merge. That merge is made with the PAT too,
-      # so it starts this workflow again, which tags the release and builds the installers.
-      # The PR is found by its label: release-please doesn't report a PR it left unchanged.
-      - name: Merge the release PR once its checks pass
-        if: ${{ steps.release.outputs.release_created != 'true' }}
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-        run: |
-          if [ -z "$GH_TOKEN" ]; then
-            echo "No RELEASE_PLEASE_TOKEN secret, so the release PR is left for you to merge."
-            exit 0
-          fi
-          prs=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --label 'autorelease: pending' --json number --jq '.[].number')
-          for pr in $prs; do
-            # GitHub refuses when the PR is already up to date; that's fine.
-            gh api -X PUT "repos/$GITHUB_REPOSITORY/pulls/$pr/update-branch" --silent || true
-            gh pr merge "$pr" --auto --squash --repo "$GITHUB_REPOSITORY"
-            echo "Release PR #$pr will merge once its checks pass."
-          done
+          persist-credentials: false
 
-  # Build installers on each OS whenever a release is cut, and attach them to it.
+      - name: Check the tag matches package.json
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version=$(node -p "require('./package.json').version")
+          if [ "$tag" != "$version" ]; then
+            echo "::error::The tag is $GITHUB_REF_NAME, but package.json says $version."
+            exit 1
+          fi
+          echo "VERSION=$tag" >> "$GITHUB_ENV"
+
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run typecheck
+      - run: pnpm run test
+
+      - name: Make the GitHub release (a draft until the installers are attached)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # This version's section of the changelog, without its heading.
+          awk -v v="$VERSION" '
+            $0 ~ "^## " v " " { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "Release $VERSION." > notes.md
+          cat >> notes.md <<NOTES
+
+          **Download:** the \`.dmg\` for macOS, the \`.exe\` for Windows, and the \`.AppImage\` or \`.deb\` for Linux, below. Builds aren't code-signed yet, so your system asks once.
+          NOTES
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --notes-file notes.md
+          else
+            gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" \
+              --notes-file notes.md --verify-tag --draft
+          fi
+
+  # The installers for each OS, attached to the release.
   build:
     name: build (${{ matrix.os }})
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    needs: release
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
@@ -85,8 +98,20 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ needs.release-please.outputs.tag_name }}
         run: |
           shopt -s nullglob
           files=(release/*/*.dmg release/*/*.zip release/*/*.exe release/*/*.AppImage release/*/*.deb release/*/latest*.yml)
-          gh release upload "$TAG" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
+          gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
+
+  # Out of draft once every installer is attached, so the release never shows without its downloads.
+  publish:
+    name: publish
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest

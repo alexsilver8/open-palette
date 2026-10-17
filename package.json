@@ -23,7 +23,9 @@
     "test:e2e": "pnpm run build && playwright test",
     "dist": "pnpm run build && electron-builder --publish never",
     "dist:dir": "pnpm run build && electron-builder --dir",
-    "extensions:data": "node scripts/extension-data.mjs"
+    "extensions:data": "node scripts/extension-data.mjs",
+    "release": "node scripts/release.mjs",
+    "commits:check": "node scripts/check-commits.mjs"
   },
   "engines": {
     "node": ">=22.12"
