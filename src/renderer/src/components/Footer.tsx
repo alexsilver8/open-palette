@@ -13,6 +13,8 @@ export interface Toast {
 interface FooterProps {
   platform: Platform;
   context: string;
+  /** At the root, clicking the mark and "Waypoint" opens Settings. */
+  onOpenSettings?(): void;
   toast: Toast | null;
   primary: Action | undefined;
   hasActions: boolean;
@@ -20,7 +22,16 @@ interface FooterProps {
   onToggleActions(): void;
 }
 
-export function Footer({ platform, context, toast, primary, hasActions, onPrimary, onToggleActions }: FooterProps) {
+export function Footer({
+  platform,
+  context,
+  onOpenSettings,
+  toast,
+  primary,
+  hasActions,
+  onPrimary,
+  onToggleActions,
+}: FooterProps) {
   const mac = platform === 'darwin';
   return (
     <footer className="footer">
@@ -30,6 +41,16 @@ export function Footer({ platform, context, toast, primary, hasActions, onPrimar
             {toast.style === 'failure' ? <CircleAlert size={14} /> : <CircleCheck size={14} />}
             {toast.text}
           </span>
+        ) : onOpenSettings ? (
+          <button
+            type="button"
+            className="footer__settings"
+            onClick={onOpenSettings}
+            title={`Open Settings (${mac ? '⌘,' : 'Ctrl+,'})`}
+          >
+            <PaletteMark />
+            <span>{context}</span>
+          </button>
         ) : (
           <>
             <PaletteMark />

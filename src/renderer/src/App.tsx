@@ -275,6 +275,13 @@ export function App() {
     [frame, applyResult, showToast, focusInput],
   );
 
+  /** The same as running Open Settings: ⌘, and clicking Waypoint in the footer. */
+  const openSettings = () =>
+    void run(
+      { id: 'settings', title: 'Settings', actions: [] },
+      { type: 'open-command', ref: { extension: 'waypoint', command: 'settings' } },
+    );
+
   /**
    * Runs an action of a row: the selected one for ↵ / ⌘↵, or the one at `index` for ⌘1–9. If a
    * self-filtering list hasn't caught up with the typing yet, waits for it first, so the row
@@ -361,10 +368,7 @@ export function App() {
       if (selected && selected.actions.length > 0) setPanelOpen((open) => !open);
     } else if (mod && key === ',') {
       event.preventDefault();
-      void run(
-        { id: 'settings', title: 'Settings', actions: [] },
-        { type: 'open-command', ref: { extension: 'waypoint', command: 'settings' } },
-      );
+      openSettings();
     } else if (key === 'Escape' && plain) {
       event.preventDefault();
       if (!isRoot) pop();
@@ -450,6 +454,7 @@ export function App() {
       <Footer
         platform={platform}
         context={isRoot ? 'Waypoint' : (frame.view?.title ?? 'Waypoint')}
+        onOpenSettings={isRoot ? openSettings : undefined}
         toast={toast}
         primary={selected?.actions[0]}
         hasActions={Boolean(selected && selected.actions.length > 0)}
