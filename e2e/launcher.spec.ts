@@ -246,7 +246,7 @@ test('lists every note, with no cap', async () => {
   await expect(page.getByRole('option')).toHaveCount(1);
 });
 
-test('switches what the root lists with the filter tabs', async () => {
+test('switches what the root lists with the scope dock', async () => {
   const tab = (name: string) => page.getByRole('tab', { name, exact: true });
   await expect(tab('All')).toHaveAttribute('aria-selected', 'true');
   await page.keyboard.press('Tab');
@@ -292,7 +292,7 @@ test('finds notes from the root and shows a preview', async () => {
   await page.keyboard.type('glass look');
   const note = page.getByRole('option', { name: /Launch plan/ });
   await expect(note).toBeVisible();
-  await expect(page.getByRole('tab', { name: /^Notes/ })).toHaveText('Notes1');
+  await expect(page.getByRole('tab', { name: /^Notes/ })).toHaveAccessibleName('Notes, 1');
 
   // In the Notes tab the note is first, and the preview shows its body.
   await page.keyboard.press('Tab');

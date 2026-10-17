@@ -1,3 +1,4 @@
+import { ArrowRight } from 'lucide-react';
 import { type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { DisplayItem, DisplaySection } from '../model';
 import { Highlight } from './Highlight';
@@ -13,13 +14,15 @@ export const QUICK_KEY_COUNT = 9;
  */
 export const VIRTUAL_AFTER = 150;
 const HEADING_HEIGHT = 28;
-const ROW_HEIGHT = 42;
-const CALC_HEIGHT = 62;
+const ROW_HEIGHT = 44;
+const CALC_HEIGHT = 92;
 const OVERSCAN = 420;
 
 interface ResultListProps {
   sections: DisplaySection[];
   selectedId: string | undefined;
+  /** The key that runs the selected row, drawn at its end ("↵", or "Enter" off the Mac). */
+  enterKey: string;
   emptyText: string | undefined;
   /** The modifier to draw beside the rows in view while it's held, e.g. "⌘". */
   quickKeyModifier: string | null;
@@ -44,15 +47,32 @@ function firstRowInView(list: HTMLElement, scroller: HTMLElement): number {
   return 0;
 }
 
-function Row({ item, quickKey }: { item: DisplayItem; quickKey: string[] | null }) {
+interface RowProps {
+  item: DisplayItem;
+  quickKey: string[] | null;
+  /** Drawn on the selected row only, where ↵ runs it; hidden while the quick keys show. */
+  enterKey: string | null;
+}
+
+function Row({ item, quickKey, enterKey }: RowProps) {
   if (item.calculator) {
+    // A card: the sum on the left, the answer large on the right.
     return (
       <span className="calc">
-        <span className="calc__expression">{item.calculator.expression}</span>
-        <span className="calc__equals" aria-hidden="true">
-          =
+        <span className="calc__side">
+          <span className="calc__expression">{item.calculator.expression}</span>
+          <span className="calc__label" aria-hidden="true">
+            Expression
+          </span>
         </span>
-        <span className="calc__result">{item.calculator.result}</span>
+        <ArrowRight className="calc__arrow" size={22} strokeWidth={2} aria-hidden="true" />
+        <span className="visually-hidden">equals</span>
+        <span className="calc__side calc__side--result">
+          <span className="calc__result">{item.calculator.result}</span>
+          <span className="calc__label" aria-hidden="true">
+            Answer
+          </span>
+        </span>
       </span>
     );
   }
@@ -70,6 +90,7 @@ function Row({ item, quickKey }: { item: DisplayItem; quickKey: string[] | null 
       ) : (
         item.accessory && <span className="row__accessory">{item.accessory}</span>
       )}
+      {enterKey && !quickKey && <Keycaps keys={[enterKey]} />}
     </>
   );
 }
@@ -101,6 +122,7 @@ function layOut(sections: DisplaySection[]): { entries: Entry[]; height: number;
 export function ResultList({
   sections: allSections,
   selectedId,
+  enterKey,
   emptyText,
   quickKeyModifier,
   quickKeyStart,
@@ -203,6 +225,7 @@ export function ResultList({
       >
         <Row
           item={item}
+          enterKey={selected && !quickKeyModifier ? enterKey : null}
           quickKey={
             quickKeyModifier && index >= quickKeyStart && index < quickKeyStart + QUICK_KEY_COUNT
               ? [quickKeyModifier, String(index - quickKeyStart + 1)]

@@ -60,7 +60,23 @@
   --glass-edge: rgb(255 255 255 / 0.6);
   --shadow-popover: 0 16px 40px rgb(0 0 0 / 0.16), 0 2px 8px rgb(0 0 0 / 0.08);
 
+  /* Halo: the launcher's floating panes (the scope dock, search capsule and results sheet). */
+  --pane: rgb(255 255 255 / 0.52);
+  --pane-border: rgb(255 255 255 / 0.72);
+  --pane-sheen: rgb(255 255 255 / 0.95);
+  --pane-shadow: 0 10px 28px rgb(30 40 70 / 0.12);
+  /* The picked scope in the dock: a solid disc. */
+  --dock-active: rgb(22 22 28 / 0.88);
+  --dock-active-ink: #fff;
+  /* Match counts on the dock. */
+  --badge: var(--accent);
+  --badge-ink: #fff;
+  --badge-quiet: rgb(0 0 0 / 0.1);
+  /* Matched letters in a result. */
+  --match: var(--accent-ink);
+
   --radius-window: 24px;
+  --radius-pane: 24px;
   --radius-row: 8px;
 
   /* Older names, kept so every window shares one vocabulary. */
@@ -96,6 +112,17 @@
     --glass-panel: rgb(40 40 46 / 0.78);
     --glass-edge: rgb(255 255 255 / 0.13);
     --shadow-popover: 0 16px 40px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.3);
+
+    --pane: rgb(22 22 28 / 0.5);
+    --pane-border: rgb(255 255 255 / 0.13);
+    --pane-sheen: rgb(255 255 255 / 0.16);
+    --pane-shadow: 0 14px 34px rgb(0 0 0 / 0.35);
+    --dock-active: rgb(255 255 255 / 0.92);
+    --dock-active-ink: #16121a;
+    --badge: #8b9bff;
+    --badge-ink: #0d0f24;
+    --badge-quiet: rgb(255 255 255 / 0.22);
+    --match: #a9b4ff;
   }
 }
 
@@ -105,6 +132,10 @@
   --glass-bar: rgb(0 0 0 / 0.025);
   --glass-raised: rgb(255 255 255 / 0.7);
   --glass-raised-border: rgb(0 0 0 / 0.06);
+  --pane: rgb(255 255 255 / 0.85);
+  --pane-border: rgb(0 0 0 / 0.07);
+  --pane-sheen: rgb(255 255 255 / 1);
+  --pane-shadow: 0 6px 18px rgb(30 40 70 / 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -113,5 +144,9 @@
     --glass-bar: rgb(255 255 255 / 0.03);
     --glass-raised: rgb(255 255 255 / 0.05);
     --glass-raised-border: rgb(255 255 255 / 0.08);
+    --pane: rgb(255 255 255 / 0.05);
+    --pane-border: rgb(255 255 255 / 0.08);
+    --pane-sheen: rgb(255 255 255 / 0.06);
+    --pane-shadow: 0 8px 20px rgb(0 0 0 / 0.25);
   }
 }
