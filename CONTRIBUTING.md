@@ -17,6 +17,7 @@ Thanks for taking the time to contribute! 🎉
 
    ```sh
    pnpm lint
+   pnpm cleaner    # conventions Biome and TypeScript don't check
    pnpm typecheck
    pnpm test
    pnpm test:e2e   # on headless Linux: xvfb-run -a pnpm test:e2e

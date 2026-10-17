@@ -56,8 +56,9 @@ export function escapeBlockStarts(markdown: string): string {
 
 /** Plain text that reads back as itself: a paragraph never turns into a list on reopening. */
 const NoteParagraph = Paragraph.extend({
-  renderMarkdown: (node: JSONContent, helpers, context) =>
-    escapeBlockStarts(Paragraph.config.renderMarkdown?.(node, helpers, context) ?? ''),
+  renderMarkdown(node: JSONContent, helpers, context) {
+    return escapeBlockStarts(this.parent?.(node, helpers, context) ?? '');
+  },
 });
 
 const LINK = /(?<![\\!])\[([^\]\s]+)\]\(([^)\s]+)\)/g;
