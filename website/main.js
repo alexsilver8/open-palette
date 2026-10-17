@@ -45,11 +45,15 @@ if (os === 'windows' || os === 'linux') {
 
 // ── Download links ───────────────────────────────────────
 
+// The release is kept for a few minutes, so moving around the page doesn't ask GitHub again, but a new
+// release shows up on the next visit after it's out.
+const RELEASE_CACHE_MS = 10 * 60 * 1000;
+
 async function latestRelease() {
   const cacheKey = 'waypoint:latest-release';
   try {
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) return JSON.parse(cached);
+    const cached = JSON.parse(sessionStorage.getItem(cacheKey) || 'null');
+    if (cached?.at && Date.now() - cached.at < RELEASE_CACHE_MS) return cached;
   } catch {
     // Storage can be blocked; fetch instead.
   }
@@ -63,6 +67,7 @@ async function latestRelease() {
     if (!response.ok) return null;
     const release = await response.json();
     const slim = {
+      at: Date.now(),
       tag: release.tag_name,
       assets: (release.assets || []).map((asset) => ({ name: asset.name, url: asset.browser_download_url })),
     };
@@ -127,9 +132,25 @@ async function setUpDownloads() {
     list.replaceChildren(...others.map((build) => link(build.label, build.href)), link('All releases', LATEST));
   }
 
+  // `pnpm release` writes the new version into the page, so GitHub's answer only replaces it when it's newer:
+  // while a release's installers are still building, GitHub's latest is the one before.
   if (release?.tag) {
-    for (const el of document.querySelectorAll('[data-version]')) el.textContent = release.tag;
+    for (const el of document.querySelectorAll('[data-version]')) {
+      if (isNewer(release.tag, el.textContent)) el.textContent = release.tag;
+    }
   }
+}
+
+/** Whether version tag `a` (v1.9.0) comes after `b`. */
+function isNewer(a, b) {
+  const parts = (tag) => (/(\d+)\.(\d+)\.(\d+)/.exec(tag) || []).slice(1).map(Number);
+  const [x, y] = [parts(a), parts(b)];
+  if (x.length !== 3) return false;
+  if (y.length !== 3) return true;
+  for (let i = 0; i < 3; i++) {
+    if (x[i] !== y[i]) return x[i] > y[i];
+  }
+  return false;
 }
 
 setUpDownloads();
