@@ -13,7 +13,7 @@ function isExtensionFolder(dir: string): boolean {
   if (!existsSync(pkgPath)) return false;
   try {
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as Record<string, unknown>;
-    return typeof pkg === 'object' && pkg !== null && 'openPalette' in pkg;
+    return typeof pkg === 'object' && pkg !== null && ('waypoint' in pkg || 'openPalette' in pkg);
   } catch {
     return true; // Broken package.json: report it rather than silently skipping.
   }

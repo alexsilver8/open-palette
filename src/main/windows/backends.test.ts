@@ -77,7 +77,7 @@ describe('Windows', () => {
 
     /** A stand-in helper in Node that answers like the PowerShell one. */
     function fakeHelper(body: string): PowerShellWindows {
-      const file = join(tmpdir(), `open-palette-fake-helper-${process.pid}-${Math.random()}.cjs`);
+      const file = join(tmpdir(), `waypoint-fake-helper-${process.pid}-${Math.random()}.cjs`);
       writeFileSync(
         file,
         `const rl = require('node:readline').createInterface({ input: process.stdin });

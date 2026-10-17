@@ -1,4 +1,4 @@
-# Contributing to open-palette
+# Contributing to waypoint
 
 Thanks for taking the time to contribute! 🎉
 
@@ -60,7 +60,7 @@ Releases are automated with [release-please](https://github.com/googleapis/relea
 
 ## Reporting issues
 
-- **Bugs & feature requests:** [open an issue](https://github.com/alexsilver8/open-palette/issues/new/choose).
+- **Bugs & feature requests:** [open an issue](https://github.com/alexsilver8/waypoint/issues/new/choose).
 - **Security vulnerabilities:** please don't open a public issue — see [SECURITY.md](./SECURITY.md).
 
 ## Code of conduct

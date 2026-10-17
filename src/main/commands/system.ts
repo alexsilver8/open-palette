@@ -25,11 +25,11 @@ function shellCommand(commands: PlatformCommands): CommandImplementation {
 
 const osascript = (script: string): [string, string[]] => ['osascript', ['-e', script]];
 
-/** What to do when macOS won't let Open Palette script an app, or the reason as it came. */
+/** What to do when macOS won't let Waypoint script an app, or the reason as it came. */
 export function explainFailure(error: unknown, app = 'System Events'): string {
   const reason = reasonOf(error);
   if (/-1743|not authori[sz]ed to send apple events/i.test(reason)) {
-    return `Allow Open Palette to control ${app} in System Settings → Privacy & Security → Automation.`;
+    return `Allow Waypoint to control ${app} in System Settings → Privacy & Security → Automation.`;
   }
   return reason;
 }
@@ -155,7 +155,7 @@ export function systemExtension({
     } catch (error) {
       if (isMissing(error)) {
         const doing = { restart: 'restart', 'shut-down': 'shut down', 'log-out': 'log out' }[action];
-        return failure(`Open Palette doesn't know how to ${doing} on this desktop yet.`);
+        return failure(`Waypoint doesn't know how to ${doing} on this desktop yet.`);
       }
       return failure(explainFailure(error));
     }

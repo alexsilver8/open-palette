@@ -150,7 +150,7 @@ async function portsView(ctx) {
   let ports = [];
   let problem = '';
   try {
-    // Leave out this extension's own process and Open Palette itself.
+    // Leave out this extension's own process and Waypoint itself.
     ports = (await listPorts(ctx.platform)).filter((port) => port.pid !== process.pid && port.pid !== process.ppid);
   } catch (error) {
     problem = notInstalled(error)

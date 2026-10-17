@@ -6,7 +6,7 @@ import { discoverExtensions } from './discovery';
 
 const manifest = (name: string) => ({
   name,
-  openPalette: { title: name, commands: [{ name: 'cmd', title: 'Cmd', mode: 'view' }] },
+  waypoint: { title: name, commands: [{ name: 'cmd', title: 'Cmd', mode: 'view' }] },
 });
 
 function folder(files: Record<string, unknown>): string {

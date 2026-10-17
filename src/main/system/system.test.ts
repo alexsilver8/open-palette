@@ -233,7 +233,7 @@ Ethernet Address: aa:bb:cc:dd:ee:ff
 
 describe('trash', () => {
   it('empties the Linux trash itself when gio isn’t there', async () => {
-    const data = mkdtempSync(join(tmpdir(), 'open-palette-trash-'));
+    const data = mkdtempSync(join(tmpdir(), 'waypoint-trash-'));
     const trash = linuxTrash({ XDG_DATA_HOME: data });
     mkdirSync(join(trash, 'files', 'old folder'), { recursive: true });
     mkdirSync(join(trash, 'info'), { recursive: true });

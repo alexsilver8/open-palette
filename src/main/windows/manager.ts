@@ -20,7 +20,7 @@ export class WindowManager {
 
     if (command === 'restore') {
       const before = this.original.get(window.key);
-      if (!before) throw new WindowError("Open Palette hasn't moved this window, so there's nothing to restore.");
+      if (!before) throw new WindowError("Waypoint hasn't moved this window, so there's nothing to restore.");
       await backend.move(window, before);
       this.original.delete(window.key);
       return;

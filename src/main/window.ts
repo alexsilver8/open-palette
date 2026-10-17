@@ -102,7 +102,7 @@ export class LauncherWindow {
 
   /**
    * Hides the launcher and makes sure what you were using before is in front again, so a
-   * paste lands there. On macOS, a visible Notes window would otherwise keep Open Palette the
+   * paste lands there. On macOS, a visible Notes window would otherwise keep Waypoint the
    * active app; unless you opened the launcher from Notes, the whole app steps aside.
    */
   hideAndReturnFocus(): void {

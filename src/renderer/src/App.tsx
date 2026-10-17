@@ -363,7 +363,7 @@ export function App() {
       event.preventDefault();
       void run(
         { id: 'settings', title: 'Settings', actions: [] },
-        { type: 'open-command', ref: { extension: 'open-palette', command: 'settings' } },
+        { type: 'open-command', ref: { extension: 'waypoint', command: 'settings' } },
       );
     } else if (key === 'Escape' && plain) {
       event.preventDefault();
@@ -449,7 +449,7 @@ export function App() {
 
       <Footer
         platform={platform}
-        context={isRoot ? 'Open Palette' : (frame.view?.title ?? 'Open Palette')}
+        context={isRoot ? 'Waypoint' : (frame.view?.title ?? 'Waypoint')}
         toast={toast}
         primary={selected?.actions[0]}
         hasActions={Boolean(selected && selected.actions.length > 0)}

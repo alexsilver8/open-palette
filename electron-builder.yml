@@ -1,6 +1,6 @@
 # Packaging config: https://www.electron.build/configuration
-appId: dev.openpalette.app
-productName: Open Palette
+appId: dev.waypoint.app
+productName: Waypoint
 copyright: Copyright © 2026 Alexander Silver and contributors
 directories:
   buildResources: build

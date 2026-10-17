@@ -39,7 +39,7 @@ const copied = (text: string): RootItem => ({
 const items: RootItem[] = [
   command('Clipboard History', { frecency: 3 }),
   command('Search Google', { fallback: { extension: 'web-search', command: 'google' } }),
-  command('Quit Open Palette'),
+  command('Quit Waypoint'),
   app('Safari', 1),
   app('Calendar'),
   app('Calculator'),
@@ -55,7 +55,7 @@ describe('buildRootSections', () => {
   it('shows suggestions by usage, then the remaining commands, when the query is empty', () => {
     expect(titles('')).toEqual([
       ['Suggestions', ['Clipboard History', 'Safari']],
-      ['Commands', ['Quit Open Palette', 'Search Google']],
+      ['Commands', ['Quit Waypoint', 'Search Google']],
     ]);
   });
 

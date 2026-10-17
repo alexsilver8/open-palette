@@ -71,10 +71,10 @@ function explain(body: string): void {
  */
 export async function pasteIntoFrontApp(platform: NodeJS.Platform = process.platform): Promise<boolean> {
   if (platform === 'darwin' && !systemPreferences.isTrustedAccessibilityClient(false)) {
-    // Asks macOS to show its "allow Open Palette to control your computer" prompt.
+    // Asks macOS to show its "allow Waypoint to control your computer" prompt.
     if (!explained) systemPreferences.isTrustedAccessibilityClient(true);
     explain(
-      'Press ⌘V to paste it. To paste straight into apps, turn on Open Palette in System Settings → Privacy & Security → Accessibility.',
+      'Press ⌘V to paste it. To paste straight into apps, turn on Waypoint in System Settings → Privacy & Security → Accessibility.',
     );
     return false;
   }
@@ -92,7 +92,7 @@ export async function pasteIntoFrontApp(platform: NodeJS.Platform = process.plat
       const automation = /not authori[sz]ed|-1743/i.test(String((error as Error).message));
       explain(
         automation
-          ? `Press ${shortcut} to paste it. To paste straight into apps, allow Open Palette to control System Events in System Settings → Privacy & Security → Automation.`
+          ? `Press ${shortcut} to paste it. To paste straight into apps, allow Waypoint to control System Events in System Settings → Privacy & Security → Automation.`
           : `Press ${shortcut} to paste it.`,
       );
       return false;

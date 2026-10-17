@@ -5,7 +5,7 @@
   "description": "Example extension: UUIDs, npm search and a to-do list.",
   "type": "module",
   "main": "index.js",
-  "openPalette": {
+  "waypoint": {
     "title": "Developer Utilities",
     "icon": "🧰",
     "commands": [

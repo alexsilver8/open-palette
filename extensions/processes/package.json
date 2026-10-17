@@ -6,7 +6,7 @@
   "type": "module",
   "main": "index.js",
   "license": "MIT",
-  "openPalette": {
+  "waypoint": {
     "title": "Processes",
     "icon": "⚙️",
     "commands": [

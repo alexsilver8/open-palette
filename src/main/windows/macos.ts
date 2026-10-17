@@ -3,7 +3,7 @@ import type { Rect } from './layout';
 
 /**
  * macOS moves other apps' windows through System Events, which uses the Accessibility API:
- * Open Palette needs to be allowed under Privacy & Security → Accessibility (as for pasting).
+ * Waypoint needs to be allowed under Privacy & Security → Accessibility (as for pasting).
  * Coordinates are points from the top-left of the main display, the same as Electron's.
  */
 
@@ -85,11 +85,11 @@ export function explainMacError(error: unknown): WindowError {
   const message = error instanceof Error ? error.message : String(error);
   if (/-1743|not authori[sz]ed to send apple events/i.test(message)) {
     return new WindowError(
-      'Allow Open Palette to control System Events in System Settings → Privacy & Security → Automation.',
+      'Allow Waypoint to control System Events in System Settings → Privacy & Security → Automation.',
     );
   }
   if (/-25211|-1719|assistive access|accessibility/i.test(message)) {
-    return new WindowError('Allow Open Palette in System Settings → Privacy & Security → Accessibility.');
+    return new WindowError('Allow Waypoint in System Settings → Privacy & Security → Accessibility.');
   }
   const reason =
     message

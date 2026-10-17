@@ -159,7 +159,7 @@ Thumbs.db
 .idea/
 *.swp
 
-# Open Palette build output
+# Waypoint build output
 out/
 release/
 test-results/

@@ -6,9 +6,9 @@ import { type Exec, isMissing, powershellArgs } from '../exec';
 
 /** Empties the Recycle Bin on every drive, without Windows asking again. Prints `empty` if there was nothing in it. */
 export const WINDOWS_EMPTY_RECYCLE_BIN = `$ErrorActionPreference = 'Stop'
-Add-Type -Namespace OpenPalette -Name RecycleBin -MemberDefinition '[DllImport("shell32.dll", CharSet = CharSet.Unicode)] public static extern int SHEmptyRecycleBin(IntPtr hwnd, string root, uint flags);'
+Add-Type -Namespace Waypoint -Name RecycleBin -MemberDefinition '[DllImport("shell32.dll", CharSet = CharSet.Unicode)] public static extern int SHEmptyRecycleBin(IntPtr hwnd, string root, uint flags);'
 # 7: no confirmation, no progress, no sound. An already empty bin answers E_UNEXPECTED.
-$result = [OpenPalette.RecycleBin]::SHEmptyRecycleBin([IntPtr]::Zero, $null, 7)
+$result = [Waypoint.RecycleBin]::SHEmptyRecycleBin([IntPtr]::Zero, $null, 7)
 if ($result -eq -2147418113) { 'empty'; exit }
 if ($result -ne 0) { throw ("Windows couldn't empty the Recycle Bin (0x{0:X8})." -f $result) }
 'emptied'`;
@@ -39,7 +39,7 @@ async function emptyFolder(dir: string): Promise<void> {
 
 /**
  * Deletes everything in the Trash (Recycle Bin on Windows) for good. Resolves to whether there
- * was anything to delete. On macOS, the first time asks to let Open Palette control Finder.
+ * was anything to delete. On macOS, the first time asks to let Waypoint control Finder.
  */
 export async function emptyTrash(platform: Platform, exec: Exec, env = process.env): Promise<'emptied' | 'empty'> {
   switch (platform) {

@@ -1,12 +1,12 @@
 // Runs the media scripts on the real system. Off by default; the platform workflow runs it on
-// macOS, Windows and Linux with OPEN_PALETTE_SMOKE=1. CI machines play nothing, so this checks
+// macOS, Windows and Linux with WAYPOINT_SMOKE=1. CI machines play nothing, so this checks
 // that the scripts run and report that, rather than what they find.
 import { execFile } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 import { listPlayers } from './index.js';
 import { MAC_MEDIA_KEY_SCRIPT, windowsMediaKeyScript } from './media.js';
 
-const enabled = process.env.OPEN_PALETTE_SMOKE === '1';
+const enabled = process.env.WAYPOINT_SMOKE === '1';
 const platform = /** @type {'darwin' | 'win32' | 'linux'} */ (process.platform);
 
 /** @param {string} file @param {string[]} args */

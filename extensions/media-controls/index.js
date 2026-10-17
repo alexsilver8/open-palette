@@ -86,7 +86,7 @@ function reasonOf(error) {
 function explain(error, app) {
   const reason = reasonOf(error);
   if (/-1743|not authori[sz]ed to send apple events/i.test(reason)) {
-    return `Allow Open Palette to control ${app ?? 'that app'} in System Settings → Privacy & Security → Automation.`;
+    return `Allow Waypoint to control ${app ?? 'that app'} in System Settings → Privacy & Security → Automation.`;
   }
   return reason;
 }

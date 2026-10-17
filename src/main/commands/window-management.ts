@@ -52,7 +52,7 @@ function pixelWorkAreas(): Rect[] {
   }));
 }
 
-/** Open Palette's own windows (Notes, Settings) are moved directly. */
+/** Waypoint's own windows (Notes, Settings) are moved directly. */
 function ownWindowBackend(window: BrowserWindow): WindowBackend {
   return {
     async front() {
@@ -109,9 +109,9 @@ export function windowManagementExtension({ platform, launcher }: WindowManageme
       return "Wayland doesn't let apps move other apps' windows. Log in with an X11 session to use this.";
     }
     if (platform === 'darwin' && !systemPreferences.isTrustedAccessibilityClient(false)) {
-      // Shows macOS's "allow Open Palette to control your computer" prompt.
+      // Shows macOS's "allow Waypoint to control your computer" prompt.
       systemPreferences.isTrustedAccessibilityClient(true);
-      return 'Allow Open Palette in System Settings → Privacy & Security → Accessibility, then try again.';
+      return 'Allow Waypoint in System Settings → Privacy & Security → Accessibility, then try again.';
     }
     return undefined;
   };

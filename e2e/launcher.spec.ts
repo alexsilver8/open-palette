@@ -18,7 +18,7 @@ function savedNotes(): string[] {
 }
 
 test.beforeEach(async () => {
-  userData = mkdtempSync(join(tmpdir(), 'open-palette-e2e-'));
+  userData = mkdtempSync(join(tmpdir(), 'waypoint-e2e-'));
   if (test.info().title.includes('no cap') || test.info().title.includes('scrolled')) {
     mkdirSync(join(userData, 'notes'));
     for (let i = 1; i <= 12; i++) writeFileSync(join(userData, 'notes', `note-${i}.md`), `Note number ${i}`);
@@ -43,7 +43,7 @@ test.beforeEach(async () => {
     // Launch the project folder (package.json "main" points at the build) so the app path
     // is the repo root and the example extensions get loaded.
     args: [join(import.meta.dirname, '..'), '--show', ...(process.platform === 'linux' ? ['--no-sandbox'] : [])],
-    env: { ...process.env, OPEN_PALETTE_USER_DATA: userData },
+    env: { ...process.env, WAYPOINT_USER_DATA: userData },
   });
   page = await app.firstWindow();
   await expect(page.getByRole('combobox')).toBeFocused();
@@ -87,7 +87,7 @@ test('runs an extension command in the extension host', async () => {
 test('shows the actions of the selected item', async () => {
   await page.keyboard.type('quit');
   await page.keyboard.press(`${mod}+k`);
-  const panel = page.getByRole('dialog', { name: /Actions for Quit Open Palette/ });
+  const panel = page.getByRole('dialog', { name: /Actions for Quit Waypoint/ });
   await expect(panel).toBeVisible();
   await expect(panel.getByRole('option')).toHaveText([/^Run Command/]);
   await page.keyboard.press('Escape');
@@ -278,7 +278,7 @@ test('lists each extension with its commands in the Extensions tab', async () =>
   await expect(page.locator('.results__heading')).toHaveText(['Docker']);
   await expect(page.getByRole('option')).toHaveText([/Search Docker Containers/, /Search Docker Images/]);
   await page.keyboard.press(`${mod}+a`);
-  await page.keyboard.type('quit open palette');
+  await page.keyboard.type('quit waypoint');
   await expect(page.getByRole('option')).toHaveCount(0);
 
   await page.keyboard.press(`${mod}+a`);

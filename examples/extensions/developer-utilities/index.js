@@ -1,4 +1,4 @@
-// An example Open Palette extension: UUIDs, npm search and a to-do list.
+// An example Waypoint extension: UUIDs, npm search and a to-do list.
 // See docs/extensions.md for the full API.
 //
 // Each command named in package.json is implemented here. `view` commands return a list,

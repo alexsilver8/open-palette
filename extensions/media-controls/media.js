@@ -137,7 +137,7 @@ export const MAC_MEDIA_KEYS = { 'play-pause': 16, next: 17, previous: 18 };
 
 /**
  * Presses a media key, so whatever app macOS considers to be playing (a browser tab, Podcasts…)
- * responds, as it would to the key on the keyboard. macOS only delivers it once Open Palette
+ * responds, as it would to the key on the keyboard. macOS only delivers it once Waypoint
  * is allowed under Accessibility.
  */
 export const MAC_MEDIA_KEY_SCRIPT = `ObjC.import('AppKit');

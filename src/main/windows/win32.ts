@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-public static class OpenPaletteWindows {
+public static class WaypointWindows {
   [StructLayout(LayoutKind.Sequential)]
   public struct RECT { public int Left; public int Top; public int Right; public int Bottom; }
 
@@ -143,7 +143,7 @@ export const HELPER_SCRIPT = `$ErrorActionPreference = 'Stop'
 Add-Type -TypeDefinition @'
 ${HELPER_SOURCE}
 '@
-[OpenPaletteWindows]::Init()
+[WaypointWindows]::Init()
 [Console]::Out.WriteLine('{"ready":true}')
 while ($true) {
   $line = [Console]::In.ReadLine()
@@ -151,9 +151,9 @@ while ($true) {
   try {
     $parts = $line.Trim().Split(' ')
     if ($parts[0] -eq 'front') {
-      $out = [OpenPaletteWindows]::Front()
+      $out = [WaypointWindows]::Front()
     } elseif ($parts[0] -eq 'move' -and $parts.Length -eq 6) {
-      $out = [OpenPaletteWindows]::Move([long]$parts[1], [int]$parts[2], [int]$parts[3], [int]$parts[4], [int]$parts[5])
+      $out = [WaypointWindows]::Move([long]$parts[1], [int]$parts[2], [int]$parts[3], [int]$parts[4], [int]$parts[5])
     } else {
       $out = '{"error":"unknown request"}'
     }
@@ -188,7 +188,7 @@ export function checkMove(line: string): void {
   if (reply.error === 'gone') throw new WindowError('That window has closed.');
   if (reply.error === 'hung') throw new WindowError("That app isn't responding, so its window can't be moved.");
   if (reply.error === 'denied') {
-    throw new WindowError("Windows doesn't let Open Palette move the windows of apps running as administrator.");
+    throw new WindowError("Windows doesn't let Waypoint move the windows of apps running as administrator.");
   }
   throw new WindowError(`Couldn't move the window: ${reply.error ?? 'no answer'}`);
 }

@@ -22,7 +22,7 @@ export function headers(token) {
     accept: 'application/vnd.github+json',
     authorization: `Bearer ${token}`,
     'x-github-api-version': '2022-11-28',
-    'user-agent': 'open-palette',
+    'user-agent': 'waypoint',
   };
 }
 

@@ -1,4 +1,4 @@
-/** The Open Palette mark: a command bar holding three pigment wells. */
+/** The Waypoint mark: a command bar holding three pigment wells. */
 export function PaletteMark({ size = 16 }: { size?: number }) {
   return (
     <svg className="palette-mark" width={size} height={size} viewBox="0 0 16 16" aria-hidden="true">

@@ -1,9 +1,9 @@
 // Reads this system's details for real. Off by default; the platform workflow runs it on
-// macOS, Windows and Linux with OPEN_PALETTE_SMOKE=1.
+// macOS, Windows and Linux with WAYPOINT_SMOKE=1.
 import { describe, expect, it } from 'vitest';
 import extension from './index.js';
 
-const enabled = process.env.OPEN_PALETTE_SMOKE === '1';
+const enabled = process.env.WAYPOINT_SMOKE === '1';
 
 describe.runIf(enabled)(`System Info on ${process.platform}`, () => {
   it('lists CPU, memory, disk, addresses and the system', { timeout: 30_000 }, async () => {

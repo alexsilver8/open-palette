@@ -1,16 +1,16 @@
 # Writing extensions
 
-An extension adds commands to Open Palette. It's a folder with a `package.json` and a JavaScript module, and it runs in its own process (Electron's [utility process](https://www.electronjs.org/docs/latest/api/utility-process)), so a slow or crashing extension can't freeze the launcher.
+An extension adds commands to Waypoint. It's a folder with a `package.json` and a JavaScript module, and it runs in its own process (Electron's [utility process](https://www.electronjs.org/docs/latest/api/utility-process)), so a slow or crashing extension can't freeze the launcher.
 
-The quickest way to start is to copy [`examples/extensions/developer-utilities`](../examples/extensions/developer-utilities) into your extensions folder and change it. The extensions that come with Open Palette, in [`extensions/`](../extensions), use the same API and make good examples too: [Port Manager](../extensions/port-manager) runs system tools, [Emoji](../extensions/emoji) searches a big list itself and remembers what you used, [Conventional Commits](../extensions/conventional-commits) builds its list from what you type, [MDN](../extensions/mdn) searches a web API as you type, [GitHub](../extensions/github) signs in with a token pasted into its own search field, [Colors](../extensions/colors) draws its icons as SVG files in `supportPath`, and [Media Controls](../extensions/media-controls) runs a different script on each system. Run **Open Extensions Folder** from the launcher to find that folder, then **Reload Extensions** after each change.
+The quickest way to start is to copy [`examples/extensions/developer-utilities`](../examples/extensions/developer-utilities) into your extensions folder and change it. The extensions that come with Waypoint, in [`extensions/`](../extensions), use the same API and make good examples too: [Port Manager](../extensions/port-manager) runs system tools, [Emoji](../extensions/emoji) searches a big list itself and remembers what you used, [Conventional Commits](../extensions/conventional-commits) builds its list from what you type, [MDN](../extensions/mdn) searches a web API as you type, [GitHub](../extensions/github) signs in with a token pasted into its own search field, [Colors](../extensions/colors) draws its icons as SVG files in `supportPath`, and [Media Controls](../extensions/media-controls) runs a different script on each system. Run **Open Extensions Folder** from the launcher to find that folder, then **Reload Extensions** after each change.
 
 > Extensions have full Node.js access, like a package you `npm install`. Only install extensions you trust.
 
 ## Where extensions are loaded from
 
-- The `extensions` folder inside Open Palette's data folder (run **Open Extensions Folder**).
+- The `extensions` folder inside Waypoint's data folder (run **Open Extensions Folder**).
 - Every path in `extensionDirectories` in your [settings](../README.md#settings). Each path can be one extension, or a folder of them — handy for working on an extension in its own repo.
-- The extensions that come with Open Palette: inside the app once installed, `extensions/` when running from source.
+- The extensions that come with Waypoint: inside the app once installed, `extensions/` when running from source.
 - `examples/extensions` when running from source with `pnpm dev`.
 
 **Manage Extensions** lists everything that loaded, and why anything didn't.
@@ -22,7 +22,7 @@ The quickest way to start is to copy [`examples/extensions/developer-utilities`]
   "name": "developer-utilities",
   "type": "module",
   "main": "index.js",
-  "openPalette": {
+  "waypoint": {
     "title": "Developer Utilities",
     "icon": "🧰",
     "commands": [
@@ -37,9 +37,9 @@ The quickest way to start is to copy [`examples/extensions/developer-utilities`]
 | --- | --- |
 | `name` | Lowercase letters, digits and dashes; unique across your extensions. An npm scope (`@you/`) is ignored. |
 | `main` | The module to load. Defaults to `index.js`. ES modules and CommonJS both work. |
-| `openPalette.title` | Shown as the subtitle of every command. |
-| `openPalette.icon` | An emoji, or a path to an image relative to the extension folder. |
-| `openPalette.commands[]` | See below. |
+| `waypoint.title` | Shown as the subtitle of every command. |
+| `waypoint.icon` | An emoji, or a path to an image relative to the extension folder. |
+| `waypoint.commands[]` | See below. |
 
 Each command:
 
@@ -176,9 +176,9 @@ Returning `copy` or `paste` from `onAction` (instead of using a `copy` or `paste
 
 ### Pasting
 
-To paste, Open Palette puts the text on the clipboard, closes the launcher so the previous app is in front again, and presses the paste shortcut:
+To paste, Waypoint puts the text on the clipboard, closes the launcher so the previous app is in front again, and presses the paste shortcut:
 
-- **macOS:** through System Events. The first time, macOS asks to let Open Palette control your computer (Accessibility) and System Events (Automation).
+- **macOS:** through System Events. The first time, macOS asks to let Waypoint control your computer (Accessibility) and System Events (Automation).
 - **Windows:** with SendKeys, nothing to set up.
 - **Linux:** with `xdotool` on X11 or `wtype` on Wayland, if one is installed.
 
@@ -192,4 +192,4 @@ The types in [`src/shared/extension-api.ts`](../src/shared/extension-api.ts) wor
 
 ## Debugging
 
-Run Open Palette from source with `pnpm dev`: `console.log` from extensions shows up in that terminal. **Reload Extensions** restarts the extension process, so your latest code is loaded.
+Run Waypoint from source with `pnpm dev`: `console.log` from extensions shows up in that terminal. **Reload Extensions** restarts the extension process, so your latest code is loaded.

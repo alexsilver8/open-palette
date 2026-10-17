@@ -28,13 +28,16 @@ import { AppTray } from './tray';
 import { UsageTracker } from './usage';
 import { LauncherWindow } from './window';
 
-// Lets tests and multiple dev copies use their own data folder.
-if (process.env.OPEN_PALETTE_USER_DATA) app.setPath('userData', process.env.OPEN_PALETTE_USER_DATA);
+// Lets tests and multiple dev copies use their own data folder. Otherwise, people who
+// installed the app as Open Palette keep their notes and settings in the folder under that name.
+const legacyData = join(app.getPath('appData'), 'Open Palette');
+if (process.env.WAYPOINT_USER_DATA) app.setPath('userData', process.env.WAYPOINT_USER_DATA);
+else if (existsSync(legacyData)) app.setPath('userData', legacyData);
 
 registerIconScheme();
 
 if (!app.requestSingleInstanceLock()) {
-  // Running `open-palette` again toggles the existing instance (handy on Wayland,
+  // Running `waypoint` again toggles the existing instance (handy on Wayland,
   // where global shortcuts can be bound to a command instead).
   app.quit();
 } else {
